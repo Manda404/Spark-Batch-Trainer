@@ -1,0 +1,681 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spark_batch_trainer.core.base_trainer &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Spark Batch Trainer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">spark_batch_trainer</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Spark Batch Trainer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spark_batch_trainer.core.base_trainer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spark_batch_trainer.core.base_trainer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">cumsum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">ntile</span><span class="p">,</span> <span class="n">rand</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">SparkDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.logger.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">figure</span><span class="p">,</span>
+    <span class="n">plot</span><span class="p">,</span>
+    <span class="n">gca</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">,</span>
+    <span class="n">xlabel</span><span class="p">,</span>
+    <span class="n">ylabel</span><span class="p">,</span>
+    <span class="n">legend</span><span class="p">,</span>
+    <span class="n">grid</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="BatchTrainer">
+<a class="viewcode-back" href="../../../spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchTrainer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for batch trainers.</span>
+
+<span class="sd">    This class defines the interface and provides common utilities</span>
+<span class="sd">    for implementing batch-wise training with Spark and pandas.</span>
+<span class="sd">    It is designed to be subclassed by concrete trainers</span>
+<span class="sd">    (e.g., XGBoost, CatBoost, LightGBM).</span>
+
+<span class="sd">    Main Features</span>
+<span class="sd">    -------------</span>
+<span class="sd">    - **Training interface**</span>
+
+<span class="sd">      - ``fit``: Abstract method to train a model in batches.</span>
+<span class="sd">      - ``get_trained_model``: Abstract method to retrieve the trained model.</span>
+
+<span class="sd">    - **Batch creation &amp; processing**</span>
+
+<span class="sd">      - ``_create_and_apply_batches``: Stratified splitting into batches using Spark.</span>
+<span class="sd">      - ``_apply_pandas_processing_to_generator``: Convert Spark batches to pandas DataFrames (generator).</span>
+<span class="sd">      - ``_apply_pandas_processing``: Convert a full Spark DataFrame into pandas.</span>
+
+<span class="sd">    - **Learning curve visualization**</span>
+
+<span class="sd">      - ``_plot_learning_curve``: Plot flattened training/validation loss across batches.</span>
+
+<span class="sd">    - **Data preprocessing**</span>
+
+<span class="sd">      - ``_convert_object_to_category_dtype``: Convert object-type columns in pandas DataFrame to categorical.</span>
+
+<span class="sd">    - **Learning rate scheduling**</span>
+
+<span class="sd">      - ``_exponential_lr_schedule``: Compute exponentially decayed learning rates per batch.</span>
+<span class="sd">      - ``_plot_lr_schedule``: Plot learning rate evolution across batches.</span>
+
+<span class="sd">    - **Training metrics extraction**</span>
+
+<span class="sd">      - ``_get_training_metrics``: Extract per-iteration training and validation metrics</span>
+<span class="sd">        from LightGBM, XGBoost, or CatBoost models.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _logger : Logger</span>
+<span class="sd">        Logger instance used for logging training, preprocessing, and plotting information.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - This is an abstract class and cannot be instantiated directly.</span>
+<span class="sd">    - Subclasses must implement at least ``fit`` and ``get_trained_model``.</span>
+<span class="sd">    - Designed for scalable ML workflows combining Spark preprocessing and batch-wise training.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">setup_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BatchTrainer.fit">
+<a class="viewcode-back" href="../../../spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer.fit">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">train_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">valid_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract method to train a model on Spark DataFrames in batches.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Training dataset.</span>
+<span class="sd">        valid_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Validation dataset.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Name of the target column.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional training configurations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BatchTrainer.get_trained_model">
+<a class="viewcode-back" href="../../../spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer.get_trained_model">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_trained_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract method to retrieve the trained model instance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            The trained model object (depends on implementation).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_and_apply_batches</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">SparkDataFrame</span><span class="p">,</span> <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparkDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create stratified training batches per target class using Spark&#39;s ``ntile``.</span>
+
+<span class="sd">        This ensures that each batch contains approximately the same distribution</span>
+<span class="sd">        of the target classes, which is useful for imbalanced datasets.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataframe : SparkDataFrame</span>
+<span class="sd">            Input dataset.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Target column used for stratified batching.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional arguments, such as:</span>
+<span class="sd">            - ``num_batches`` (int, default=10): Number of batches to create.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        SparkDataFrame</span>
+<span class="sd">            Input DataFrame with an additional ``batch_id`` column</span>
+<span class="sd">            indicating the assigned batch index.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``num_batches`` &lt;= 0 or if ``target_column`` is missing.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Uses ``ntile`` to split each class into evenly sized batches.</span>
+<span class="sd">        - A fixed random seed (42) ensures reproducibility.</span>
+<span class="sd">        - Batch indices start at 0 and go up to ``num_batches - 1``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Retrieve number of batches from kwargs:</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_batches&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="c1"># Validate the number of batches</span>
+        <span class="k">if</span> <span class="n">num_batches</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_batches must be &gt;= 1&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate that the target column exists in the dataset</span>
+        <span class="k">if</span> <span class="n">target_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DataFrame must contain &#39;</span><span class="si">{</span><span class="n">target_column</span><span class="si">}</span><span class="s2">&#39; column&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating stratified batches...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Define a window that partitions by target class and assigns a random order</span>
+        <span class="c1"># (ensures balanced batches while preserving class distribution)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="n">target_column</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">))</span>
+
+        <span class="c1"># Assign each row to a batch using ntile (1..K), then shift to 0..K-1</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;batch_id&quot;</span><span class="p">,</span> <span class="n">ntile</span><span class="p">(</span><span class="n">num_batches</span><span class="p">)</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Successfully created </span><span class="si">%d</span><span class="s2"> stratified batches by target column &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+            <span class="n">num_batches</span><span class="p">,</span>
+            <span class="n">target_column</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_pandas_processing_to_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataframe</span><span class="p">:</span> <span class="n">SparkDataFrame</span><span class="p">,</span>
+        <span class="n">batch_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert Spark DataFrame batches into pandas DataFrames, yielding them sequentially.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataframe : SparkDataFrame</span>
+<span class="sd">            Input dataset.</span>
+<span class="sd">        batch_column : str</span>
+<span class="sd">            Column used for batch stratification.</span>
+<span class="sd">        num_batches : int</span>
+<span class="sd">            Number of batches.</span>
+
+<span class="sd">        Yields</span>
+<span class="sd">        ------</span>
+<span class="sd">        PandasDataFrame</span>
+<span class="sd">            Pandas DataFrame for each batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting to process DataFrame in batches...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create and assign batch IDs to the Spark DataFrame</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_and_apply_batches</span><span class="p">(</span>
+            <span class="n">dataframe</span><span class="p">,</span> <span class="n">batch_column</span><span class="p">,</span> <span class="n">num_batches</span><span class="o">=</span><span class="n">num_batches</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Batches successfully created and applied to DataFrame.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Sequentially process each batch</span>
+        <span class="k">for</span> <span class="n">batch_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">):</span>
+            <span class="c1"># Filter rows belonging to the current batch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtering batch </span><span class="si">{</span><span class="n">batch_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">batch_dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;batch_id&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">batch_id</span><span class="p">)</span>
+
+            <span class="c1"># Convert Spark DataFrame to pandas for local processing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Converting Spark DataFrame to pandas DataFrame for batch </span><span class="si">{</span><span class="n">batch_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">pandas_df</span> <span class="o">=</span> <span class="n">batch_dataframe</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;batch_id&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Yield the pandas DataFrame for the current batch</span>
+            <span class="k">yield</span> <span class="n">pandas_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_pandas_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">SparkDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a Spark DataFrame into a pandas DataFrame.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataframe : SparkDataFrame</span>
+<span class="sd">            Input dataset.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PandasDataFrame</span>
+<span class="sd">            Equivalent pandas DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert the full Spark DataFrame to pandas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Converting Spark DataFrame to pandas DataFrame for validation.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">pandas_df</span><span class="p">:</span> <span class="n">PandasDataFrame</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+
+        <span class="c1"># Log the resulting DataFrame shape for debugging purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Pandas DataFrame created with </span><span class="si">%d</span><span class="s2"> rows and </span><span class="si">%d</span><span class="s2"> columns&quot;</span><span class="p">,</span>
+            <span class="n">pandas_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">pandas_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Return the processed DataFrame</span>
+        <span class="k">return</span> <span class="n">pandas_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_plot_learning_curve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">global_train_loss</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+        <span class="n">global_valid_loss</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+        <span class="n">global_iterations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;CatBoost&quot;</span><span class="p">,</span>
+        <span class="n">eval_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Logloss&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the global flattened learning curve over all batches.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        global_train_loss : list of list of float</span>
+<span class="sd">            Training loss per batch.</span>
+<span class="sd">        global_valid_loss : list of list of float</span>
+<span class="sd">            Validation loss per batch.</span>
+<span class="sd">        global_iterations : list of int</span>
+<span class="sd">            Batch indices corresponding to losses.</span>
+<span class="sd">        model_name : str, optional</span>
+<span class="sd">            Model name for plot title (default=&quot;CatBoost&quot;).</span>
+<span class="sd">        eval_metric : str, optional</span>
+<span class="sd">            Evaluation metric name for axis label (default=&quot;Logloss&quot;).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            Displays the matplotlib plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Log the start of the plotting process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting learning curve of </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> model...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Flatten the list of per-batch losses into a single sequence</span>
+        <span class="n">flattened_train_loss</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">loss</span> <span class="k">for</span> <span class="n">batch_curve</span> <span class="ow">in</span> <span class="n">global_train_loss</span> <span class="k">for</span> <span class="n">loss</span> <span class="ow">in</span> <span class="n">batch_curve</span>
+        <span class="p">]</span>
+        <span class="n">flattened_val_loss</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">loss</span> <span class="k">for</span> <span class="n">batch_curve</span> <span class="ow">in</span> <span class="n">global_valid_loss</span> <span class="k">for</span> <span class="n">loss</span> <span class="ow">in</span> <span class="n">batch_curve</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Compute the cumulative starting index for each batch</span>
+        <span class="n">batch_start_indices</span> <span class="o">=</span> <span class="n">cumsum</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">global_train_loss</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Initialize the figure</span>
+        <span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+        <span class="c1"># Plot training and validation losses</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">flattened_train_loss</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Train Logloss (flattened)&quot;</span><span class="p">)</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">flattened_val_loss</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Validation Logloss (flattened)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add vertical lines and labels to indicate batch boundaries</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">gca</span><span class="p">()</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_start_indices</span><span class="p">)):</span>
+            <span class="n">batch_num</span> <span class="o">=</span> <span class="n">global_iterations</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="c1"># Draw vertical line at the start of each batch</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">batch_start_indices</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Annotate the plot with epoch and batch information</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="n">batch_start_indices</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                <span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.95</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2"> - Batch </span><span class="si">{</span><span class="n">batch_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Add titles and labels</span>
+        <span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Global Flattened Learning Curve Over All Batches (</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Global Iteration (All Batches Concatenated)&quot;</span><span class="p">)</span>
+        <span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">eval_metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add legend and grid for better readability</span>
+        <span class="n">legend</span><span class="p">()</span>
+        <span class="n">grid</span><span class="p">()</span>
+
+        <span class="c1"># Display the plot</span>
+        <span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Log successful plot creation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Learning curve plotted successfully.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_object_to_category_dtype</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert object columns in a pandas DataFrame to categorical dtype.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : PandasDataFrame</span>
+<span class="sd">            Input dataset.</span>
+<span class="sd">        target_column : str, optional</span>
+<span class="sd">            Target column name (excluded from conversion).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : PandasDataFrame</span>
+<span class="sd">            Updated DataFrame with categorical features converted.</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether categorical features were detected and converted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Identify candidate categorical features:</span>
+        <span class="c1"># all columns of type &#39;object&#39; except the target column</span>
+        <span class="n">cat_features</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">col</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="n">target_column</span>
+        <span class="p">]</span>
+
+        <span class="c1"># If categorical features are found, convert them to pandas &#39;category&#39; dtype</span>
+        <span class="k">if</span> <span class="n">cat_features</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Converting </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cat_features</span><span class="p">)</span><span class="si">}</span><span class="s2"> features to &#39;category&#39;: </span><span class="si">{</span><span class="n">cat_features</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">cat_features</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">cat_features</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+            <span class="n">is_present</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No object-type columns to convert</span>
+            <span class="n">is_present</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Return updated DataFrame and flag indicating categorical presence</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">is_present</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_exponential_lr_schedule</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">initial_lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">decay_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">min_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute exponentially decayed learning rate, bounded by ``min_lr``.</span>
+
+<span class="sd">        Formula</span>
+<span class="sd">        -------</span>
+<span class="sd">        lr_b = max(min_lr, initial_lr * decay_rate ** (batch_id - 1))</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        initial_lr : float</span>
+<span class="sd">            Initial learning rate (&gt; 0).</span>
+<span class="sd">        decay_rate : float</span>
+<span class="sd">            Multiplicative decay factor (0 &lt; decay_rate &lt;= 1).</span>
+<span class="sd">        batch_id : int</span>
+<span class="sd">            Current batch index (1-indexed).</span>
+<span class="sd">        min_lr : float, optional</span>
+<span class="sd">            Minimum learning rate (default=1e-4).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Learning rate for the current batch.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If parameters are invalid.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; trainer._exponential_lr_schedule(0.1, 0.9, 3)</span>
+<span class="sd">        0.081</span>
+<span class="sd">        &gt;&gt;&gt; trainer._exponential_lr_schedule(0.001, 0.5, 10, min_lr=0.0005)</span>
+<span class="sd">        0.0005</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate that the initial learning rate is positive</span>
+        <span class="k">if</span> <span class="n">initial_lr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;initial_lr must be &gt; 0&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate that decay_rate is within (0, 1]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">decay_rate</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;decay_rate must be in the interval (0, 1]&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure batch index starts from 1 (1-indexed, not 0-indexed)</span>
+        <span class="k">if</span> <span class="n">batch_id</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;batch_id must be &gt;= 1 (1-indexed)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate that the minimum learning rate is positive</span>
+        <span class="k">if</span> <span class="n">min_lr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_lr must be &gt; 0&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Apply exponential decay formula</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="n">initial_lr</span> <span class="o">*</span> <span class="p">(</span><span class="n">decay_rate</span> <span class="o">**</span> <span class="p">(</span><span class="n">batch_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># Ensure the learning rate never goes below min_lr</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_lr</span><span class="p">,</span> <span class="n">lr</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_plot_lr_schedule</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">lrs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">titlename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Learning Rate Schedule&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a learning-rate schedule.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Scheduler name (e.g., &quot;ExponentialLR&quot;).</span>
+<span class="sd">        lrs : list of float</span>
+<span class="sd">            Sequence of learning rates.</span>
+<span class="sd">        titlename : str, optional</span>
+<span class="sd">            Plot title (default=&quot;Learning Rate Schedule&quot;).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            Displays the matplotlib plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If no learning rates are available, skip plotting</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lrs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Skipping learning-rate schedule plot: empty &#39;lrs&#39; for scheduler &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Log information about the scheduler and number of points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Plotting learning-rate schedule (scheduler=</span><span class="si">%s</span><span class="s2">, n_points=</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">lrs</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Prepare x-axis as batch indices</span>
+        <span class="n">batch_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lrs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># Plot learning rate evolution</span>
+        <span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">batch_ids</span><span class="p">,</span> <span class="n">lrs</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Add plot title, labels, and legend</span>
+        <span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">titlename</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Batch&quot;</span><span class="p">)</span>
+        <span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Learning Rate&quot;</span><span class="p">)</span>
+        <span class="n">legend</span><span class="p">()</span>
+        <span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Show the plot</span>
+        <span class="n">show</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_training_metrics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">framework</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lightgbm&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract per-iteration training and validation metrics.</span>
+
+<span class="sd">        Supports LightGBM, XGBoost, and CatBoost.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : object</span>
+<span class="sd">            Trained model instance. Supported types:</span>
+<span class="sd">            - lightgbm.LGBMClassifier</span>
+<span class="sd">            - xgboost.XGBClassifier</span>
+<span class="sd">            - catboost.CatBoostClassifier</span>
+<span class="sd">        framework : str, optional</span>
+<span class="sd">            Framework name, one of {&quot;lightgbm&quot;, &quot;xgboost&quot;, &quot;catboost&quot;}.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        train_metric : list of float</span>
+<span class="sd">            Training metric values per iteration.</span>
+<span class="sd">        valid_metric : list of float</span>
+<span class="sd">            Validation metric values per iteration.</span>
+<span class="sd">        metric_name : str</span>
+<span class="sd">            Name of the evaluation metric (e.g., &quot;logloss&quot;).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the framework is unsupported or no eval results are available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">evals_result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Extract evaluation results depending on the framework</span>
+        <span class="k">if</span> <span class="n">framework</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span><span class="p">:</span>
+            <span class="n">evals_result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">evals_result_</span>
+            <span class="n">train_key</span><span class="p">,</span> <span class="n">valid_key</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span>
+
+        <span class="k">elif</span> <span class="n">framework</span> <span class="o">==</span> <span class="s2">&quot;xgboost&quot;</span><span class="p">:</span>
+            <span class="n">evals_result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">evals_result</span><span class="p">()</span>
+            <span class="n">train_key</span><span class="p">,</span> <span class="n">valid_key</span> <span class="o">=</span> <span class="s2">&quot;validation_0&quot;</span><span class="p">,</span> <span class="s2">&quot;validation_1&quot;</span>
+
+        <span class="k">elif</span> <span class="n">framework</span> <span class="o">==</span> <span class="s2">&quot;catboost&quot;</span><span class="p">:</span>
+            <span class="n">evals_result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_evals_result</span><span class="p">()</span>
+            <span class="n">train_key</span><span class="p">,</span> <span class="n">valid_key</span> <span class="o">=</span> <span class="s2">&quot;learn&quot;</span><span class="p">,</span> <span class="s2">&quot;validation&quot;</span> <span class="c1">#&quot;validation_0&quot;, &quot;validation_1&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;framework must be one of: &#39;lightgbm&#39;, &#39;xgboost&#39;, &#39;catboost&#39;.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If no evaluation results are available, raise an error</span>
+        <span class="k">if</span> <span class="n">evals_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluation results are not available for this model.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Retrieve the first available metric (e.g., &#39;logloss&#39;, &#39;accuracy&#39;)</span>
+        <span class="n">first_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">evals_result</span><span class="p">[</span><span class="n">train_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tracking evaluation metric: </span><span class="si">{</span><span class="n">first_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Return per-iteration metrics and the metric name</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">evals_result</span><span class="p">[</span><span class="n">train_key</span><span class="p">][</span><span class="n">first_key</span><span class="p">],</span>  <span class="c1"># Training metric values</span>
+            <span class="n">evals_result</span><span class="p">[</span><span class="n">valid_key</span><span class="p">][</span><span class="n">first_key</span><span class="p">],</span>  <span class="c1"># Validation metric values</span>
+            <span class="n">first_key</span><span class="p">,</span>  <span class="c1"># Metric name</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Rostand Surel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,5 +1,42 @@
-# Object file
-*.o
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
 
-# Ada Library Information
-*.ali
+# --- Environnements ---
+.venv/
+env/
+venv/
+ENV/
+
+# --- Poetry ---
+poetry.lock
+
+# --- IDE / Éditeurs ---
+.vscode/
+.idea/
+*.swp
+
+# --- Tests ---
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# --- Logs ---
+*.log
+
+# --- Sphinx Docs ---
+docs/_build/
+docs/_autosummary/
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+
+# --- MacOS / Linux / Windows ---
+.DS_Store
+Thumbs.db
