@@ -30,10 +30,11 @@ Cette documentation est organisée en plusieurs sections :
 
    usage/installation
    usage/quickstart
+   usage/tutorials
    usage/examples
+   usage/dataset_overview.rst
    usage/examples_binary
    usage/examples_multiclass
-   usage/tutorials
 
 .. toctree::
    :maxdepth: 2

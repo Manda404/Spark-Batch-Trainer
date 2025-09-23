@@ -53,13 +53,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutoriels</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">spark_batch_trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Spark batch trainer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
@@ -93,24 +94,32 @@
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<p><strong>Spark Batch Trainer</strong> est un framework modulaire et extensible pour
-l’entraînement de modèles de machine learning par lots (<strong>batch-wise training</strong>).</p>
+<p><strong>Spark Batch Trainer</strong> est un framework modulaire et extensible dédié à
+l’entraînement par lots (<strong>batch-wise training</strong>) de modèles de boosting en machine learning,
+tout en optimisant la gestion de la mémoire.</p>
 <p>Il est conçu pour fonctionner avec :</p>
 <ul class="simple">
-<li><p><strong>Apache Spark DataFrames</strong> : prétraitement distribué et scalable.</p></li>
-<li><p><strong>Frameworks ML populaires</strong> : intégration avec <strong>XGBoost</strong>, <strong>CatBoost</strong>, et <strong>LightGBM</strong>.</p></li>
-<li><p><strong>Scénarios Big Data</strong> : apprentissage incrémental, équilibrage des classes, suivi des métriques.</p></li>
+<li><p><strong>Apache Spark DataFrames</strong> : prétraitement distribué et scalable.
+(les données d’entrée sont directement fournies sous forme de Spark DataFrames)</p></li>
+<li><p><strong>Frameworks ML populaires</strong> : intégration native avec <strong>XGBoost</strong>, <strong>CatBoost</strong> et <strong>LightGBM</strong>,
+spécifiquement orientée vers les modèles de boosting.</p></li>
+<li><p><strong>Scénarios Big Data</strong> : apprentissage incrémental, équilibrage des classes,
+suivi des <strong>courbes d’apprentissage</strong>.</p></li>
+<li><p><strong>Cas d’usage ciblé</strong> : cette première version est principalement conçue
+pour adresser des problèmes de <strong>classification</strong>.</p></li>
 </ul>
 <section id="principales-fonctionnalites">
 <h2>Principales fonctionnalités<a class="headerlink" href="#principales-fonctionnalites" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Création de batchs stratifiés pour gérer les datasets déséquilibrés.</p></li>
-<li><p>Conversion fluide entre <strong>Spark DataFrames</strong> et <strong>pandas DataFrames</strong>.</p></li>
-<li><p>Visualisation des courbes d’apprentissage et des planifications de learning rate.</p></li>
-<li><p>Extraction des métriques multi-frameworks.</p></li>
+<li><p>Création de batchs stratifiés pour gérer efficacement les jeux de données déséquilibrés
+et garantir la présence de toutes les classes dans chaque batch.</p></li>
+<li><p>Prétraitement basique des données d’entraînement et de validation :
+conversion fluide entre <strong>Spark DataFrames</strong> et <strong>pandas DataFrames</strong>,
+gestion des conversions de types (par ex. <em>object</em> → <em>category</em>).</p></li>
+<li><p>Visualisation des courbes d’apprentissage et des planifications du <em>learning rate</em>.</p></li>
 </ul>
-<p>👉 Objectif : permettre aux data scientists d’entraîner des modèles à grande échelle
-de façon simple, reproductible et extensible.</p>
+<p>👉 <strong>Objectif</strong> : offrir aux data scientists un outil simple, reproductible et extensible
+pour entraîner des modèles de boosting à grande échelle.</p>
 </section>
 </section>
 

@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Binary Classification Examples" href="examples_binary.html" />
-    <link rel="prev" title="Introduction" href="../introduction.html" /> 
+    <link rel="prev" title="Tutoriels" href="tutorials.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,17 +45,24 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#principales-fonctionnalites">Principales fonctionnalités</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#structure-du-code">Structure du code</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#usage-example-binary-dataset">Usage example (binary dataset)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#usage-example-multiclass-dataset">Usage example (multiclass dataset)</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutoriels</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">spark_batch_trainer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Spark batch trainer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 
         </div>
@@ -84,27 +91,35 @@
              
   <section id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
-<p>Cette section présente différents scénarios d’utilisation de <strong>Spark Batch Trainer</strong>
-avec plusieurs frameworks ML (XGBoost, CatBoost, LightGBM).</p>
-<p>Vous trouverez des cas pratiques organisés par type de problème :</p>
+<p>Cette section illustre l’utilisation de <strong>Spark Batch Trainer</strong> avec plusieurs
+frameworks de boosting en machine learning (<strong>XGBoost</strong>, <strong>CatBoost</strong>, <strong>LightGBM</strong>).</p>
+<p>Deux cas de classification sont actuellement supportés :</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="examples_binary.html"><span class="doc">Binary Classification Examples</span></a> → Exemple complet pour la <strong>classification binaire</strong></p></li>
 <li><p><a class="reference internal" href="examples_multiclass.html"><span class="doc">Multiclass Classification Examples</span></a> → Exemple complet pour la <strong>classification multiclasse</strong></p></li>
 </ul>
-<p>Chaque exemple inclut :</p>
+<p>Chaque exemple présente de bout en bout :</p>
 <ul class="simple">
-<li><p><strong>Configuration modèle</strong> (paramètres spécifiques au framework)</p></li>
-<li><p><strong>Scheduler du learning rate</strong> (si applicable)</p></li>
-<li><p><strong>Entraînement batch-wise</strong> (num_batches, patience, métriques)</p></li>
-<li><p><strong>Récupération du modèle final</strong></p></li>
+<li><p><strong>Configuration du modèle</strong> (<em>config_model</em> : hyperparamètres propres au framework)</p></li>
+<li><p><strong>Configuration de l’entraînement batch-wise</strong> (<em>config_training</em> : nombre de batches, taille, patience, etc…)</p></li>
+<li><p><strong>Configuration Scheduler du learning rate</strong> (<em>config_lr_scheduler</em> : planification dynamique basée sur la <strong>décroissance exponentielle</strong>)</p></li>
+<li><p><strong>Récupération modèle final</strong> pour effectuer des predictions</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>La version actuelle (<strong>v1.0.0</strong>) de <strong>Spark Batch Trainer</strong> est dédiée
+exclusivement aux tâches de <strong>classification</strong> (binaire et multiclasse),
+sur des jeux de données aussi bien <strong>équilibrés</strong> que <strong>déséquilibrés</strong>.</p>
+<p>Le support d’autres tâches, telles que la <strong>régression</strong> ou le
+<strong>ranking</strong>, fait partie des évolutions envisagées dans les prochaines versions.</p>
+</div>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutoriels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="examples_binary.html" class="btn btn-neutral float-right" title="Binary Classification Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

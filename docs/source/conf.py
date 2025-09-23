@@ -44,3 +44,11 @@ html_static_path = ["_static"]
 # Personnalisation de l’autodoc (optionnel mais utile).
 autodoc_typehints = "description"   # Ajoute les hints de type dans la description
 autoclass_content = "both"          # Inclut docstring de la classe + __init__
+
+# -- Substitutions dynamiques -----------------------------------
+from datetime import date
+
+# La variable |date| sera remplacée par la date du jour (format AAAA-MM-JJ)
+rst_prolog = f"""
+.. |date| replace:: {date.today().strftime("%Y-%m-%d")}
+"""
