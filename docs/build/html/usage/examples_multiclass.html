@@ -269,8 +269,8 @@ conversion en Spark DataFrames) est décrite en détail dans la section
 
 <span class="c1"># 4. Entraînement batch-wise</span>
 <span class="n">config_training</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                <span class="c1"># Nombre de lots</span>
-    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>               <span class="c1"># Patience early stopping global</span>
+    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>                <span class="c1"># Nombre de lots</span>
+    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>               <span class="c1"># Patience early stopping global</span>
     <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>     <span class="c1"># Afficher la courbe d’apprentissage</span>
     <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>       <span class="c1"># Gestion pondérations</span>
     <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;multi_logloss&quot;</span><span class="p">,</span>  <span class="c1"># Métrique de suivi</span>

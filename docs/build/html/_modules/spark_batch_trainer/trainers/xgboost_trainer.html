@@ -1,0 +1,916 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spark_batch_trainer.trainers.xgboost_trainer &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Spark Batch Trainer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">Tutoriels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/dataset_overview.html">Présentation des datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_binary.html">Binary Classification Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Spark batch trainer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Spark Batch Trainer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spark_batch_trainer.trainers.xgboost_trainer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spark_batch_trainer.trainers.xgboost_trainer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">SparkDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.core.base_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">BatchTrainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.core.memory_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">MemoryOptimizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.core.class_weight_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptimizedWeightCalculator</span>
+
+
+<div class="viewcode-block" id="XGBoostTrainer">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">XGBoostTrainer</span><span class="p">(</span><span class="n">BatchTrainer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Batch trainer for XGBoost classifiers.</span>
+
+<span class="sd">    This class supports incremental training in mini-batches on Spark DataFrames,</span>
+<span class="sd">    with validation support, early stopping, sample weighting, and learning rate scheduling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the XGBoost batch trainer.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        _global_train_loss : list of list of float</span>
+<span class="sd">            History of training loss values for each batch.</span>
+<span class="sd">        _global_valid_loss : list of list of float</span>
+<span class="sd">            History of validation loss values for each batch.</span>
+<span class="sd">        _global_iterations : list of int</span>
+<span class="sd">            Indices of processed batches during training.</span>
+<span class="sd">        _model : XGBClassifier or None</span>
+<span class="sd">            The trained XGBoost model instance (set after training).</span>
+<span class="sd">        _lr_schedulers : list of float</span>
+<span class="sd">            History of learning rates applied per batch.</span>
+<span class="sd">        _categorical_features : list of str or None</span>
+<span class="sd">            Names of categorical features used for training.</span>
+<span class="sd">        _weight_calculator : OptimizedWeightCalculator</span>
+<span class="sd">            Utility to compute optimized sample weights per batch.</span>
+<span class="sd">        _optimizer : MemoryOptimizer</span>
+<span class="sd">            Utility for reducing memory usage of validation DataFrames</span>
+<span class="sd">            (optimizes size in MB before training).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_train_loss</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_valid_loss</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_iterations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">XGBClassifier</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lr_schedulers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_categorical_features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_calculator</span> <span class="o">=</span> <span class="n">OptimizedWeightCalculator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">MemoryOptimizer</span><span class="p">(</span>
+            <span class="n">use_logger</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>  <span class="c1"># Memory optimization of the validation DataFrame (reduce size in MB before training)</span>
+
+<div class="viewcode-block" id="XGBoostTrainer.fit">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">train_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">valid_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train an XGBoost classifier incrementally on Spark DataFrames in batches.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Training dataset in Spark DataFrame format.</span>
+<span class="sd">        valid_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Target column name in both train and validation DataFrames.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional configuration dictionaries.</span>
+
+<span class="sd">            - config_model : dict</span>
+<span class="sd">                XGBoost hyperparameters. ``learning_rate`` may be updated batch-wise.</span>
+<span class="sd">            - config_training : dict</span>
+<span class="sd">                Training options such as ``num_batches`` (int), ``eval_metric`` (str),</span>
+<span class="sd">                ``use_sample_weight`` (bool), ``max_patience`` (int).</span>
+<span class="sd">            - config_lr_scheduler : dict or None</span>
+<span class="sd">                Learning rate scheduler configuration.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The trained model is stored internally in ``self._model``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If input DataFrames or target column are invalid.</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If no model is successfully trained.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Supports early stopping based on validation loss.</span>
+<span class="sd">        - Supports warm-restart training across batches.</span>
+<span class="sd">        - Learning rate can be scheduled dynamically per batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract model, training, and learning rate scheduler configurations</span>
+        <span class="n">config_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;config_model&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="n">config_training</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;config_training&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_batches&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">lr_scheduler_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;config_lr_scheduler&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Validate input parameters before starting training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Validating input parameters&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input_parameters</span><span class="p">(</span>
+            <span class="n">train_dataframe</span><span class="p">,</span> <span class="n">valid_dataframe</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">num_batches</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Preprocess training data and split into batches (generator)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Preparing training data&quot;</span><span class="p">)</span>
+        <span class="n">dataframe_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_pandas_processing_to_generator</span><span class="p">(</span>
+            <span class="n">train_dataframe</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">num_batches</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Prepare validation dataset (converted to pandas + preprocessing) and return dict (features, target, sample weights)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Preparing validation data&quot;</span><span class="p">)</span>
+        <span class="n">valid_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_validation_data</span><span class="p">(</span>
+            <span class="n">valid_data</span><span class="o">=</span><span class="n">valid_dataframe</span><span class="p">,</span>
+            <span class="n">target_column</span><span class="o">=</span><span class="n">target_column</span><span class="p">,</span>
+            <span class="n">config_model</span><span class="o">=</span><span class="n">config_model</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Initialize training state (best model, patience, eval metric, etc.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setup training state for XGBoost&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_training_state</span><span class="p">(</span>
+            <span class="n">config_training</span><span class="o">=</span><span class="n">config_training</span><span class="p">,</span>
+            <span class="n">num_batches</span><span class="o">=</span><span class="n">num_batches</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Log the start of training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🚀 Starting XGBoost training with </span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2"> batches&quot;</span><span class="p">)</span>
+
+        <span class="c1"># --- Main training loop ---</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">batch_id</span><span class="p">,</span> <span class="n">processed_batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataframe_generator</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- 📦 Processing batch </span><span class="si">{</span><span class="n">batch_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Prepare current batch (features, target, sample weights)</span>
+                <span class="n">current_batch_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_batch_data</span><span class="p">(</span>
+                    <span class="n">processed_batch</span><span class="p">,</span>
+                    <span class="n">target_column</span><span class="p">,</span>
+                    <span class="n">batch_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Retrieve the current learning rate from the scheduler</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating XGBoost learning rate for current batch.&quot;</span><span class="p">)</span>
+                <span class="n">current_lr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_learning_rate</span><span class="p">(</span>
+                    <span class="n">lr_scheduler_config</span><span class="p">,</span> <span class="n">batch_id</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Update or initialize the model (booster)</span>
+                <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;booster&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_model</span><span class="p">(</span>
+                    <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;booster&quot;</span><span class="p">],</span> <span class="n">config_model</span><span class="p">,</span> <span class="n">current_lr</span><span class="p">,</span> <span class="n">batch_id</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Train the booster on the current batch with validation set</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_train_batch</span><span class="p">(</span>
+                    <span class="n">booster</span><span class="o">=</span><span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;booster&quot;</span><span class="p">],</span>
+                    <span class="n">best_model</span><span class="o">=</span><span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">],</span>
+                    <span class="n">batch_data</span><span class="o">=</span><span class="n">current_batch_data</span><span class="p">,</span>
+                    <span class="n">valid_data</span><span class="o">=</span><span class="n">valid_data</span><span class="p">,</span>
+                    <span class="n">config_training</span><span class="o">=</span><span class="n">config_training</span><span class="p">,</span>
+                    <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Evaluate the trained booster and update best model if improved</span>
+                <span class="n">should_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_trained_model</span><span class="p">(</span>
+                    <span class="n">booster</span><span class="o">=</span><span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;booster&quot;</span><span class="p">],</span>
+                    <span class="n">config_training</span><span class="o">=</span><span class="n">config_training</span><span class="p">,</span>
+                    <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Check early stopping condition</span>
+                <span class="k">if</span> <span class="n">should_stop</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Early stopping triggered - Training completed&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Log and propagate any exception during training</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training failed at batch </span><span class="si">{</span><span class="n">batch_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="c1"># Finalize training: select best model, log results, and generate diagnostics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrap_up_training</span><span class="p">(</span>
+            <span class="n">config_training</span><span class="o">=</span><span class="n">config_training</span><span class="p">,</span>
+            <span class="n">config_model</span><span class="o">=</span><span class="n">config_model</span><span class="p">,</span>
+            <span class="n">lr_scheduler_config</span><span class="o">=</span><span class="n">lr_scheduler_config</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="XGBoostTrainer.get_trained_model">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.get_trained_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_trained_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the final trained model instance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            Trained model object (e.g. ``XGBClassifier``).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span></div>
+
+
+    <span class="c1"># Helper function required for the proper execution of the fit method</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_training_state</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config_training</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize and update the training state inside the provided config_training dictionary.</span>
+
+<span class="sd">        This method enriches the training configuration with runtime state information</span>
+<span class="sd">        required during the batch-wise training process (e.g., early stopping, best model,</span>
+<span class="sd">        patience counter, etc.). It modifies the dictionary in place and does not return</span>
+<span class="sd">        any value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config_training : dict</span>
+<span class="sd">            Training configuration parameters that will also store the runtime training state.</span>
+<span class="sd">            Keys such as &#39;max_patience&#39;, &#39;use_sample_weight&#39;, and &#39;verbose&#39; are read if present,</span>
+<span class="sd">            otherwise defaults are used.</span>
+<span class="sd">        num_batches : int</span>
+<span class="sd">            Total number of batches planned for the training session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config_training</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;previous_model&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Model trained on the previous batch (used for warm start)</span>
+                <span class="s2">&quot;best_model&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Best model found so far (updated when validation improves)</span>
+                <span class="s2">&quot;booster&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Current XGBoost booster being trained</span>
+                <span class="s2">&quot;should_stop&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Early stopping flag (True if training should end)</span>
+                <span class="s2">&quot;patience_counter&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Number of consecutive batches without improvement</span>
+                <span class="s2">&quot;best_valid_loss&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>  <span class="c1"># Best validation loss achieved so far</span>
+                <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_patience&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                <span class="c1"># Maximum number of batches allowed without improvement before stopping</span>
+                <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="n">num_batches</span><span class="p">,</span>
+                <span class="c1"># Total number of batches planned for the training session</span>
+                <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_sample_weight&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="c1"># Whether to apply sample weights during training</span>
+                <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;verbose&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="c1"># Controls verbosity of XGBoost training logs</span>
+                <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;show_learning_curve&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="c1"># Afficher la courbe d’apprentissage</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_train_batch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">booster</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+        <span class="n">best_model</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+        <span class="n">batch_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">valid_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">config_training</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train an XGBoost booster on the current batch, with optional warm restart</span>
+<span class="sd">        and support for sample weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        booster : XGBClassifier</span>
+<span class="sd">            Booster instance to be trained on the current batch.</span>
+<span class="sd">        best_model : XGBClassifier</span>
+<span class="sd">            Best model so far. If provided (and not the first batch), its booster</span>
+<span class="sd">            is used to perform a warm restart.</span>
+<span class="sd">        batch_data : dict</span>
+<span class="sd">            Dictionary containing training data:</span>
+<span class="sd">            - &quot;features&quot; : pandas.DataFrame</span>
+<span class="sd">            - &quot;target&quot; : pandas.Series</span>
+<span class="sd">            - &quot;sample_weight&quot; : array-like (optional, required if `use_sample_weight=True`)</span>
+<span class="sd">        valid_data : dict</span>
+<span class="sd">            Dictionary containing validation data:</span>
+<span class="sd">            - &quot;features&quot; : pandas.DataFrame</span>
+<span class="sd">            - &quot;target&quot; : pandas.Series</span>
+<span class="sd">            - &quot;sample_weight&quot; : array-like (optional, required if `use_sample_weight=True`)</span>
+<span class="sd">        config_training : dict</span>
+<span class="sd">            Training configuration and runtime state, including:</span>
+<span class="sd">            - &quot;use_sample_weight&quot; : bool</span>
+<span class="sd">            - &quot;verbose&quot; : bool</span>
+<span class="sd">        batch_id : int</span>
+<span class="sd">            Index of the current batch (1-based).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - If ``best_model`` is provided and ``batch_id &gt; 1``, warm restart training</span>
+<span class="sd">        is performed by continuing from the previous best booster.</span>
+<span class="sd">        - When ``sample_weight_eval_set`` is passed:</span>
+<span class="sd">            - The first array corresponds to the training set (``validation_0``),</span>
+<span class="sd">            - The second array corresponds to the validation set (``validation_1``).</span>
+<span class="sd">        This ensures evaluation metrics (e.g., logloss, AUC) are computed while</span>
+<span class="sd">        accounting for class imbalance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🏋️ Training XGBoost on batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Warm restart: continue training from the best booster if available</span>
+        <span class="n">xgb_model_param</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">batch_id</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">best_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xgb_model_param</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">get_booster</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using warm restart from best model&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Train booster on current batch</span>
+        <span class="n">booster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">],</span>
+            <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">],</span>
+            <span class="n">eval_set</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">],</span>
+                    <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">],</span>
+                <span class="p">),</span>  <span class="c1"># Train set for monitoring</span>
+                <span class="p">(</span>
+                    <span class="n">valid_data</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">],</span>
+                    <span class="n">valid_data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">],</span>
+                <span class="p">),</span>  <span class="c1"># Validation set for monitoring</span>
+            <span class="p">],</span>
+            <span class="n">xgb_model</span><span class="o">=</span><span class="n">xgb_model_param</span><span class="p">,</span>  <span class="c1"># Continue training from previous best booster if set</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;sample_weight&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_sample_weight&quot;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Apply sample weights to training set if enabled</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;verbose&quot;</span><span class="p">),</span>  <span class="c1"># XGBoost verbosity</span>
+            <span class="n">sample_weight_eval_set</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;sample_weight&quot;</span><span class="p">],</span>
+                <span class="n">valid_data</span><span class="p">[</span><span class="s2">&quot;sample_weight&quot;</span><span class="p">],</span>
+            <span class="p">],</span>  <span class="c1"># Apply sample weights to both train and validation sets</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🎯 Completed XGBoost training on batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_input_parameters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">train_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">valid_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate input parameters before starting training.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Training dataset. Must be a Spark DataFrame containing the target column.</span>
+<span class="sd">        valid_dataframe : SparkDataFrame or None</span>
+<span class="sd">            Validation dataset. Must be a Spark DataFrame containing the target column.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Name of the target column to predict. Must exist in both</span>
+<span class="sd">            `train_dataframe` and `valid_dataframe`.</span>
+<span class="sd">        num_batches : int</span>
+<span class="sd">            Number of batches to split the training data into.</span>
+<span class="sd">            Must be greater than or equal to 1.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If:</span>
+<span class="sd">            - `train_dataframe` or `valid_dataframe` is None</span>
+<span class="sd">            - `num_batches` is less than 1</span>
+<span class="sd">            - `target_column` is missing from either DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Validating input parameters...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">train_dataframe</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_dataframe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;train dataframe and validation dataframe cannot be None&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_batches</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;the number of batches must be &gt;= 1&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">train_dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train dataframe must contain &#39;</span><span class="si">{</span><span class="n">target_column</span><span class="si">}</span><span class="s2">&#39; column&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;valid dataframe must contain &#39;</span><span class="si">{</span><span class="n">target_column</span><span class="si">}</span><span class="s2">&#39; column&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Input parameters validation passed.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">current_booster</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">XGBClassifier</span><span class="p">],</span>
+        <span class="n">config_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">current_lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XGBClassifier</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize or update the XGBoost booster.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        current_booster : XGBClassifier or None</span>
+<span class="sd">            Existing booster model or None if this is the first batch.</span>
+<span class="sd">        config_model : dict</span>
+<span class="sd">            XGBoost hyperparameters.</span>
+<span class="sd">        current_lr : float</span>
+<span class="sd">            Learning rate for the current batch.</span>
+<span class="sd">        batch_id : int</span>
+<span class="sd">            Batch index.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        XGBClassifier</span>
+<span class="sd">            Updated or newly initialized booster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">current_booster</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># First initialization of the XGBoost classifier with the given configuration</span>
+            <span class="n">config_model</span><span class="p">[</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_lr</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[Batch </span><span class="si">{</span><span class="n">batch_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">] Initializing XGBoost model with configuration parameters.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">booster</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">config_model</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">booster</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Update parameters of the existing booster</span>
+            <span class="c1"># - Dynamically adjust learning rate</span>
+            <span class="c1"># - Update n_estimators if provided in the config, otherwise keep current</span>
+            <span class="n">current_booster</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span>
+                <span class="n">learning_rate</span><span class="o">=</span><span class="n">current_lr</span><span class="p">,</span>
+                <span class="n">n_estimators</span><span class="o">=</span><span class="n">config_model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;n_estimators&quot;</span><span class="p">,</span> <span class="n">current_booster</span><span class="o">.</span><span class="n">n_estimators</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">current_booster</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wrap_up_training</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config_training</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">config_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">lr_scheduler_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize the XGBoost training process by selecting the final model,</span>
+<span class="sd">        clearing caches, and generating optional visualizations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config_training : dict</span>
+<span class="sd">            Training configuration and runtime state. Expected keys include:</span>
+<span class="sd">            - &quot;best_model&quot; : best booster found (or None if no improvement)</span>
+<span class="sd">            - &quot;previous_model&quot; : last trained booster</span>
+<span class="sd">            - &quot;best_valid_loss&quot; : lowest validation loss achieved</span>
+<span class="sd">            - &quot;show_learning_curve&quot; : bool, whether to plot curves</span>
+<span class="sd">        config_model : dict</span>
+<span class="sd">            Model hyperparameters, used in particular for labeling plots.</span>
+<span class="sd">            Expected key:</span>
+<span class="sd">            - &quot;eval_metric&quot; : str or callable, optional (default: &quot;logloss&quot;)</span>
+<span class="sd">        lr_scheduler_config : dict or None</span>
+<span class="sd">            Learning rate scheduler configuration if one was used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If no model was successfully trained.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Clear cached values from the weight calculator to free memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cleaning cache of </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weight_calculator</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_calculator</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+
+        <span class="c1"># Select the final model: prefer best model if available, otherwise last</span>
+        <span class="n">final_model</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;previous_model&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">final_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No model was successfully trained&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store the selected model internally</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">final_model</span>
+
+        <span class="c1"># Optionally plot learning curves and LR schedule</span>
+        <span class="k">if</span> <span class="n">config_training</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;show_learning_curve&quot;</span><span class="p">):</span>
+            <span class="c1"># Plot LR schedule if configured</span>
+            <span class="k">if</span> <span class="n">lr_scheduler_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr_schedulers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_plot_lr_schedule</span><span class="p">(</span><span class="s2">&quot;Exponential Decay&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr_schedulers</span><span class="p">)</span>
+
+            <span class="c1"># Plot train/validation losses across batches</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_learning_curve</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_global_train_loss</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_global_valid_loss</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_global_iterations</span><span class="p">,</span>
+                <span class="s2">&quot;XGBoost&quot;</span><span class="p">,</span>
+                <span class="n">config_model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;eval_metric&quot;</span><span class="p">,</span> <span class="s2">&quot;logloss&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Log summary of the training session</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_global_iterations</span><span class="p">)</span>
+        <span class="n">final_valid_loss</span> <span class="o">=</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_valid_loss&quot;</span><span class="p">]</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;best&quot;</span> <span class="k">if</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;last&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;XGBoost training completed&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total batches processed: </span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best validation loss: </span><span class="si">{</span><span class="n">final_valid_loss</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final model selected: </span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Log categorical features if any were used</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_categorical_features</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Categorical features used: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_categorical_features</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_trained_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">booster</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+        <span class="n">config_training</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the trained booster on the current batch and update the training state.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        booster : XGBClassifier</span>
+<span class="sd">            The model trained on the current batch.</span>
+<span class="sd">        config_training : dict</span>
+<span class="sd">            Training configuration and runtime state. Updated in place with:</span>
+<span class="sd">            - &quot;previous_model&quot; : last trained booster</span>
+<span class="sd">            - &quot;best_model&quot; : best booster found so far</span>
+<span class="sd">            - &quot;best_valid_loss&quot; : lowest validation loss observed</span>
+<span class="sd">            - &quot;patience_counter&quot; : consecutive non-improving batches</span>
+<span class="sd">        batch_id : int</span>
+<span class="sd">            Index of the current batch (1-based).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if training should stop early (patience exhausted), False otherwise.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Tracks training and validation metrics over time for global monitoring.</span>
+<span class="sd">        - Updates the best model when validation loss improves.</span>
+<span class="sd">        - Implements early stopping by comparing validation loss across batches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Evaluating model on batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Retrieve evaluation metrics from booster training history</span>
+        <span class="n">train_scores</span><span class="p">,</span> <span class="n">valid_scores</span><span class="p">,</span> <span class="n">eval_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_training_metrics</span><span class="p">(</span>
+            <span class="n">booster</span><span class="p">,</span> <span class="s2">&quot;xgboost&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Take the last available score (most recent iteration)</span>
+        <span class="n">current_train_loss</span> <span class="o">=</span> <span class="n">train_scores</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">current_valid_loss</span> <span class="o">=</span> <span class="n">valid_scores</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Store metrics for global tracking/visualization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_train_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_scores</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_valid_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valid_scores</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_id</span><span class="p">)</span>
+
+        <span class="c1"># Log results for this batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">eval_metric</span><span class="si">}</span><span class="s2"> | &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Train: </span><span class="si">{</span><span class="n">current_train_loss</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> | &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Valid: </span><span class="si">{</span><span class="n">current_valid_loss</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Keep the current booster as &quot;previous_model&quot;</span>
+        <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;previous_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">booster</span><span class="p">)</span>
+
+        <span class="c1"># --- Early stopping logic ---</span>
+        <span class="k">if</span> <span class="n">current_valid_loss</span> <span class="o">&lt;</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_valid_loss&quot;</span><span class="p">]:</span>
+            <span class="c1"># Improvement → update best model and reset patience</span>
+            <span class="n">improvement</span> <span class="o">=</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_valid_loss&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">current_valid_loss</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;🎉 New best model - </span><span class="si">{</span><span class="n">eval_metric</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">current_valid_loss</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(improvement: </span><span class="si">{</span><span class="n">improvement</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+            <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_valid_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_valid_loss</span>
+            <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;patience_counter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">booster</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No improvement → increment patience counter</span>
+            <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;patience_counter&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;⏳ No improvement - Patience: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config_training</span><span class="p">[</span><span class="s1">&#39;patience_counter&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">config_training</span><span class="p">[</span><span class="s1">&#39;max_patience&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># Stop if patience exhausted</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;patience_counter&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">config_training</span><span class="p">[</span><span class="s2">&quot;max_patience&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Common function shared by both LightGBM and XGBoost:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_current_learning_rate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">lr_scheduler_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the learning rate for the current batch using an exponential decay schedule.</span>
+
+<span class="sd">        If no scheduler configuration is provided, a default learning rate of 0.1 is used.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lr_scheduler_config : dict or None</span>
+<span class="sd">            Configuration for the learning rate scheduler. Expected keys:</span>
+<span class="sd">            - &quot;initial_lr&quot; : float, default=0.1</span>
+<span class="sd">                Initial learning rate before decay.</span>
+<span class="sd">            - &quot;decay_rate&quot; : float, default=0.95</span>
+<span class="sd">                Multiplicative decay factor applied per batch.</span>
+<span class="sd">            - &quot;min_lr&quot; : float, default=1e-4</span>
+<span class="sd">                Minimum learning rate allowed to avoid vanishing updates.</span>
+<span class="sd">        batch_id : int</span>
+<span class="sd">            Index of the current batch (starting at 1).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The learning rate computed for the given batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If no scheduler configuration is provided, fall back to a constant learning rate</span>
+        <span class="k">if</span> <span class="n">lr_scheduler_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.1</span>
+
+        <span class="c1"># Log the use of exponential decay for the learning rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing the current learning rate with exponential decay&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Compute the current learning rate using exponential decay:</span>
+        <span class="c1"># LR = max(initial_lr * (decay_rate ** batch_id), min_lr)</span>
+        <span class="n">current_lr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exponential_lr_schedule</span><span class="p">(</span>
+            <span class="n">initial_lr</span><span class="o">=</span><span class="n">lr_scheduler_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;initial_lr&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>  <span class="c1"># Default initial LR</span>
+            <span class="n">decay_rate</span><span class="o">=</span><span class="n">lr_scheduler_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;decay_rate&quot;</span><span class="p">,</span> <span class="mf">0.95</span>
+            <span class="p">),</span>  <span class="c1"># Default decay factor</span>
+            <span class="n">min_lr</span><span class="o">=</span><span class="n">lr_scheduler_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min_lr&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">),</span>  <span class="c1"># Lower bound for LR</span>
+            <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">,</span>  <span class="c1"># Current batch index</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Log the computed learning rate for monitoring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Learning rate for batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">current_lr</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Keep track of learning rates used across batches for later analysis/visualization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lr_schedulers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_lr</span><span class="p">)</span>
+
+        <span class="c1"># Return the final learning rate for the current batch</span>
+        <span class="k">return</span> <span class="n">current_lr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_batch_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">processed_batch</span><span class="p">:</span> <span class="n">PandasDataFrame</span><span class="p">,</span>
+        <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">batch_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare a training batch by extracting features, targets, and sample weights.</span>
+
+<span class="sd">        This method:</span>
+<span class="sd">        - Computes sample weights for the batch based on the target distribution.</span>
+<span class="sd">        - Converts object-type features to categorical dtype when applicable.</span>
+<span class="sd">        - Optimizes memory usage of the feature matrix using the class-level optimizer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        processed_batch : PandasDataFrame</span>
+<span class="sd">            Batch of training data after preprocessing.</span>
+<span class="sd">            Must include both input features and the target column.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Name of the target column in `processed_batch`.</span>
+<span class="sd">        batch_num : int</span>
+<span class="sd">            Index of the current batch (used for logging or tracking).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Dictionary containing:</span>
+
+<span class="sd">            - &quot;features&quot; : pandas.DataFrame</span>
+<span class="sd">                Optimized feature matrix (target column excluded).</span>
+<span class="sd">            - &quot;target&quot; : pandas.Series</span>
+<span class="sd">                Target vector aligned with the feature matrix.</span>
+<span class="sd">            - &quot;sample_weight&quot; : numpy.ndarray</span>
+<span class="sd">                Computed weights for each sample, based on class distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log the beginning of sample weight calculation for this batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculating sample weights for batch </span><span class="si">{</span><span class="n">batch_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Compute sample weights based on the distribution of the target values</span>
+        <span class="c1"># (important for handling class imbalance)</span>
+        <span class="n">sample_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight_calculator</span><span class="o">.</span><span class="n">calculate_sample_weights</span><span class="p">(</span>
+            <span class="n">processed_batch</span><span class="p">[</span><span class="n">target_column</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Log the categorical conversion process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Converting all features of type &#39;object&#39; to &#39;categorical&#39;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Convert columns with dtype &quot;object&quot; into pandas &quot;category&quot;</span>
+        <span class="c1"># This is useful for models like XGBoost/CatBoost/lightgbm that can leverage categorical features</span>
+        <span class="n">processed_batch</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_object_to_category_dtype</span><span class="p">(</span>
+            <span class="n">processed_batch</span><span class="p">,</span> <span class="n">target_column</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Return the batch data in a standardized dictionary format:</span>
+        <span class="c1"># - Features (optimized using the instance-level MemoryOptimizer)</span>
+        <span class="c1"># - Target vector</span>
+        <span class="c1"># - Sample weights</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span>
+                <span class="n">processed_batch</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">target_column</span><span class="p">]</span>
+                <span class="p">)</span>  <span class="c1"># Optimized feature matrix</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">processed_batch</span><span class="p">[</span><span class="n">target_column</span><span class="p">],</span>  <span class="c1"># Target vector</span>
+            <span class="s2">&quot;sample_weight&quot;</span><span class="p">:</span> <span class="n">sample_weight</span><span class="p">,</span>  <span class="c1"># Sample weights for balancing</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_validation_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">valid_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
+        <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">config_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare and preprocess the validation dataset for model training.</span>
+
+<span class="sd">        This method:</span>
+<span class="sd">        - Converts the input Spark DataFrame into a pandas DataFrame.</span>
+<span class="sd">        - Applies preprocessing steps (e.g., optimization).</span>
+<span class="sd">        - Detects categorical features and converts them to the proper categorical dtype.</span>
+<span class="sd">        - Updates the model configuration to enable categorical support if needed.</span>
+<span class="sd">        - Computes sample/class weights based on the target distribution.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        valid_data : SparkDataFrame or None</span>
+<span class="sd">            Validation dataset in Spark format. If None, no validation data is prepared.</span>
+<span class="sd">        target_column : str</span>
+<span class="sd">            Name of the target column in the dataset.</span>
+<span class="sd">        config_model : dict</span>
+<span class="sd">            Dictionary containing model configuration parameters. This dictionary may</span>
+<span class="sd">            be updated in-place to enable categorical support.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Dictionary containing the processed validation data:</span>
+<span class="sd">            - &quot;features&quot; (pandas.DataFrame): Optimized feature matrix.</span>
+<span class="sd">            - &quot;target&quot; (pandas.Series): Target vector.</span>
+<span class="sd">            - &quot;sample_weight&quot; (numpy.ndarray): Computed class/sample weights.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert Spark DataFrame to pandas and apply preprocessing if required</span>
+        <span class="n">valid_data_processed</span><span class="p">:</span> <span class="n">PandasDataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_pandas_processing</span><span class="p">(</span>
+            <span class="n">valid_data</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert object-type columns to categorical dtype (excluding target column)</span>
+        <span class="n">valid_data_processed</span><span class="p">,</span> <span class="n">cat_is_present</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_object_to_category_dtype</span><span class="p">(</span>
+            <span class="n">valid_data_processed</span><span class="p">,</span> <span class="n">target_column</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If categorical features are detected, enable categorical support in XGBoost</span>
+        <span class="k">if</span> <span class="n">cat_is_present</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Categorical features detected - Enabling categorical support for XGBoost model&quot;</span>
+            <span class="p">)</span>
+            <span class="n">config_model</span><span class="p">[</span><span class="s2">&quot;enable_categorical&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Compute sample weights based on the target distribution</span>
+        <span class="n">sample_weights_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight_calculator</span><span class="o">.</span><span class="n">calculate_sample_weights</span><span class="p">(</span>
+            <span class="n">valid_data_processed</span><span class="p">[</span><span class="n">target_column</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Return the processed validation dataset</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span>
+                <span class="n">valid_data_processed</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">target_column</span><span class="p">])</span>
+            <span class="p">),</span>  <span class="c1"># Feature matrix optimized</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">valid_data_processed</span><span class="p">[</span><span class="n">target_column</span><span class="p">],</span>  <span class="c1"># Target vector</span>
+            <span class="s2">&quot;sample_weight&quot;</span><span class="p">:</span> <span class="n">sample_weights_valid</span><span class="p">,</span>  <span class="c1"># Class weights</span>
+        <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Rostand Surel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -195,8 +195,8 @@ Résultats visuels
 
     # 4. Entraînement batch-wise
     config_training = {
-        "num_batches": 2,                # Nombre de lots
-        "max_patience": 1,               # Patience early stopping global
+        "num_batches": 5,                # Nombre de lots
+        "max_patience": 2,               # Patience early stopping global
         "show_learning_curve": True,     # Afficher la courbe d’apprentissage
         "use_sample_weight": True,       # Gestion pondérations
         "eval_metric": "multi_logloss",  # Métrique de suivi
