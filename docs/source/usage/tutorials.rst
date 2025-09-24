@@ -1,227 +1,279 @@
-Tutoriels
+Tutorials
 =========
 
-Cette section présente les concepts fondamentaux de **Spark Batch Trainer**,
-indispensables pour comprendre son architecture et son mode d’utilisation.  
+This section introduces the fundamental concepts of **Spark Batch Trainer**,
+essential to understanding its architecture and usage.  
 
-📘 Les cas pratiques complets et reproductibles (datasets, code exécutable)
-sont détaillés séparément dans la section :doc:`examples`.
+📘 Complete and reproducible use cases (datasets, executable code)
+are detailed separately in the :doc:`examples` section.
 
 ---
 
-1. Flux de travail général
---------------------------
+Quickstart
+----------
 
-L’utilisation de **Spark Batch Trainer** repose sur un flux de travail standardisé :  
+Here is a minimal example to get started with **XGBoostTrainer**:
 
-1. Préparer les données d’entrée au format **Spark DataFrame** (train et validation)  
-2. Définir les dictionnaires de configuration  
-3. Instancier un **trainer** adapté au framework ML choisi (**XGBoost**, **CatBoost**, **LightGBM**)  
-4. Lancer l’entraînement batch-wise et évaluer le modèle obtenu  
+.. code-block:: python
+
+   from spark_batch_trainer.trainers import XGBoostTrainer
+
+   trainer = XGBoostTrainer()
+
+   config_model={"objective": "binary:logistic", "max_depth": 6},
+   config_training={"num_batches": 5, "show_learning_curve": True}
+   config_lr_scheduler = {}  # Empty dictionary → use fixed learning rate (no scheduler)
+
+   trainer.fit(spark_train_df, spark_valid_df, config_model, config_training, config_lr_scheduler)
+
+   model = trainer.get_trained_model()
+
+This quickstart shows the basic usage: provide preprocessed Spark DataFrames,
+define configurations, fit the model, and retrieve the trained estimator.
+
+---
+
+Defaults
+--------
+
+Before diving deeper, it is important to understand the default behavior of the framework:
+
+- Input must always be **preprocessed Spark DataFrames** (train & validation).  
+- If a configuration dictionary is left empty (`{}`), Spark Batch Trainer applies its internal defaults.  
+- Supported ML frameworks: **XGBoost**, **CatBoost**, **LightGBM**.  
+
+---
+
+1. General Workflow
+-------------------
+
+The workflow of **Spark Batch Trainer** follows a standardized process:
+
+1. Prepare preprocessed **Spark DataFrames** (train and validation)  
+2. Define the configuration dictionaries  
+3. Instantiate a **trainer** for the chosen ML framework  
+4. Launch **batch-wise training** and evaluate the trained model  
+
+Workflow illustration:
+
+.. code-block::
+
+   Spark DataFrames
+        │
+        ├── Train set
+        ├── Validation set
+        ▼
+   [ Spark Batch Trainer ]
+        │
+        ├── Config dictionaries
+        │
+        ▼
+   [ Trainer (XGBoost / CatBoost / LightGBM) ]
+        │
+        ▼
+   Batch-wise training → Evaluation → Trained Model
+
+.. note::
+   The user must provide a **train set** and a **validation set**
+   as **preprocessed Spark DataFrames**.
+
+---
+
+2. Data Preparation
+-------------------
+
+The framework expects **preprocessed Spark DataFrames** as input.  
 
 .. note::
 
-   Le découpage en *train/validation/test* n’est pas géré directement par
-   Spark Batch Trainer.  
-   L’utilisateur doit fournir au minimum un **train** et un **validation set**
-   sous forme de **Spark DataFrames** déjà prétraités.
+   Spark Batch Trainer does not perform **full preprocessing**
+   (cleaning, encoding, normalization, handling missing values, etc.).  
+   These steps must be performed upstream by the user.
+
+   However, the framework provides some automatic features:  
+
+   - Conversion of *object* columns into **categorical**  
+   - Memory optimization of Pandas DataFrames  
+     (automatic downcasting of integers/floats, conversion to categories)  
+   - Detection of categorical columns and automatic adjustment of hyperparameters
+     in the underlying model (native support in XGBoost, CatBoost, LightGBM)  
+
+This design ensures that users keep full control over preprocessing,
+while still benefiting from some convenient automatic optimizations.
 
 ---
 
-2. Préparation des données
---------------------------
+3. Configuration Dictionaries
+-----------------------------
 
-Le framework attend en entrée des **Spark DataFrames déjà prétraités**.  
+Training is controlled by three dictionaries.  
+Each can be left empty (`{}`) to use default parameters.
 
-.. note::
+### a) `config_model`
 
-   Spark Batch Trainer ne réalise pas de **prétraitement complet**
-   (nettoyage, encodage, normalisation, gestion des valeurs manquantes, etc.).  
-   Ces étapes doivent être effectuées en amont par l’utilisateur.
-
-En revanche, le framework offre certaines fonctionnalités automatiques :  
-
-- Conversion des colonnes de type *object* en **catégoriel**  
-- Détection des colonnes catégorielles et ajustement des hyperparamètres
-  associés dans le modèle sous-jacent (par ex. gestion native dans XGBoost,
-  CatBoost ou LightGBM)  
-
-Ainsi, l’utilisateur conserve la maîtrise du prétraitement tout en bénéficiant
-d’une intégration simplifiée avec les frameworks ML supportés.
-
----
-
-3. Les dictionnaires de configuration
--------------------------------------
-
-L’entraînement est piloté par trois dictionnaires distincts.  
-Chaque dictionnaire joue un rôle précis et peut être laissé vide (`{}`) pour
-utiliser les paramètres par défaut prévus dans le framework.
-
---- a) `config_model`
-
-Ce dictionnaire définit les **hyperparamètres du modèle ML** choisi
+This dictionary defines the **hyperparameters of the chosen ML model**
 (**XGBoost**, **CatBoost**, **LightGBM**).  
 
-📌 Pourquoi le définir ?
+📌 Why define it?
 
-- Adapter le modèle au type de tâche (binaire, multiclasse, régression)  
-- Optimiser la performance (profondeur des arbres, régularisation, taux
-  d’échantillonnage, etc.)  
-- Garantir la reproductibilité grâce au `random_state`  
+- Adapt the model to the task type (binary, multiclass, regression)  
+- Optimize performance (tree depth, regularization, sampling rate, etc.)  
+- Guarantee reproducibility through `random_state`  
+
+.. note::
+
+   If this dictionary is left empty (`{}`), the framework applies
+   its internal default parameters.
 
 .. warning::
 
-   En classification **multiclasse**, il est fortement recommandé de définir
-   explicitement ce dictionnaire afin d’éviter des erreurs ou une
-   dégradation de performance lors de l’entraînement.
+   For **multiclass classification**, it is strongly recommended to
+   explicitly define this dictionary to avoid errors or performance
+   degradation during training.
 
---- b) `config_training`
+### b) `config_training`
 
-Ce dictionnaire contrôle les paramètres liés à l’**entraînement batch-wise**.  
+This dictionary controls the parameters related to **batch-wise training**.  
 
-📌 Pourquoi le définir ?
+📌 Why define it?
 
-- Spécifier le nombre de lots (`num_batches`) pour gérer de grands datasets  
-- Définir une patience globale (`max_patience`) pour l’early stopping  
-- Activer le suivi des courbes d’apprentissage (`show_learning_curve`)
-  afin de visualiser l’évolution de la performance en train/validation  
-- Gérer les classes déséquilibrées en activant (`use_sample_weight`)  
+- `num_batches` → controls how the dataset is split into manageable parts  
+- `max_patience` → defines the global patience for early stopping  
+- `show_learning_curve` → enables visualization of train/validation learning curves  
+- `use_sample_weight` → activates weighting for imbalanced datasets  
 
-.. note::
+With this configuration, users can balance performance monitoring,
+memory efficiency, and control over training convergence.
 
-   Si ce dictionnaire est laissé vide (`{}`), le framework applique ses
-   paramètres internes par défaut.
+### c) `config_lr_scheduler`
 
---- c) `config_lr_scheduler`
+This dictionary defines the strategy for **dynamic learning rate scheduling**.  
 
-Ce dictionnaire définit la stratégie de **planification dynamique du learning rate**.  
+📌 What is a *learning rate scheduler*?  
 
-📌 Qu’est-ce qu’un *learning rate scheduler* ?  
+A *learning rate scheduler* is a mechanism that automatically adjusts the **learning rate**
+during training.  
 
-Un *learning rate scheduler* est une méthode qui ajuste le **taux d’apprentissage**
-au cours de l’entraînement.
+The idea is to begin with a relatively high learning rate, which allows the model to
+explore the parameter space quickly when it is still far from the optimum.  
+As training progresses and the model approaches convergence, the learning rate is gradually reduced.  
+This makes updates more precise, stabilizes optimization, and reduces the risk of overshooting.  
 
-Il permet de commencer avec un taux élevé pour effectuer des mises à jour rapides
-quand les paramètres sont encore loin de leur optimum, puis de réduire ce taux
-au fur et à mesure que le modèle s’approche de la solution optimale afin
-d’affiner l’entraînement.
+📌 Why use it?
 
-📌 Pourquoi l’utiliser ?  
+- **Faster convergence** at the beginning of training  
+- **Improved stability** as the model approaches the optimum  
+- **Reduced overfitting** on noisy or complex datasets  
 
-- Démarrer avec un taux élevé pour accélérer la convergence 
+Example strategy: **Exponential Decay**, with:  
 
-- Réduire progressivement ce taux pour stabiliser le modèle  
+- `initial_lr` → starting learning rate  
+- `decay_rate` → reduction factor applied at each step  
+- `min_lr` → minimum learning rate threshold  
 
-- Limiter le surapprentissage sur des données complexes ou bruitées  
-
-Exemple de stratégie : **décroissance exponentielle**, avec :  
-
-- `initial_lr` → taux d’apprentissage de départ  
-- `decay_rate` → facteur de réduction appliqué à chaque étape  
-- `min_lr` → valeur minimale en dessous de laquelle le taux ne descend pas  
-
-Exemple alternatif : **Step Decay**  
-Réduction par paliers, où le learning rate est divisé par un facteur fixe toutes
-les *s* itérations.  
+Alternative strategy: **Step Decay** (not implemented in this version):  
+The learning rate is divided by a constant factor every *s* iterations.  
 
 .. note::
 
-   Dans cette version de **Spark Batch Trainer**, seule la stratégie de
-   **décroissance exponentielle** est implémentée.
+   In the current version of **Spark Batch Trainer**, only
+   **exponential decay** is implemented.  
 
-   Si ce dictionnaire est laissé vide (`{}`), le modèle conserve son
-   learning rate fixe par défaut.
+   If this dictionary is left empty (`{}`), the model keeps
+   its fixed learning rate by default.  
+
+   For further details, see:  
+   `Introduction to Learning Rate Schedulers <https://medium.com/@theom/a-very-short-visual-introduction-to-learning-rate-schedulers-with-code-189eddffdb00>`_
 
 ---
 
-4. Les trainers
----------------
+4. Trainers
+-----------
 
-**Spark Batch Trainer** fournit plusieurs implémentations de trainers, chacune
-associée à un framework de boosting :  
+**Spark Batch Trainer** provides several trainer implementations,
+each associated with a boosting framework:  
 
 - `XGBoostTrainer` (**XGBoost**) :  
-  Performant et flexible, particulièrement adapté aux datasets hétérogènes et
-  aux tâches de classification binaire.  
+  Flexible and powerful, especially effective for heterogeneous datasets
+  and binary classification tasks.  
 
 - `CatBoostTrainer` (**CatBoost**) :  
-  Spécialement optimisé pour la gestion native des **variables catégorielles**,
-  réduisant le besoin de prétraitement manuel.  
+  Optimized for native handling of **categorical variables**, reducing
+  the need for manual preprocessing.  
 
 - `LightGBMTrainer` (**LightGBM**) :  
-  Conçu pour la **vitesse et l’efficacité mémoire**, performant sur de très
-  grands datasets avec un temps d’entraînement réduit.  
+  Designed for **speed and memory efficiency**, making it highly effective
+  for very large datasets with reduced training time.  
 
-Tous héritent d’une classe abstraite commune (`BaseTrainer`) et partagent une
-interface unifiée :  
+All trainers inherit from a common abstract class (`BaseTrainer`)
+and share a unified interface:  
 
-- `.fit()` → lance l’entraînement  
-- `.get_trained_model()` → récupère le modèle entraîné  
+- `.fit()` → launches training  
+- `.get_trained_model()` → retrieves the trained model  
 
-Cette conception modulaire garantit une API homogène et permet d’ajouter
-facilement de nouveaux trainers.
-
----
-
-5. Entraînement batch-wise
---------------------------
-
-Le cœur du framework repose sur l’entraînement par lots (**batch-wise
-training**).  
-
-Plutôt que d’entraîner un modèle sur l’ensemble des données en une seule fois,
-le dataset est divisé en **batches successifs**.  
-Chaque batch est utilisé pour affiner le modèle.  
-
-📌 Avantages :  
-
-- Réduction de la consommation mémoire  
-- Meilleure gestion des datasets massifs  
-- Possibilité d’appliquer un **early stopping global** (`max_patience`)  
-- Suivi détaillé des courbes d’apprentissage au fil des batches  
-
-Cette approche rend le framework adapté aux environnements **Big Data**
-et aux contextes de production à grande échelle.
+This modular design ensures a consistent API across frameworks
+and allows easy integration of new trainers.
 
 ---
 
-6. Évaluation et récupération du modèle
----------------------------------------
+5. Batch-wise Training
+----------------------
 
-À la fin de l’entraînement, l’utilisateur peut :  
+The core of the framework is **batch-wise training**.  
 
-- Récupérer le modèle entraîné via `.get_trained_model()`  
-- Effectuer des prédictions sur de nouvelles données  
-- Visualiser les courbes d’apprentissage pour diagnostiquer les performances  
-- Exporter ou sauvegarder le modèle en utilisant les méthodes natives du
-  framework sous-jacent (ex. `.save_model()` pour XGBoost ou LightGBM)  
+Instead of training the model on the full dataset at once,
+the dataset is divided into **successive batches**.  
+The model is first trained on the initial batch, then incrementally
+refined with each subsequent batch.  
 
-L’évaluation repose sur les données de test définies en amont, ce qui garantit
-une mesure objective des performances.
+📌 Advantages:  
 
----
+- **Reduced memory consumption**: only part of the dataset is loaded at a time  
+- **Scalability**: supports massive datasets in distributed environments  
+- **Better monitoring**: performance can be tracked batch by batch  
+- **Global early stopping**: if no improvement is seen within the patience window, training can stop early  
 
-7. Bonnes pratiques
--------------------
-
-Pour tirer le meilleur parti de **Spark Batch Trainer**, il est recommandé de :  
-
-- Vérifier systématiquement vos splits (train/valid/test) afin d’éviter toute
-  fuite de données  
-
-- Toujours définir `config_model` aussi bien pour la classification binaire que
-  pour la classification multiclasse  
-
-- Activer `show_learning_curve=True` dans `config_training` pour surveiller le
-  surapprentissage et visualiser les courbes train vs validation  
-
-- Exploiter les pondérations (`use_sample_weight`) en cas de datasets
-  déséquilibrés  
-
-- Sauvegarder vos modèles via les méthodes natives du framework ML sous-jacent  
+This approach makes the framework highly suited for **Big Data contexts**
+and production-scale environments.
 
 ---
 
-📘 Pour des cas d’utilisation complets (datasets, code reproductible,
-résultats), consultez la section :doc:`examples`.
+6. Model Evaluation and Retrieval
+---------------------------------
+
+At the end of training, the user can:  
+
+- Retrieve the trained model with `.get_trained_model()`  
+- Make predictions on new datasets  
+- Visualize learning curves to assess performance  
+- Save or export the model using the native methods of the underlying framework  
+  (e.g., `.save_model()` for XGBoost or LightGBM)  
+
+Evaluation is performed using the **test dataset defined upstream**, ensuring
+an unbiased measure of generalization.
+
+---
+
+7. Best Practices
+-----------------
+
+To make the most of **Spark Batch Trainer**, it is recommended to:  
+
+- Carefully check your splits (train/valid/test) to avoid data leakage  
+- Explicitly define `config_model` for both binary and multiclass tasks  
+- Enable `show_learning_curve=True` in `config_training` to monitor overfitting  
+- Use `use_sample_weight` when working with imbalanced datasets  
+- Save models using the native methods of the underlying ML framework  
+
+---
+
+8. Limitations
+--------------
+
+- No automatic preprocessing (cleaning, encoding, normalization, missing values).  
+- No built-in handling of train/validation/test splits.  
+- Only **exponential decay** is implemented for the learning rate scheduler.  
+
+---
+
+📘 For complete use cases (datasets, reproducible code, results), see the :doc:`examples` section.

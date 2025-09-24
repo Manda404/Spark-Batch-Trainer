@@ -48,10 +48,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">Tutoriels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/dataset_overview.html">Présentation des datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -99,7 +102,7 @@
 
 
 <div class="viewcode-block" id="XGBoostTrainer">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer">[docs]</a>
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.XGBoostTrainer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">XGBoostTrainer</span><span class="p">(</span><span class="n">BatchTrainer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Batch trainer for XGBoost classifiers.</span>
@@ -145,7 +148,7 @@
         <span class="p">)</span>  <span class="c1"># Memory optimization of the validation DataFrame (reduce size in MB before training)</span>
 
 <div class="viewcode-block" id="XGBoostTrainer.fit">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.fit">[docs]</a>
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.XGBoostTrainer.fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">train_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
@@ -292,7 +295,7 @@
 
 
 <div class="viewcode-block" id="XGBoostTrainer.get_trained_model">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.get_trained_model">[docs]</a>
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.XGBoostTrainer.get_trained_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_trained_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve the final trained model instance.</span>

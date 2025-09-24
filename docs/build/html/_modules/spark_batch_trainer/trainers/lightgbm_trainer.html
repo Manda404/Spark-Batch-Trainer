@@ -48,10 +48,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">Tutoriels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/dataset_overview.html">Présentation des datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -98,9 +101,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.core.class_weight_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptimizedWeightCalculator</span>
 
 
-<div class="viewcode-block" id="LGBMTrainer">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.lightgbm_trainer.LGBMTrainer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LGBMTrainer</span><span class="p">(</span><span class="n">BatchTrainer</span><span class="p">):</span>
+<div class="viewcode-block" id="LightGBMTrainer">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.LightGBMTrainer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LightGBMTrainer</span><span class="p">(</span><span class="n">BatchTrainer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Batch trainer for LightGBM classifiers.</span>
 
@@ -144,8 +147,8 @@
             <span class="n">use_logger</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>  <span class="c1"># Memory optimization of the validation DataFrame (reduce size in MB before training)</span>
 
-<div class="viewcode-block" id="LGBMTrainer.fit">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.lightgbm_trainer.LGBMTrainer.fit">[docs]</a>
+<div class="viewcode-block" id="LightGBMTrainer.fit">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.LightGBMTrainer.fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">train_dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkDataFrame</span><span class="p">],</span>
@@ -271,8 +274,8 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="LGBMTrainer.get_trained_model">
-<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.trainers.lightgbm_trainer.LGBMTrainer.get_trained_model">[docs]</a>
+<div class="viewcode-block" id="LightGBMTrainer.get_trained_model">
+<a class="viewcode-back" href="../../../spark_batch_trainer.trainers.html#spark_batch_trainer.LightGBMTrainer.get_trained_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_trained_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve the final trained model instance.</span>

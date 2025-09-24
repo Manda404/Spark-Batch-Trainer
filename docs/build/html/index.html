@@ -49,11 +49,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutoriels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Présentation des datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -91,22 +94,27 @@
              
   <section id="spark-batch-trainer-documentation">
 <h1>Spark Batch Trainer Documentation<a class="headerlink" href="#spark-batch-trainer-documentation" title="Link to this heading"></a></h1>
-<p><strong>Spark Batch Trainer</strong> est un framework modulaire et extensible pour
-l’entraînement de modèles de machine learning par lots (<strong>batch-wise training</strong>).</p>
-<p>Il s’intègre avec <strong>Apache Spark DataFrames</strong> et les frameworks ML populaires
-comme <strong>XGBoost</strong>, <strong>CatBoost</strong> et <strong>LightGBM</strong>.</p>
-<p>Cette documentation est organisée en plusieurs sections :</p>
+<p><strong>Spark Batch Trainer</strong> is a modular and extensible framework for
+batch-wise training of machine learning models.</p>
+<p>It integrates seamlessly with <strong>Apache Spark DataFrames</strong> and popular ML
+frameworks such as <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p>
+<p>This documentation is organized into several sections:</p>
 <ul class="simple">
-<li><p><strong>Introduction</strong> : présentation du projet et concepts clés.</p></li>
-<li><p><strong>Guide utilisateur</strong> : installation, démarrage rapide et exemples pratiques.</p></li>
-<li><p><strong>Référence API</strong> : détails complets des classes, fonctions et modules.</p></li>
-<li><p><strong>Guide contributeur</strong> : règles de développement et historique des versions.</p></li>
+<li><p><strong>Introduction</strong>: project overview and key concepts.</p></li>
+<li><p><strong>User Guide</strong>: installation, quickstart, and hands-on tutorials.</p></li>
+<li><p><strong>Examples</strong>: practical use cases for different problem types.</p></li>
+<li><p><strong>API Reference</strong>: detailed description of classes, functions, and modules.</p></li>
+<li><p><strong>Developer Guide</strong>: contribution guidelines and version history.</p></li>
 </ul>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#principales-fonctionnalites">Principales fonctionnalités</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#what-is-batch-wise-training">What is Batch-wise Training?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#how-spark-batch-trainer-works">How Spark Batch Trainer Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#typical-workflow">Typical Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#why-spark-batch-trainer">Why Spark Batch Trainer?</a></li>
 </ul>
 </li>
 </ul>
@@ -123,33 +131,50 @@ comme <strong>XGBoost</strong>, <strong>CatBoost</strong> et <strong>LightGBM</s
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutoriels</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#flux-de-travail-general">1. Flux de travail général</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#preparation-des-donnees">2. Préparation des données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#les-dictionnaires-de-configuration">3. Les dictionnaires de configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#les-trainers">4. Les trainers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#entrainement-batch-wise">5. Entraînement batch-wise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#evaluation-et-recuperation-du-modele">6. Évaluation et récupération du modèle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#bonnes-pratiques">7. Bonnes pratiques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#defaults">Defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#general-workflow">1. General Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#data-preparation">2. Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#configuration-dictionaries">3. Configuration Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#trainers">4. Trainers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#batch-wise-training">5. Batch-wise Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#model-evaluation-and-retrieval">6. Model Evaluation and Retrieval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#best-practices">7. Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#limitations">8. Limitations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Présentation des datasets</a><ul>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples.html#what-you-will-learn">What You Will Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples.html#available-example-scenarios">Available Example Scenarios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples.html#planned-extensions">Planned Extensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples.html#how-to-use-this-section">How to Use This Section</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Dataset</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="usage/dataset_overview.html#diabetes-dataset-binary-classification">1. Diabetes Dataset (Binary Classification)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage/dataset_overview.html#obesity-dataset-multiclass-classification">2. Obesity Dataset (Multiclass Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/dataset_overview.html#preparation-et-utilisation">3. Préparation et utilisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/dataset_overview.html#preparation-and-usage">3. Preparation and Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/dataset_overview.html#example-code-snippet">4. Example Code Snippet</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#xgboost-example-binary-classification">1. XGBoost Example (Binary Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#catboost-example-binary-classification">2. CatBoost Example (Binary Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#lightgbm-example-binary-classification">3. LightGBM Example (Binary Classification)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#xgboost-example">1. XGBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#catboost-example">2. CatBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#lightgbm-example">3. LightGBM Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_binary.html#key-takeaways">Key Takeaways</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#xgboost-example-multiclass-classification">1. XGBoost Example (Multiclass Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#catboost-example-multiclass-classification">2. CatBoost Example (Multiclass Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#lightgbm-example-multiclass-classification">3. LightGBM Example (Multiclass Classification)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#xgboost-example">1. XGBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#catboost-example">2. CatBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#lightgbm-example">3. LightGBM Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/examples_multiclass.html#key-takeaways">Key Takeaways</a></li>
 </ul>
 </li>
 </ul>
@@ -170,14 +195,14 @@ comme <strong>XGBoost</strong>, <strong>CatBoost</strong> et <strong>LightGBM</s
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 </div>
-</section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+</section>
 </section>
 
 

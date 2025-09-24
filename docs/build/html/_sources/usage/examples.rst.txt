@@ -1,26 +1,58 @@
-Examples
-========
+Overview
+=================
 
-Cette section illustre l’utilisation de **Spark Batch Trainer** avec plusieurs
-frameworks de boosting en machine learning (**XGBoost**, **CatBoost**, **LightGBM**).
+This section provides a guided introduction to the **practical examples** included in
+**Spark Batch Trainer**. The goal is to help you quickly understand how the framework
+can be applied to real-world machine learning tasks.
 
-Deux cas de classification sont actuellement supportés :
+What You Will Learn
+-------------------
+The examples are designed to show you step by step how to:
 
-- :doc:`examples_binary` → Exemple complet pour la **classification binaire**  
-- :doc:`examples_multiclass` → Exemple complet pour la **classification multiclasse**
+1. **Configure a model**  
+   Define framework-specific hyperparameters (*config_model*) for  
+   **XGBoost**, **CatBoost**, or **LightGBM**.
 
-Chaque exemple présente de bout en bout :
+2. **Set up batch-wise training**  
+   Control the training process with *config_training* parameters such as  
+   number of batches, batch size, and early stopping patience.
 
-- **Configuration du modèle** (*config_model* : hyperparamètres propres au framework)
-- **Configuration de l’entraînement batch-wise** (*config_training* : nombre de batches, taille, patience, etc...)    
-- **Configuration Scheduler du learning rate** (*config_lr_scheduler* : planification dynamique basée sur la **décroissance exponentielle**) 
-- **Récupération modèle final** pour effectuer des predictions 
+3. **Apply learning rate scheduling**  
+   Use *config_lr_scheduler* to dynamically adjust the learning rate  
+   (e.g., with **exponential decay**) during training.
+
+4. **Retrieve and evaluate the final model**  
+   Once training is complete, the trained model is ready for predictions  
+   and evaluation.
+
+Available Example Scenarios
+---------------------------
+
+Currently, Spark Batch Trainer provides complete examples for two major
+classification tasks:
+
+- :doc:`examples_binary` → Full workflow for **binary classification**  
+- :doc:`examples_multiclass` → Full workflow for **multiclass classification**
+
+Additionally, the :doc:`dataset_overview` page explains the datasets used
+throughout the examples.
+
+Planned Extensions
+------------------
 
 .. note::
 
-   La version actuelle (**v1.0.0**) de **Spark Batch Trainer** est dédiée
-   exclusivement aux tâches de **classification** (binaire et multiclasse),
-   sur des jeux de données aussi bien **équilibrés** que **déséquilibrés**.  
+   The current release (**v1.0.0**) of **Spark Batch Trainer** supports only
+   **classification tasks** (binary and multiclass), on both **balanced**
+   and **imbalanced** datasets.
 
-   Le support d’autres tâches, telles que la **régression** ou le
-   **ranking**, fait partie des évolutions envisagées dans les prochaines versions.
+   Support for additional machine learning tasks, such as **regression** and
+   **ranking**, is planned in future releases.
+
+How to Use This Section
+-----------------------
+
+- **New users**: Start with the :doc:`dataset_overview` to understand the data.  
+- **Hands-on learners**: Go directly to the :doc:`examples_binary` example.  
+- **Advanced users**: Explore the :doc:`examples_multiclass` to see how batch-wise
+  training scales to more complex problems.  

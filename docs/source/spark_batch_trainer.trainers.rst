@@ -5,7 +5,7 @@ Submodules
 ----------
 
 spark_batch_trainer.trainers.catboost_trainer module
----------------------------------------------------
+----------------------------------------------------
 
 .. automodule:: spark_batch_trainer.trainers.catboost_trainer
    :members:
@@ -13,7 +13,7 @@ spark_batch_trainer.trainers.catboost_trainer module
    :show-inheritance:
 
 spark_batch_trainer.trainers.lightgbm_trainer module
----------------------------------------------------
+----------------------------------------------------
 
 .. automodule:: spark_batch_trainer.trainers.lightgbm_trainer
    :members:

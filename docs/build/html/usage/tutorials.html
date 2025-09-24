@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutoriels &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+  <title>Tutorials &mdash; Spark Batch Trainer 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="next" title="Overview" href="examples.html" />
     <link rel="prev" title="Quickstart" href="quickstart.html" /> 
 </head>
 
@@ -50,19 +50,26 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutoriels</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#flux-de-travail-general">1. Flux de travail général</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#preparation-des-donnees">2. Préparation des données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#les-dictionnaires-de-configuration">3. Les dictionnaires de configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#les-trainers">4. Les trainers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#entrainement-batch-wise">5. Entraînement batch-wise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#evaluation-et-recuperation-du-modele">6. Évaluation et récupération du modèle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bonnes-pratiques">7. Bonnes pratiques</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defaults">Defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-workflow">1. General Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-preparation">2. Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-dictionaries">3. Configuration Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#trainers">4. Trainers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#batch-wise-training">5. Batch-wise Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-evaluation-and-retrieval">6. Model Evaluation and Retrieval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">7. Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#limitations">8. Limitations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -88,7 +95,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Tutoriels</li>
+      <li class="breadcrumb-item active">Tutorials</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/usage/tutorials.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,194 +105,244 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="tutoriels">
-<h1>Tutoriels<a class="headerlink" href="#tutoriels" title="Link to this heading"></a></h1>
-<p>Cette section présente les concepts fondamentaux de <strong>Spark Batch Trainer</strong>,
-indispensables pour comprendre son architecture et son mode d’utilisation.</p>
-<p>📘 Les cas pratiques complets et reproductibles (datasets, code exécutable)
-sont détaillés séparément dans la section <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>.</p>
+  <section id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading"></a></h1>
+<p>This section introduces the fundamental concepts of <strong>Spark Batch Trainer</strong>,
+essential to understanding its architecture and usage.</p>
+<p>📘 Complete and reproducible use cases (datasets, executable code)
+are detailed separately in the <a class="reference internal" href="examples.html"><span class="doc">Overview</span></a> section.</p>
 <p>—</p>
-<section id="flux-de-travail-general">
-<h2>1. Flux de travail général<a class="headerlink" href="#flux-de-travail-general" title="Link to this heading"></a></h2>
-<p>L’utilisation de <strong>Spark Batch Trainer</strong> repose sur un flux de travail standardisé :</p>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
+<p>Here is a minimal example to get started with <strong>XGBoostTrainer</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.trainers</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBoostTrainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">XGBoostTrainer</span><span class="p">()</span>
+
+<span class="n">config_model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="s2">&quot;binary:logistic&quot;</span><span class="p">,</span> <span class="s2">&quot;max_depth&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
+<span class="n">config_training</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="n">config_lr_scheduler</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Empty dictionary → use fixed learning rate (no scheduler)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">spark_train_df</span><span class="p">,</span> <span class="n">spark_valid_df</span><span class="p">,</span> <span class="n">config_model</span><span class="p">,</span> <span class="n">config_training</span><span class="p">,</span> <span class="n">config_lr_scheduler</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">get_trained_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This quickstart shows the basic usage: provide preprocessed Spark DataFrames,
+define configurations, fit the model, and retrieve the trained estimator.</p>
+<p>—</p>
+</section>
+<section id="defaults">
+<h2>Defaults<a class="headerlink" href="#defaults" title="Link to this heading"></a></h2>
+<p>Before diving deeper, it is important to understand the default behavior of the framework:</p>
+<ul class="simple">
+<li><p>Input must always be <strong>preprocessed Spark DataFrames</strong> (train &amp; validation).</p></li>
+<li><p>If a configuration dictionary is left empty (<cite>{}</cite>), Spark Batch Trainer applies its internal defaults.</p></li>
+<li><p>Supported ML frameworks: <strong>XGBoost</strong>, <strong>CatBoost</strong>, <strong>LightGBM</strong>.</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="general-workflow">
+<h2>1. General Workflow<a class="headerlink" href="#general-workflow" title="Link to this heading"></a></h2>
+<p>The workflow of <strong>Spark Batch Trainer</strong> follows a standardized process:</p>
 <ol class="arabic simple">
-<li><p>Préparer les données d’entrée au format <strong>Spark DataFrame</strong> (train et validation)</p></li>
-<li><p>Définir les dictionnaires de configuration</p></li>
-<li><p>Instancier un <strong>trainer</strong> adapté au framework ML choisi (<strong>XGBoost</strong>, <strong>CatBoost</strong>, <strong>LightGBM</strong>)</p></li>
-<li><p>Lancer l’entraînement batch-wise et évaluer le modèle obtenu</p></li>
+<li><p>Prepare preprocessed <strong>Spark DataFrames</strong> (train and validation)</p></li>
+<li><p>Define the configuration dictionaries</p></li>
+<li><p>Instantiate a <strong>trainer</strong> for the chosen ML framework</p></li>
+<li><p>Launch <strong>batch-wise training</strong> and evaluate the trained model</p></li>
 </ol>
+<p>Workflow illustration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Spark DataFrames
+     │
+     ├── Train set
+     ├── Validation set
+     ▼
+[ Spark Batch Trainer ]
+     │
+     ├── Config dictionaries
+     │
+     ▼
+[ Trainer (XGBoost / CatBoost / LightGBM) ]
+     │
+     ▼
+Batch-wise training → Evaluation → Trained Model
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Le découpage en <em>train/validation/test</em> n’est pas géré directement par
-Spark Batch Trainer.
-L’utilisateur doit fournir au minimum un <strong>train</strong> et un <strong>validation set</strong>
-sous forme de <strong>Spark DataFrames</strong> déjà prétraités.</p>
+<p>The user must provide a <strong>train set</strong> and a <strong>validation set</strong>
+as <strong>preprocessed Spark DataFrames</strong>.</p>
 </div>
 <p>—</p>
 </section>
-<section id="preparation-des-donnees">
-<h2>2. Préparation des données<a class="headerlink" href="#preparation-des-donnees" title="Link to this heading"></a></h2>
-<p>Le framework attend en entrée des <strong>Spark DataFrames déjà prétraités</strong>.</p>
+<section id="data-preparation">
+<h2>2. Data Preparation<a class="headerlink" href="#data-preparation" title="Link to this heading"></a></h2>
+<p>The framework expects <strong>preprocessed Spark DataFrames</strong> as input.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Spark Batch Trainer ne réalise pas de <strong>prétraitement complet</strong>
-(nettoyage, encodage, normalisation, gestion des valeurs manquantes, etc.).
-Ces étapes doivent être effectuées en amont par l’utilisateur.</p>
-</div>
-<p>En revanche, le framework offre certaines fonctionnalités automatiques :</p>
+<p>Spark Batch Trainer does not perform <strong>full preprocessing</strong>
+(cleaning, encoding, normalization, handling missing values, etc.).
+These steps must be performed upstream by the user.</p>
+<p>However, the framework provides some automatic features:</p>
 <ul class="simple">
-<li><p>Conversion des colonnes de type <em>object</em> en <strong>catégoriel</strong></p></li>
-<li><p>Détection des colonnes catégorielles et ajustement des hyperparamètres
-associés dans le modèle sous-jacent (par ex. gestion native dans XGBoost,
-CatBoost ou LightGBM)</p></li>
+<li><p>Conversion of <em>object</em> columns into <strong>categorical</strong></p></li>
+<li><p>Memory optimization of Pandas DataFrames
+(automatic downcasting of integers/floats, conversion to categories)</p></li>
+<li><p>Detection of categorical columns and automatic adjustment of hyperparameters
+in the underlying model (native support in XGBoost, CatBoost, LightGBM)</p></li>
 </ul>
-<p>Ainsi, l’utilisateur conserve la maîtrise du prétraitement tout en bénéficiant
-d’une intégration simplifiée avec les frameworks ML supportés.</p>
+</div>
+<p>This design ensures that users keep full control over preprocessing,
+while still benefiting from some convenient automatic optimizations.</p>
 <p>—</p>
 </section>
-<section id="les-dictionnaires-de-configuration">
-<h2>3. Les dictionnaires de configuration<a class="headerlink" href="#les-dictionnaires-de-configuration" title="Link to this heading"></a></h2>
-<p>L’entraînement est piloté par trois dictionnaires distincts.
-Chaque dictionnaire joue un rôle précis et peut être laissé vide (<cite>{}</cite>) pour
-utiliser les paramètres par défaut prévus dans le framework.</p>
-<p>— a) <cite>config_model</cite></p>
-<p>Ce dictionnaire définit les <strong>hyperparamètres du modèle ML</strong> choisi
+<section id="configuration-dictionaries">
+<h2>3. Configuration Dictionaries<a class="headerlink" href="#configuration-dictionaries" title="Link to this heading"></a></h2>
+<p>Training is controlled by three dictionaries.
+Each can be left empty (<cite>{}</cite>) to use default parameters.</p>
+<p>### a) <cite>config_model</cite></p>
+<p>This dictionary defines the <strong>hyperparameters of the chosen ML model</strong>
 (<strong>XGBoost</strong>, <strong>CatBoost</strong>, <strong>LightGBM</strong>).</p>
-<p>📌 Pourquoi le définir ?</p>
+<p>📌 Why define it?</p>
 <ul class="simple">
-<li><p>Adapter le modèle au type de tâche (binaire, multiclasse, régression)</p></li>
-<li><p>Optimiser la performance (profondeur des arbres, régularisation, taux
-d’échantillonnage, etc.)</p></li>
-<li><p>Garantir la reproductibilité grâce au <cite>random_state</cite></p></li>
+<li><p>Adapt the model to the task type (binary, multiclass, regression)</p></li>
+<li><p>Optimize performance (tree depth, regularization, sampling rate, etc.)</p></li>
+<li><p>Guarantee reproducibility through <cite>random_state</cite></p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If this dictionary is left empty (<cite>{}</cite>), the framework applies
+its internal default parameters.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>En classification <strong>multiclasse</strong>, il est fortement recommandé de définir
-explicitement ce dictionnaire afin d’éviter des erreurs ou une
-dégradation de performance lors de l’entraînement.</p>
+<p>For <strong>multiclass classification</strong>, it is strongly recommended to
+explicitly define this dictionary to avoid errors or performance
+degradation during training.</p>
 </div>
-<p>— b) <cite>config_training</cite></p>
-<p>Ce dictionnaire contrôle les paramètres liés à l’<strong>entraînement batch-wise</strong>.</p>
-<p>📌 Pourquoi le définir ?</p>
+<p>### b) <cite>config_training</cite></p>
+<p>This dictionary controls the parameters related to <strong>batch-wise training</strong>.</p>
+<p>📌 Why define it?</p>
 <ul class="simple">
-<li><p>Spécifier le nombre de lots (<cite>num_batches</cite>) pour gérer de grands datasets</p></li>
-<li><p>Définir une patience globale (<cite>max_patience</cite>) pour l’early stopping</p></li>
-<li><p>Activer le suivi des courbes d’apprentissage (<cite>show_learning_curve</cite>)
-afin de visualiser l’évolution de la performance en train/validation</p></li>
-<li><p>Gérer les classes déséquilibrées en activant (<cite>use_sample_weight</cite>)</p></li>
+<li><p><cite>num_batches</cite> → controls how the dataset is split into manageable parts</p></li>
+<li><p><cite>max_patience</cite> → defines the global patience for early stopping</p></li>
+<li><p><cite>show_learning_curve</cite> → enables visualization of train/validation learning curves</p></li>
+<li><p><cite>use_sample_weight</cite> → activates weighting for imbalanced datasets</p></li>
 </ul>
+<p>With this configuration, users can balance performance monitoring,
+memory efficiency, and control over training convergence.</p>
+<p>### c) <cite>config_lr_scheduler</cite></p>
+<p>This dictionary defines the strategy for <strong>dynamic learning rate scheduling</strong>.</p>
+<p>📌 What is a <em>learning rate scheduler</em>?</p>
+<p>A <em>learning rate scheduler</em> is a mechanism that automatically adjusts the <strong>learning rate</strong>
+during training.</p>
+<p>The idea is to begin with a relatively high learning rate, which allows the model to
+explore the parameter space quickly when it is still far from the optimum.
+As training progresses and the model approaches convergence, the learning rate is gradually reduced.
+This makes updates more precise, stabilizes optimization, and reduces the risk of overshooting.</p>
+<p>📌 Why use it?</p>
+<ul class="simple">
+<li><p><strong>Faster convergence</strong> at the beginning of training</p></li>
+<li><p><strong>Improved stability</strong> as the model approaches the optimum</p></li>
+<li><p><strong>Reduced overfitting</strong> on noisy or complex datasets</p></li>
+</ul>
+<p>Example strategy: <strong>Exponential Decay</strong>, with:</p>
+<ul class="simple">
+<li><p><cite>initial_lr</cite> → starting learning rate</p></li>
+<li><p><cite>decay_rate</cite> → reduction factor applied at each step</p></li>
+<li><p><cite>min_lr</cite> → minimum learning rate threshold</p></li>
+</ul>
+<p>Alternative strategy: <strong>Step Decay</strong> (not implemented in this version):
+The learning rate is divided by a constant factor every <em>s</em> iterations.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Si ce dictionnaire est laissé vide (<cite>{}</cite>), le framework applique ses
-paramètres internes par défaut.</p>
-</div>
-<p>— c) <cite>config_lr_scheduler</cite></p>
-<p>Ce dictionnaire définit la stratégie de <strong>planification dynamique du learning rate</strong>.</p>
-<p>📌 Qu’est-ce qu’un <em>learning rate scheduler</em> ?</p>
-<p>Un <em>learning rate scheduler</em> est une méthode qui ajuste le <strong>taux d’apprentissage</strong>
-au cours de l’entraînement.</p>
-<p>Il permet de commencer avec un taux élevé pour effectuer des mises à jour rapides
-quand les paramètres sont encore loin de leur optimum, puis de réduire ce taux
-au fur et à mesure que le modèle s’approche de la solution optimale afin
-d’affiner l’entraînement.</p>
-<p>📌 Pourquoi l’utiliser ?</p>
-<ul class="simple">
-<li><p>Démarrer avec un taux élevé pour accélérer la convergence</p></li>
-<li><p>Réduire progressivement ce taux pour stabiliser le modèle</p></li>
-<li><p>Limiter le surapprentissage sur des données complexes ou bruitées</p></li>
-</ul>
-<p>Exemple de stratégie : <strong>décroissance exponentielle</strong>, avec :</p>
-<ul class="simple">
-<li><p><cite>initial_lr</cite> → taux d’apprentissage de départ</p></li>
-<li><p><cite>decay_rate</cite> → facteur de réduction appliqué à chaque étape</p></li>
-<li><p><cite>min_lr</cite> → valeur minimale en dessous de laquelle le taux ne descend pas</p></li>
-</ul>
-<p>Exemple alternatif : <strong>Step Decay</strong>
-Réduction par paliers, où le learning rate est divisé par un facteur fixe toutes
-les <em>s</em> itérations.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Dans cette version de <strong>Spark Batch Trainer</strong>, seule la stratégie de
-<strong>décroissance exponentielle</strong> est implémentée.</p>
-<p>Si ce dictionnaire est laissé vide (<cite>{}</cite>), le modèle conserve son
-learning rate fixe par défaut.</p>
+<p>In the current version of <strong>Spark Batch Trainer</strong>, only
+<strong>exponential decay</strong> is implemented.</p>
+<p>If this dictionary is left empty (<cite>{}</cite>), the model keeps
+its fixed learning rate by default.</p>
+<p>For further details, see:
+<a class="reference external" href="https://medium.com/&#64;theom/a-very-short-visual-introduction-to-learning-rate-schedulers-with-code-189eddffdb00">Introduction to Learning Rate Schedulers</a></p>
 </div>
 <p>—</p>
 </section>
-<section id="les-trainers">
-<h2>4. Les trainers<a class="headerlink" href="#les-trainers" title="Link to this heading"></a></h2>
-<p><strong>Spark Batch Trainer</strong> fournit plusieurs implémentations de trainers, chacune
-associée à un framework de boosting :</p>
+<section id="trainers">
+<h2>4. Trainers<a class="headerlink" href="#trainers" title="Link to this heading"></a></h2>
+<p><strong>Spark Batch Trainer</strong> provides several trainer implementations,
+each associated with a boosting framework:</p>
 <ul class="simple">
 <li><p><cite>XGBoostTrainer</cite> (<strong>XGBoost</strong>) :
-Performant et flexible, particulièrement adapté aux datasets hétérogènes et
-aux tâches de classification binaire.</p></li>
+Flexible and powerful, especially effective for heterogeneous datasets
+and binary classification tasks.</p></li>
 <li><p><cite>CatBoostTrainer</cite> (<strong>CatBoost</strong>) :
-Spécialement optimisé pour la gestion native des <strong>variables catégorielles</strong>,
-réduisant le besoin de prétraitement manuel.</p></li>
+Optimized for native handling of <strong>categorical variables</strong>, reducing
+the need for manual preprocessing.</p></li>
 <li><p><cite>LightGBMTrainer</cite> (<strong>LightGBM</strong>) :
-Conçu pour la <strong>vitesse et l’efficacité mémoire</strong>, performant sur de très
-grands datasets avec un temps d’entraînement réduit.</p></li>
+Designed for <strong>speed and memory efficiency</strong>, making it highly effective
+for very large datasets with reduced training time.</p></li>
 </ul>
-<p>Tous héritent d’une classe abstraite commune (<cite>BaseTrainer</cite>) et partagent une
-interface unifiée :</p>
+<p>All trainers inherit from a common abstract class (<cite>BaseTrainer</cite>)
+and share a unified interface:</p>
 <ul class="simple">
-<li><p><cite>.fit()</cite> → lance l’entraînement</p></li>
-<li><p><cite>.get_trained_model()</cite> → récupère le modèle entraîné</p></li>
+<li><p><cite>.fit()</cite> → launches training</p></li>
+<li><p><cite>.get_trained_model()</cite> → retrieves the trained model</p></li>
 </ul>
-<p>Cette conception modulaire garantit une API homogène et permet d’ajouter
-facilement de nouveaux trainers.</p>
+<p>This modular design ensures a consistent API across frameworks
+and allows easy integration of new trainers.</p>
 <p>—</p>
 </section>
-<section id="entrainement-batch-wise">
-<h2>5. Entraînement batch-wise<a class="headerlink" href="#entrainement-batch-wise" title="Link to this heading"></a></h2>
-<p>Le cœur du framework repose sur l’entraînement par lots (<strong>batch-wise
-training</strong>).</p>
-<p>Plutôt que d’entraîner un modèle sur l’ensemble des données en une seule fois,
-le dataset est divisé en <strong>batches successifs</strong>.
-Chaque batch est utilisé pour affiner le modèle.</p>
-<p>📌 Avantages :</p>
+<section id="batch-wise-training">
+<h2>5. Batch-wise Training<a class="headerlink" href="#batch-wise-training" title="Link to this heading"></a></h2>
+<p>The core of the framework is <strong>batch-wise training</strong>.</p>
+<p>Instead of training the model on the full dataset at once,
+the dataset is divided into <strong>successive batches</strong>.
+The model is first trained on the initial batch, then incrementally
+refined with each subsequent batch.</p>
+<p>📌 Advantages:</p>
 <ul class="simple">
-<li><p>Réduction de la consommation mémoire</p></li>
-<li><p>Meilleure gestion des datasets massifs</p></li>
-<li><p>Possibilité d’appliquer un <strong>early stopping global</strong> (<cite>max_patience</cite>)</p></li>
-<li><p>Suivi détaillé des courbes d’apprentissage au fil des batches</p></li>
+<li><p><strong>Reduced memory consumption</strong>: only part of the dataset is loaded at a time</p></li>
+<li><p><strong>Scalability</strong>: supports massive datasets in distributed environments</p></li>
+<li><p><strong>Better monitoring</strong>: performance can be tracked batch by batch</p></li>
+<li><p><strong>Global early stopping</strong>: if no improvement is seen within the patience window, training can stop early</p></li>
 </ul>
-<p>Cette approche rend le framework adapté aux environnements <strong>Big Data</strong>
-et aux contextes de production à grande échelle.</p>
+<p>This approach makes the framework highly suited for <strong>Big Data contexts</strong>
+and production-scale environments.</p>
 <p>—</p>
 </section>
-<section id="evaluation-et-recuperation-du-modele">
-<h2>6. Évaluation et récupération du modèle<a class="headerlink" href="#evaluation-et-recuperation-du-modele" title="Link to this heading"></a></h2>
-<p>À la fin de l’entraînement, l’utilisateur peut :</p>
+<section id="model-evaluation-and-retrieval">
+<h2>6. Model Evaluation and Retrieval<a class="headerlink" href="#model-evaluation-and-retrieval" title="Link to this heading"></a></h2>
+<p>At the end of training, the user can:</p>
 <ul class="simple">
-<li><p>Récupérer le modèle entraîné via <cite>.get_trained_model()</cite></p></li>
-<li><p>Effectuer des prédictions sur de nouvelles données</p></li>
-<li><p>Visualiser les courbes d’apprentissage pour diagnostiquer les performances</p></li>
-<li><p>Exporter ou sauvegarder le modèle en utilisant les méthodes natives du
-framework sous-jacent (ex. <cite>.save_model()</cite> pour XGBoost ou LightGBM)</p></li>
+<li><p>Retrieve the trained model with <cite>.get_trained_model()</cite></p></li>
+<li><p>Make predictions on new datasets</p></li>
+<li><p>Visualize learning curves to assess performance</p></li>
+<li><p>Save or export the model using the native methods of the underlying framework
+(e.g., <cite>.save_model()</cite> for XGBoost or LightGBM)</p></li>
 </ul>
-<p>L’évaluation repose sur les données de test définies en amont, ce qui garantit
-une mesure objective des performances.</p>
+<p>Evaluation is performed using the <strong>test dataset defined upstream</strong>, ensuring
+an unbiased measure of generalization.</p>
 <p>—</p>
 </section>
-<section id="bonnes-pratiques">
-<h2>7. Bonnes pratiques<a class="headerlink" href="#bonnes-pratiques" title="Link to this heading"></a></h2>
-<p>Pour tirer le meilleur parti de <strong>Spark Batch Trainer</strong>, il est recommandé de :</p>
+<section id="best-practices">
+<h2>7. Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<p>To make the most of <strong>Spark Batch Trainer</strong>, it is recommended to:</p>
 <ul class="simple">
-<li><p>Vérifier systématiquement vos splits (train/valid/test) afin d’éviter toute
-fuite de données</p></li>
-<li><p>Toujours définir <cite>config_model</cite> aussi bien pour la classification binaire que
-pour la classification multiclasse</p></li>
-<li><p>Activer <cite>show_learning_curve=True</cite> dans <cite>config_training</cite> pour surveiller le
-surapprentissage et visualiser les courbes train vs validation</p></li>
-<li><p>Exploiter les pondérations (<cite>use_sample_weight</cite>) en cas de datasets
-déséquilibrés</p></li>
-<li><p>Sauvegarder vos modèles via les méthodes natives du framework ML sous-jacent</p></li>
+<li><p>Carefully check your splits (train/valid/test) to avoid data leakage</p></li>
+<li><p>Explicitly define <cite>config_model</cite> for both binary and multiclass tasks</p></li>
+<li><p>Enable <cite>show_learning_curve=True</cite> in <cite>config_training</cite> to monitor overfitting</p></li>
+<li><p>Use <cite>use_sample_weight</cite> when working with imbalanced datasets</p></li>
+<li><p>Save models using the native methods of the underlying ML framework</p></li>
 </ul>
 <p>—</p>
-<p>📘 Pour des cas d’utilisation complets (datasets, code reproductible,
-résultats), consultez la section <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>.</p>
+</section>
+<section id="limitations">
+<h2>8. Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>No automatic preprocessing (cleaning, encoding, normalization, missing values).</p></li>
+<li><p>No built-in handling of train/validation/test splits.</p></li>
+<li><p>Only <strong>exponential decay</strong> is implemented for the learning rate scheduler.</p></li>
+</ul>
+<p>—</p>
+<p>📘 For complete use cases (datasets, reproducible code, results), see the <a class="reference internal" href="examples.html"><span class="doc">Overview</span></a> section.</p>
 </section>
 </section>
 
@@ -294,7 +351,7 @@ résultats), consultez la section <a class="reference internal" href="examples.h
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

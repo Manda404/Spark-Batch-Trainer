@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Présentation des datasets &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+  <title>Dataset &mdash; Spark Batch Trainer 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Binary Classification Examples" href="examples_binary.html" />
-    <link rel="prev" title="Examples" href="examples.html" /> 
+    <link rel="next" title="Binary Classification" href="examples_binary.html" />
+    <link rel="prev" title="Overview" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,19 +47,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutoriels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Présentation des datasets</a><ul>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dataset</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#diabetes-dataset-binary-classification">1. Diabetes Dataset (Binary Classification)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#obesity-dataset-multiclass-classification">2. Obesity Dataset (Multiclass Classification)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#preparation-et-utilisation">3. Préparation et utilisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preparation-and-usage">3. Preparation and Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-code-snippet">4. Example Code Snippet</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -85,7 +89,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Présentation des datasets</li>
+      <li class="breadcrumb-item active">Dataset</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/usage/dataset_overview.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -95,76 +99,71 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="presentation-des-datasets">
-<h1>Présentation des datasets<a class="headerlink" href="#presentation-des-datasets" title="Link to this heading"></a></h1>
-<p>Cette section présente les deux jeux de données utilisés dans les exemples
-de <strong>Spark Batch Trainer</strong> :</p>
+  <section id="dataset">
+<h1>Dataset<a class="headerlink" href="#dataset" title="Link to this heading"></a></h1>
+<p>This section introduces the two datasets used in the <strong>Spark Batch Trainer</strong> examples:</p>
 <ul class="simple">
-<li><p>Le <strong>Diabetes Dataset</strong> pour les tâches de <strong>classification binaire</strong></p></li>
-<li><p>Le <strong>Obesity Dataset</strong> pour les tâches de <strong>classification multiclasse</strong></p></li>
+<li><p>The <strong>Diabetes Dataset</strong> for <strong>binary classification</strong> tasks</p></li>
+<li><p>The <strong>Obesity Dataset</strong> for <strong>multiclass classification</strong> tasks</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Ces datasets sont utilisés uniquement à titre illustratif afin de montrer le
-fonctionnement du framework.</p>
+<p>These datasets are provided for illustrative purposes only, to demonstrate
+how the framework works.</p>
 </div>
 <p>—</p>
 <section id="diabetes-dataset-binary-classification">
 <h2>1. Diabetes Dataset (Binary Classification)<a class="headerlink" href="#diabetes-dataset-binary-classification" title="Link to this heading"></a></h2>
-<p>📌 <strong>Objectif</strong> : prédire si un patient est atteint de <strong>diabète</strong> en fonction
-de caractéristiques médicales et démographiques.</p>
+<p>📌 <strong>Goal</strong>: Predict whether a patient has <strong>diabetes</strong> based on medical and demographic features.</p>
 <ul class="simple">
-<li><p><strong>Source</strong> : <em>National Institute of Diabetes and Digestive and Kidney Diseases</em> (Diabetes.csv)</p></li>
-<li><p><strong>Taille</strong> : <cite>shape = (100000, 9)</cite></p></li>
-<li><p><strong>Colonnes disponibles</strong> :</p>
+<li><p><strong>Source</strong>: <em>National Institute of Diabetes and Digestive and Kidney Diseases</em> (Diabetes.csv)</p></li>
+<li><p><strong>Shape</strong>: <cite>shape = (100000, 9)</cite></p></li>
+<li><p><strong>Available columns</strong>:</p>
 <ul>
-<li><p><cite>gender</cite> → Sexe du patient</p></li>
-<li><p><cite>age</cite> → Âge</p></li>
-<li><p><cite>hypertension</cite> → Antécédent d’hypertension (0 = Non, 1 = Oui)</p></li>
-<li><p><cite>heart_disease</cite> → Antécédent de maladie cardiaque (0 = Non, 1 = Oui)</p></li>
-<li><p><cite>smoking_history</cite> → Habitudes tabagiques</p></li>
-<li><p><cite>bmi</cite> → Indice de masse corporelle</p></li>
-<li><p><cite>HbA1c_level</cite> → Taux moyen de glycémie sur 3 mois</p></li>
-<li><p><cite>blood_glucose_level</cite> → Niveau de glucose sanguin</p></li>
-<li><p><cite>diabetes</cite> → <strong>Variable cible (binaire : 0 = Non diabétique, 1 = Diabétique)</strong></p></li>
+<li><p><cite>gender</cite> → Patient’s gender</p></li>
+<li><p><cite>age</cite> → Age</p></li>
+<li><p><cite>hypertension</cite> → Hypertension history (0 = No, 1 = Yes)</p></li>
+<li><p><cite>heart_disease</cite> → Heart disease history (0 = No, 1 = Yes)</p></li>
+<li><p><cite>smoking_history</cite> → Smoking habits</p></li>
+<li><p><cite>bmi</cite> → Body mass index</p></li>
+<li><p><cite>HbA1c_level</cite> → Average blood sugar level over 3 months</p></li>
+<li><p><cite>blood_glucose_level</cite> → Current blood glucose level</p></li>
+<li><p><cite>diabetes</cite> → <strong>Target variable (binary: 0 = Non-diabetic, 1 = Diabetic)</strong></p></li>
 </ul>
 </li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Ce dataset est utilisé pour illustrer la <strong>classification binaire</strong>
-dans les exemples d’entraînement avec <strong>XGBoost</strong>, <strong>CatBoost</strong> et
-<strong>LightGBM</strong>.</p>
+<p>This dataset is used to illustrate <strong>binary classification</strong>
+in training examples with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p>
 </div>
 <p>—</p>
 </section>
 <section id="obesity-dataset-multiclass-classification">
 <h2>2. Obesity Dataset (Multiclass Classification)<a class="headerlink" href="#obesity-dataset-multiclass-classification" title="Link to this heading"></a></h2>
-<p>📌 <strong>Objectif</strong> : prédire la <strong>catégorie de poids corporel</strong> d’un individu
-en fonction de ses habitudes alimentaires, son mode de vie et ses mesures
-anthropométriques.</p>
+<p>📌 <strong>Goal</strong>: Predict an individual’s <strong>body weight category</strong> based on eating habits, lifestyle, and anthropometric measures.</p>
 <ul class="simple">
-<li><p><strong>Source</strong> : Jeu de données académique sur l’obésité (ObesityDataset.csv)</p></li>
-<li><p><strong>Taille</strong> : <cite>shape = (2111, 17)</cite></p></li>
-<li><p><strong>Colonnes disponibles</strong> :</p>
+<li><p><strong>Source</strong>: Academic dataset on obesity (ObesityDataset.csv)</p></li>
+<li><p><strong>Shape</strong>: <cite>shape = (2111, 17)</cite></p></li>
+<li><p><strong>Available columns</strong>:</p>
 <ul>
-<li><p><cite>Age</cite> → Âge</p></li>
-<li><p><cite>Gender</cite> → Sexe</p></li>
-<li><p><cite>Height</cite> → Taille (mètres)</p></li>
-<li><p><cite>Weight</cite> → Poids (kg)</p></li>
-<li><p><cite>CALC</cite> → Consommation d’alcool</p></li>
-<li><p><cite>FAVC</cite> → Consommation fréquente d’aliments riches en calories</p></li>
-<li><p><cite>FCVC</cite> → Consommation de légumes</p></li>
-<li><p><cite>NCP</cite> → Nombre de repas principaux par jour</p></li>
-<li><p><cite>SCC</cite> → Surveillance des calories consommées</p></li>
-<li><p><cite>SMOKE</cite> → Habitude tabagique</p></li>
-<li><p><cite>CH2O</cite> → Consommation d’eau quotidienne</p></li>
-<li><p><cite>family_history_with_overweight</cite> → Antécédents familiaux de surpoids</p></li>
-<li><p><cite>FAF</cite> → Activité physique hebdomadaire</p></li>
-<li><p><cite>TUE</cite> → Temps consacré à l’usage d’appareils électroniques</p></li>
-<li><p><cite>CAEC</cite> → Grignotage entre les repas</p></li>
-<li><p><cite>MTRANS</cite> → Mode de transport principal</p></li>
-<li><p><cite>NObeyesdad</cite> → <strong>Variable cible (multiclasse, 7 catégories)</strong> :</p>
+<li><p><cite>Age</cite> → Age</p></li>
+<li><p><cite>Gender</cite> → Gender</p></li>
+<li><p><cite>Height</cite> → Height (meters)</p></li>
+<li><p><cite>Weight</cite> → Weight (kg)</p></li>
+<li><p><cite>CALC</cite> → Alcohol consumption</p></li>
+<li><p><cite>FAVC</cite> → Frequent consumption of high-calorie foods</p></li>
+<li><p><cite>FCVC</cite> → Vegetable consumption</p></li>
+<li><p><cite>NCP</cite> → Number of main meals per day</p></li>
+<li><p><cite>SCC</cite> → Calorie monitoring</p></li>
+<li><p><cite>SMOKE</cite> → Smoking habit</p></li>
+<li><p><cite>CH2O</cite> → Daily water intake</p></li>
+<li><p><cite>family_history_with_overweight</cite> → Family history of overweight</p></li>
+<li><p><cite>FAF</cite> → Weekly physical activity</p></li>
+<li><p><cite>TUE</cite> → Time spent using electronic devices</p></li>
+<li><p><cite>CAEC</cite> → Snacking between meals</p></li>
+<li><p><cite>MTRANS</cite> → Main mode of transportation</p></li>
+<li><p><cite>NObeyesdad</cite> → <strong>Target variable (multiclass, 7 categories)</strong>:</p>
 <ul>
 <li><p><cite>Insufficient_Weight</cite></p></li>
 <li><p><cite>Normal_Weight</cite></p></li>
@@ -180,50 +179,70 @@ anthropométriques.</p>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Ce dataset est utilisé pour illustrer la <strong>classification multiclasse</strong>
-dans les exemples d’entraînement avec <strong>XGBoost</strong>, <strong>CatBoost</strong> et
-<strong>LightGBM</strong>.</p>
+<p>This dataset is used to illustrate <strong>multiclass classification</strong>
+in training examples with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p>
 </div>
 <p>—</p>
 </section>
-<section id="preparation-et-utilisation">
-<h2>3. Préparation et utilisation<a class="headerlink" href="#preparation-et-utilisation" title="Link to this heading"></a></h2>
-<p>Avant d’utiliser <strong>Spark Batch Trainer</strong>, il est recommandé de suivre les étapes suivantes :</p>
-<ol class="arabic">
-<li><p><strong>Charger les données</strong>
-Par exemple, avec <cite>pandas.read_csv(“fichier.csv”)</cite>.</p></li>
-<li><p><strong>Prétraiter les données (si nécessaire)</strong></p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Encodage des variables catégorielles</p></li>
-<li><p>Gestion des valeurs manquantes</p></li>
-<li><p>Normalisation / standardisation des variables numériques</p></li>
+<section id="preparation-and-usage">
+<h2>3. Preparation and Usage<a class="headerlink" href="#preparation-and-usage" title="Link to this heading"></a></h2>
+<p>Before using <strong>Spark Batch Trainer</strong>, it is recommended to follow these steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Load the dataset</strong>
+For example, with <cite>pandas.read_csv(“file.csv”)</cite>.</p></li>
+<li><p><strong>Preprocess the data (if necessary)</strong></p>
+<ul class="simple">
+<li><p>Encode categorical variables</p></li>
+<li><p>Handle missing values</p></li>
+<li><p>Normalize / standardize numerical features</p></li>
 </ul>
-</div></blockquote>
 </li>
-<li><p><strong>Diviser le dataset en sous-ensembles</strong></p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>data_train</strong> (60%) : sert à <strong>entraîner le modèle</strong></p></li>
-<li><p><strong>data_valid</strong> (20%) : sert à <strong>valider les performances</strong> et appliquer l’<strong>early stopping</strong></p></li>
-<li><p><strong>data_test</strong> (20%) : sert à l’<strong>évaluation finale</strong> sur des données jamais vues</p></li>
+<li><p><strong>Split the dataset into subsets</strong></p>
+<ul class="simple">
+<li><p><strong>data_train</strong> (60%): the portion of the dataset used to <strong>teach the model</strong> how to make predictions.</p></li>
+<li><p><strong>data_valid</strong> (20%): a separate portion used to <strong>check the model’s performance while training</strong> and decide when to stop (early stopping).</p></li>
+<li><p><strong>data_test</strong> (20%): a final portion kept aside to <strong>simulate real-world unseen data</strong> and measure how well the model generalizes.</p></li>
 </ul>
-</div></blockquote>
 </li>
-<li><p><strong>Convertir les sous-ensembles train / validation</strong> en <strong>Spark DataFrames</strong></p>
-<blockquote>
-<div><p>Ces DataFrames seront directement utilisés par les méthodes <cite>.fit()</cite> du framework.</p>
-</div></blockquote>
-</li>
+<li><p><strong>Convert the train / validation subsets</strong> into <strong>Spark DataFrames</strong>
+These DataFrames can be passed directly to the framework’s <cite>.fit()</cite> methods.</p></li>
 </ol>
 <p>—</p>
-<p>📘 Ces deux datasets constituent la base des tutoriels :</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference internal" href="examples_binary.html"><span class="doc">Binary Classification Examples</span></a> pour la <strong>classification binaire</strong></p></li>
-<li><p><a class="reference internal" href="examples_multiclass.html"><span class="doc">Multiclass Classification Examples</span></a> pour la <strong>classification multiclasse</strong></p></li>
+</section>
+<section id="example-code-snippet">
+<h2>4. Example Code Snippet<a class="headerlink" href="#example-code-snippet" title="Link to this heading"></a></h2>
+<p>Below is a minimal example of how to load, split, and convert a dataset for <strong>Spark Batch Trainer</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="c1"># Load CSV (example with Diabetes dataset)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;Diabetes.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># Split into train (60%) / validation (20%) / test (20%)</span>
+<span class="n">train</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">valid</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Initialize Spark</span>
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;CreateSparkDataFrame&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Convert to Spark DataFrames (schema is inferred automatically)</span>
+<span class="n">spark_train_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">spark_valid_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span>
+
+<span class="c1"># These Spark DataFrames can now be used with:</span>
+<span class="c1"># spark_train_df : input for .fit()</span>
+<span class="c1"># spark_valid_df : input for validation in .fit()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These two datasets are used throughout the tutorials to illustrate different tasks:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="examples_binary.html"><span class="doc">Binary Classification</span></a> for binary classification</p></li>
+<li><p><a class="reference internal" href="examples_multiclass.html"><span class="doc">Multiclass Classification</span></a> for multiclass classification</p></li>
 </ul>
-</div></blockquote>
+</div>
 </section>
 </section>
 
@@ -231,8 +250,8 @@ Par exemple, avec <cite>pandas.read_csv(“fichier.csv”)</cite>.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples_binary.html" class="btn btn-neutral float-right" title="Binary Classification Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples_binary.html" class="btn btn-neutral float-right" title="Binary Classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

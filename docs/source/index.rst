@@ -1,24 +1,26 @@
 .. Spark Batch Trainer documentation master file
-   Created by sphinx-quickstart on Fri Sep 19 11:13:23 2025.
+   Created by sphinx-quickstart.
    This is the main entry point for the documentation.
 
+=================================
 Spark Batch Trainer Documentation
 =================================
 
-**Spark Batch Trainer** est un framework modulaire et extensible pour
-l’entraînement de modèles de machine learning par lots (**batch-wise training**).
+**Spark Batch Trainer** is a modular and extensible framework for
+batch-wise training of machine learning models.
 
-Il s’intègre avec **Apache Spark DataFrames** et les frameworks ML populaires
-comme **XGBoost**, **CatBoost** et **LightGBM**.
+It integrates seamlessly with **Apache Spark DataFrames** and popular ML
+frameworks such as **XGBoost**, **CatBoost**, and **LightGBM**.
 
-Cette documentation est organisée en plusieurs sections :
+This documentation is organized into several sections:
 
-- **Introduction** : présentation du projet et concepts clés.
-- **Guide utilisateur** : installation, démarrage rapide et exemples pratiques.
-- **Référence API** : détails complets des classes, fonctions et modules.
-- **Guide contributeur** : règles de développement et historique des versions.
+- **Introduction**: project overview and key concepts.  
+- **User Guide**: installation, quickstart, and hands-on tutorials.  
+- **Examples**: practical use cases for different problem types.  
+- **API Reference**: detailed description of classes, functions, and modules.  
+- **Developer Guide**: contribution guidelines and version history.  
 
-.. toctree::
+.. toctree:: 
    :maxdepth: 2
    :caption: Introduction
 
@@ -31,8 +33,13 @@ Cette documentation est organisée en plusieurs sections :
    usage/installation
    usage/quickstart
    usage/tutorials
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples
+
    usage/examples
-   usage/dataset_overview.rst
+   usage/dataset_overview
    usage/examples_binary
    usage/examples_multiclass
 

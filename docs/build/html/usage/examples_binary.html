@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binary Classification Examples &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+  <title>Binary Classification &mdash; Spark Batch Trainer 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Multiclass Classification Examples" href="examples_multiclass.html" />
-    <link rel="prev" title="Présentation des datasets" href="dataset_overview.html" /> 
+    <link rel="next" title="Multiclass Classification" href="examples_multiclass.html" />
+    <link rel="prev" title="Dataset" href="dataset_overview.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,28 +47,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutoriels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dataset_overview.html">Présentation des datasets</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Binary Classification Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#xgboost-example-binary-classification">1. XGBoost Example (Binary Classification)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#resultats-visuels">Résultats visuels</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Binary Classification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#xgboost-example">1. XGBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catboost-example">2. CatBoost Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lightgbm-example">3. LightGBM Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-takeaways">Key Takeaways</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#catboost-example-binary-classification">2. CatBoost Example (Binary Classification)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Résultats visuels</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#lightgbm-example-binary-classification">3. LightGBM Example (Binary Classification)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Résultats visuels</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -94,7 +89,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Binary Classification Examples</li>
+      <li class="breadcrumb-item active">Binary Classification</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/usage/examples_binary.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -104,59 +99,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="binary-classification-examples">
-<h1>Binary Classification Examples<a class="headerlink" href="#binary-classification-examples" title="Link to this heading"></a></h1>
-<p>Cette page illustre l’utilisation de <strong>Spark Batch Trainer</strong>
-pour un problème de <strong>classification binaire</strong>, en s’appuyant sur le
-<a class="reference internal" href="dataset_overview.html"><span class="doc">Présentation des datasets</span></a> (Diabetes Dataset).</p>
-<p>📌 Objectif : prédire si un patient est diabétique à partir de ses données médicales.</p>
+  <section id="binary-classification">
+<h1>Binary Classification<a class="headerlink" href="#binary-classification" title="Link to this heading"></a></h1>
+<p>This page demonstrates the use of <strong>Spark Batch Trainer</strong>
+for a <strong>binary classification</strong> problem, using the
+<a class="reference internal" href="dataset_overview.html"><span class="doc">Dataset</span></a> (Diabetes Dataset).</p>
+<p>📌 <strong>Goal</strong>: Predict whether a patient has diabetes based on medical data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>La préparation des données (chargement, découpage en train/validation/test,
-conversion en Spark DataFrames) est déjà décrite en détail dans la section
-<a class="reference internal" href="dataset_overview.html"><span class="doc">Présentation des datasets</span></a>.</p>
-<p>Dans les exemples ci-dessous, nous supposons que <cite>spark_train_df</cite> et
-<cite>spark_valid_df</cite> sont déjà disponibles et prêts à l’emploi.</p>
+<p>Data preparation (loading, splitting into train/validation/test,
+converting to Spark DataFrames) is already described in detail in the
+<a class="reference internal" href="dataset_overview.html"><span class="doc">Dataset</span></a> section.</p>
+<p>In the examples below, we assume that <cite>spark_train_df</cite> and
+<cite>spark_valid_df</cite> are already available and ready to use.</p>
 </div>
 <p>—</p>
-<section id="xgboost-example-binary-classification">
-<h2>1. XGBoost Example (Binary Classification)<a class="headerlink" href="#xgboost-example-binary-classification" title="Link to this heading"></a></h2>
+<section id="xgboost-example">
+<h2>1. XGBoost Example<a class="headerlink" href="#xgboost-example" title="Link to this heading"></a></h2>
+<p><strong>Summary</strong>:
+This example shows how to train an <strong>XGBoost</strong> model with batch-wise training
+and an <strong>exponential decay learning rate</strong>.
+XGBoost is one of the most widely used boosting algorithms for tabular data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.trainers.xgboost_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBoostTrainer</span>
 
-<span class="c1"># 1. Instanciation</span>
+<span class="c1"># 1. Instantiate trainer</span>
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">XGBoostTrainer</span><span class="p">()</span>
 <span class="n">target_column</span> <span class="o">=</span> <span class="s2">&quot;diabetes&quot;</span>
 
-<span class="c1"># 2. Configuration du modèle</span>
+<span class="c1"># 2. Define model configuration</span>
 <span class="n">config_model</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="s2">&quot;binary:logistic&quot;</span><span class="p">,</span>   <span class="c1"># Tâche = classification binaire</span>
-    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;logloss&quot;</span><span class="p">,</span>         <span class="c1"># Métrique de suivi</span>
-    <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>               <span class="c1"># Nombre d’arbres</span>
-    <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>            <span class="c1"># Taux d’apprentissage</span>
-    <span class="s2">&quot;max_depth&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>                   <span class="c1"># Profondeur max</span>
-    <span class="s2">&quot;reg_lambda&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>                <span class="c1"># Régularisation L2</span>
-    <span class="s2">&quot;subsample&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>                 <span class="c1"># Sous-échantillonnage des données</span>
-    <span class="s2">&quot;colsample_bytree&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>          <span class="c1"># Sous-échantillonnage des features</span>
-    <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>               <span class="c1"># Reproductibilité</span>
-    <span class="s2">&quot;early_stopping_rounds&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>      <span class="c1"># Arrêt anticipé</span>
+    <span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="s2">&quot;binary:logistic&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;logloss&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s2">&quot;max_depth&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">&quot;reg_lambda&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+    <span class="s2">&quot;subsample&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="s2">&quot;colsample_bytree&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">&quot;early_stopping_rounds&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 3. Scheduler du learning rate</span>
+<span class="c1"># 3. Set learning rate scheduler</span>
 <span class="n">config_lr_scheduler</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;initial_lr&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>   <span class="c1"># LR initial</span>
-    <span class="s2">&quot;decay_rate&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># Facteur de réduction</span>
-    <span class="s2">&quot;min_lr&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>      <span class="c1"># LR minimal</span>
+    <span class="s2">&quot;initial_lr&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s2">&quot;decay_rate&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>
+    <span class="s2">&quot;min_lr&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 4. Entraînement batch-wise</span>
+<span class="c1"># 4. Configure batch-wise training</span>
 <span class="n">config_training</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>              <span class="c1"># Nombre de lots</span>
-    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>              <span class="c1"># Patience early stopping global</span>
-    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>    <span class="c1"># Afficher la courbe d’apprentissage</span>
-    <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>      <span class="c1"># Gestion pondérations</span>
+    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 5. Fit &amp; Evaluation</span>
+<span class="c1"># 5. Fit and evaluate</span>
 <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">train_dataframe</span><span class="o">=</span><span class="n">spark_train_df</span><span class="p">,</span>
     <span class="n">valid_dataframe</span><span class="o">=</span><span class="n">spark_valid_df</span><span class="p">,</span>
@@ -166,52 +165,59 @@ conversion en Spark DataFrames) est déjà décrite en détail dans la section
     <span class="n">config_lr_scheduler</span><span class="o">=</span><span class="n">config_lr_scheduler</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># 6. Récupération modèle entraîné</span>
+<span class="c1"># 6. Retrieve trained model</span>
 <span class="n">trained_model</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">get_trained_model</span><span class="p">()</span>
 </pre></div>
 </div>
-<section id="resultats-visuels">
-<h3>Résultats visuels<a class="headerlink" href="#resultats-visuels" title="Link to this heading"></a></h3>
-<a class="reference internal image-reference" href="../_images/xgboost_learning_curve.png"><img alt="Courbe d’apprentissage (train vs validation) pour XGBoost" class="align-center" src="../_images/xgboost_learning_curve.png" style="width: 900px; height: 250px;" />
+<p><strong>Visual Results (XGBoost)</strong></p>
+<ul class="simple">
+<li><p><strong>Learning curve</strong>: shows training vs validation loss convergence</p></li>
+<li><p><strong>Learning rate schedule</strong>: exponential decay applied during training</p></li>
+<li><p><strong>Confusion matrix</strong>: prediction accuracy on validation and test sets</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/xgboost_learning_curve.png"><img alt="Learning curve (train vs validation) for XGBoost" class="align-center" src="../_images/xgboost_learning_curve.png" style="width: 900px; height: 250px;" />
 </a>
-<a class="reference internal image-reference" href="../_images/xgboost_exponential_decay_lr.png"><img alt="Évolution du learning rate avec décroissance exponentielle (XGBoost)" class="align-center" src="../_images/xgboost_exponential_decay_lr.png" style="width: 900px; height: 250px;" />
+<a class="reference internal image-reference" href="../_images/xgboost_exponential_decay_lr.png"><img alt="Learning rate schedule with exponential decay (XGBoost)" class="align-center" src="../_images/xgboost_exponential_decay_lr.png" style="width: 900px; height: 250px;" />
 </a>
-<a class="reference internal image-reference" href="../_images/xgboost_confusion_matrix.png"><img alt="Matrices de confusion sur validation et test (XGBoost)" class="align-center" src="../_images/xgboost_confusion_matrix.png" style="width: 900px; height: 250px;" />
+<a class="reference internal image-reference" href="../_images/xgboost_confusion_matrix.png"><img alt="Confusion matrices on validation and test sets (XGBoost)" class="align-center" src="../_images/xgboost_confusion_matrix.png" style="width: 900px; height: 250px;" />
 </a>
 <p>—</p>
 </section>
-</section>
-<section id="catboost-example-binary-classification">
-<h2>2. CatBoost Example (Binary Classification)<a class="headerlink" href="#catboost-example-binary-classification" title="Link to this heading"></a></h2>
+<section id="catboost-example">
+<h2>2. CatBoost Example<a class="headerlink" href="#catboost-example" title="Link to this heading"></a></h2>
+<p><strong>Summary</strong>:
+This example shows how to train a <strong>CatBoost</strong> model with batch-wise training.
+CatBoost is particularly effective for datasets with categorical features and
+handles class imbalance natively.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.trainers.catboost_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatBoostTrainer</span>
 
-<span class="c1"># 1. Instanciation</span>
+<span class="c1"># 1. Instantiate trainer</span>
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">CatBoostTrainer</span><span class="p">()</span>
 <span class="n">target_column</span> <span class="o">=</span> <span class="s2">&quot;diabetes&quot;</span>
 
-<span class="c1"># 2. Configuration du modèle</span>
+<span class="c1"># 2. Define model configuration</span>
 <span class="n">config_model</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;loss_function&quot;</span><span class="p">:</span> <span class="s2">&quot;Logloss&quot;</span><span class="p">,</span>       <span class="c1"># Tâche binaire</span>
-    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;Logloss&quot;</span><span class="p">,</span>         <span class="c1"># Métrique de suivi</span>
-    <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>                <span class="c1"># Nombre d’itérations</span>
-    <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>            <span class="c1"># Taux d’apprentissage</span>
-    <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>                       <span class="c1"># Profondeur max</span>
-    <span class="s2">&quot;l2_leaf_reg&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>               <span class="c1"># Régularisation</span>
-    <span class="s2">&quot;auto_class_weights&quot;</span><span class="p">:</span> <span class="s2">&quot;Balanced&quot;</span><span class="p">,</span> <span class="c1"># Gestion classes déséquilibrées</span>
-    <span class="s2">&quot;bootstrap_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Bernoulli&quot;</span><span class="p">,</span>    <span class="c1"># Type de bootstrap</span>
-    <span class="s2">&quot;subsample&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>                 <span class="c1"># Sous-échantillonnage</span>
-    <span class="s2">&quot;random_seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>                <span class="c1"># Reproductibilité</span>
-    <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># Logs silencieux</span>
+    <span class="s2">&quot;loss_function&quot;</span><span class="p">:</span> <span class="s2">&quot;Logloss&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;Logloss&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">&quot;l2_leaf_reg&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+    <span class="s2">&quot;auto_class_weights&quot;</span><span class="p">:</span> <span class="s2">&quot;Balanced&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;bootstrap_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Bernoulli&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;subsample&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="s2">&quot;random_seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 3. Entraînement batch-wise</span>
+<span class="c1"># 3. Configure batch-wise training</span>
 <span class="n">config_training</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>              <span class="c1"># Nombre de lots</span>
-    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>              <span class="c1"># Patience early stopping global</span>
-    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>    <span class="c1"># Afficher la courbe d’apprentissage</span>
+    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 4. Fit &amp; Evaluation</span>
+<span class="c1"># 4. Fit and evaluate</span>
 <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">train_dataframe</span><span class="o">=</span><span class="n">spark_train_df</span><span class="p">,</span>
     <span class="n">valid_dataframe</span><span class="o">=</span><span class="n">spark_valid_df</span><span class="p">,</span>
@@ -220,53 +226,60 @@ conversion en Spark DataFrames) est déjà décrite en détail dans la section
     <span class="n">config_model</span><span class="o">=</span><span class="n">config_model</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># 5. Récupération modèle entraîné</span>
+<span class="c1"># 5. Retrieve trained model</span>
 <span class="n">trained_model</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">get_trained_model</span><span class="p">()</span>
 </pre></div>
 </div>
-<section id="id1">
-<h3>Résultats visuels<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<a class="reference internal image-reference" href="../_images/catboost_learning_curve.png"><img alt="Courbe d’apprentissage (train vs validation) pour CatBoost" class="align-center" src="../_images/catboost_learning_curve.png" style="width: 900px; height: 250px;" />
+<p><strong>Visual Results (CatBoost)</strong></p>
+<ul class="simple">
+<li><p><strong>Learning curve</strong>: shows training vs validation logloss</p></li>
+<li><p><strong>Confusion matrix</strong>: classification results on validation/test sets</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/catboost_learning_curve.png"><img alt="Learning curve (train vs validation) for CatBoost" class="align-center" src="../_images/catboost_learning_curve.png" style="width: 900px; height: 250px;" />
 </a>
-<a class="reference internal image-reference" href="../_images/catboost_confusion_matrix.png"><img alt="Matrices de confusion sur validation et test (CatBoost)" class="align-center" src="../_images/catboost_confusion_matrix.png" style="width: 900px; height: 250px;" />
+<a class="reference internal image-reference" href="../_images/catboost_confusion_matrix.png"><img alt="Confusion matrices on validation and test sets (CatBoost)" class="align-center" src="../_images/catboost_confusion_matrix.png" style="width: 900px; height: 250px;" />
 </a>
 <p>—</p>
 </section>
-</section>
-<section id="lightgbm-example-binary-classification">
-<h2>3. LightGBM Example (Binary Classification)<a class="headerlink" href="#lightgbm-example-binary-classification" title="Link to this heading"></a></h2>
+<section id="lightgbm-example">
+<h2>3. LightGBM Example<a class="headerlink" href="#lightgbm-example" title="Link to this heading"></a></h2>
+<p><strong>Summary</strong>:
+This example shows how to train a <strong>LightGBM</strong> model with batch-wise training
+and exponential decay learning rate scheduling.
+LightGBM is optimized for <strong>speed and memory efficiency</strong>, making it suitable
+for large-scale datasets.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spark_batch_trainer.trainers.lightgbm_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">LGBMTrainer</span>
 
-<span class="c1"># 1. Instanciation</span>
+<span class="c1"># 1. Instantiate trainer</span>
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">LGBMTrainer</span><span class="p">()</span>
 <span class="n">target_column</span> <span class="o">=</span> <span class="s2">&quot;diabetes&quot;</span>
 
-<span class="c1"># 2. Configuration du modèle</span>
+<span class="c1"># 2. Define model configuration</span>
 <span class="n">config_model</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span><span class="p">,</span>    <span class="c1"># Tâche binaire</span>
-    <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>       <span class="c1"># Nombre d’arbres</span>
-    <span class="s2">&quot;num_leaves&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>         <span class="c1"># Nombre de feuilles</span>
-    <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>       <span class="c1"># Reproductibilité</span>
-    <span class="s2">&quot;force_col_wise&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>   <span class="c1"># Optimisation mémoire</span>
+    <span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s2">&quot;num_leaves&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">&quot;force_col_wise&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 3. Scheduler du learning rate</span>
+<span class="c1"># 3. Set learning rate scheduler</span>
 <span class="n">config_lr_scheduler</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;initial_lr&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>   <span class="c1"># LR initial</span>
-    <span class="s2">&quot;decay_rate&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># Facteur de réduction</span>
-    <span class="s2">&quot;min_lr&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>      <span class="c1"># LR minimal</span>
+    <span class="s2">&quot;initial_lr&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s2">&quot;decay_rate&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>
+    <span class="s2">&quot;min_lr&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 4. Entraînement batch-wise</span>
+<span class="c1"># 4. Configure batch-wise training</span>
 <span class="n">config_training</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>               <span class="c1"># Nombre de lots</span>
-    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>              <span class="c1"># Patience early stopping global</span>
-    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;binary_logloss&quot;</span><span class="p">,</span><span class="c1"># Métrique de suivi</span>
-    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>    <span class="c1"># Afficher la courbe d’apprentissage</span>
-    <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>      <span class="c1"># Gestion pondérations</span>
+    <span class="s2">&quot;num_batches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;max_patience&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;eval_metric&quot;</span><span class="p">:</span> <span class="s2">&quot;binary_logloss&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;show_learning_curve&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;use_sample_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># 5. Fit &amp; Evaluation</span>
+<span class="c1"># 5. Fit and evaluate</span>
 <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">train_dataframe</span><span class="o">=</span><span class="n">spark_train_df</span><span class="p">,</span>
     <span class="n">valid_dataframe</span><span class="o">=</span><span class="n">spark_valid_df</span><span class="p">,</span>
@@ -276,20 +289,38 @@ conversion en Spark DataFrames) est déjà décrite en détail dans la section
     <span class="n">config_lr_scheduler</span><span class="o">=</span><span class="n">config_lr_scheduler</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># 6. Récupération modèle entraîné</span>
+<span class="c1"># 6. Retrieve trained model</span>
 <span class="n">trained_model</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">get_trained_model</span><span class="p">()</span>
 </pre></div>
 </div>
-<section id="id2">
-<h3>Résultats visuels<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
-<a class="reference internal image-reference" href="../_images/lightgbm_learning_curve.png"><img alt="Courbe d’apprentissage (train vs validation) pour LightGBM" class="align-center" src="../_images/lightgbm_learning_curve.png" style="width: 900px; height: 250px;" />
+<p><strong>Visual Results (LightGBM)</strong></p>
+<ul class="simple">
+<li><p><strong>Learning curve</strong>: training vs validation logloss</p></li>
+<li><p><strong>Learning rate schedule</strong>: exponential decay applied</p></li>
+<li><p><strong>Confusion matrix</strong>: validation/test classification performance</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/lightgbm_learning_curve.png"><img alt="Learning curve (train vs validation) for LightGBM" class="align-center" src="../_images/lightgbm_learning_curve.png" style="width: 900px; height: 250px;" />
 </a>
-<a class="reference internal image-reference" href="../_images/lightgbm_exponential_decay_lr.png"><img alt="Évolution du learning rate avec décroissance exponentielle (LightGBM)" class="align-center" src="../_images/lightgbm_exponential_decay_lr.png" style="width: 900px; height: 250px;" />
+<a class="reference internal image-reference" href="../_images/lightgbm_exponential_decay_lr.png"><img alt="Learning rate schedule with exponential decay (LightGBM)" class="align-center" src="../_images/lightgbm_exponential_decay_lr.png" style="width: 900px; height: 250px;" />
 </a>
-<a class="reference internal image-reference" href="../_images/lightgbm_confusion_matrix.png"><img alt="Matrices de confusion sur validation et test (LightGBM)" class="align-center" src="../_images/lightgbm_confusion_matrix.png" style="width: 900px; height: 250px;" />
+<a class="reference internal image-reference" href="../_images/lightgbm_confusion_matrix.png"><img alt="Confusion matrices on validation and test sets (LightGBM)" class="align-center" src="../_images/lightgbm_confusion_matrix.png" style="width: 900px; height: 250px;" />
 </a>
 <p>—</p>
 </section>
+<section id="key-takeaways">
+<h2>Key Takeaways<a class="headerlink" href="#key-takeaways" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Spark Batch Trainer supports <strong>binary classification</strong> with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p></li>
+<li><p>Batch-wise training allows <strong>global early stopping</strong> and <strong>progress monitoring</strong>.</p></li>
+<li><p>Learning rate scheduling (e.g., <strong>exponential decay</strong>) improves training stability.</p></li>
+<li><p>Each framework has its strengths:</p>
+<ul>
+<li><p><strong>XGBoost</strong>: versatile, widely adopted.</p></li>
+<li><p><strong>CatBoost</strong>: efficient with categorical data, handles imbalance well.</p></li>
+<li><p><strong>LightGBM</strong>: fast and memory-efficient, ideal for large datasets.</p></li>
+</ul>
+</li>
+</ul>
 </section>
 </section>
 
@@ -297,8 +328,8 @@ conversion en Spark DataFrames) est déjà décrite en détail dans la section
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dataset_overview.html" class="btn btn-neutral float-left" title="Présentation des datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples_multiclass.html" class="btn btn-neutral float-right" title="Multiclass Classification Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dataset_overview.html" class="btn btn-neutral float-left" title="Dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples_multiclass.html" class="btn btn-neutral float-right" title="Multiclass Classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

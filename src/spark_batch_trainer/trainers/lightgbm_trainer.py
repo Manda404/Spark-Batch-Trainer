@@ -8,7 +8,7 @@ from spark_batch_trainer.core.memory_optimizer import MemoryOptimizer
 from spark_batch_trainer.core.class_weight_optimizer import OptimizedWeightCalculator
 
 
-class LGBMTrainer(BatchTrainer):
+class LightGBMTrainer(BatchTrainer):
     """
     Batch trainer for LightGBM classifiers.
 

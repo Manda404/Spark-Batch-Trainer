@@ -32,4 +32,4 @@ Vérification
 .. code-block:: python
 
    import spark_batch_trainer
-   print("✅ Installation réussie !")
+   print("Installation réussie !")

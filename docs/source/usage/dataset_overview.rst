@@ -1,75 +1,70 @@
-Présentation des datasets
-=========================
+Dataset
+================
 
-Cette section présente les deux jeux de données utilisés dans les exemples
-de **Spark Batch Trainer** :  
+This section introduces the two datasets used in the **Spark Batch Trainer** examples:  
 
-- Le **Diabetes Dataset** pour les tâches de **classification binaire**  
-- Le **Obesity Dataset** pour les tâches de **classification multiclasse**  
+- The **Diabetes Dataset** for **binary classification** tasks  
+- The **Obesity Dataset** for **multiclass classification** tasks  
 
 .. note::
 
-   Ces datasets sont utilisés uniquement à titre illustratif afin de montrer le
-   fonctionnement du framework.  
+   These datasets are provided for illustrative purposes only, to demonstrate
+   how the framework works.
 
 ---
 
 1. Diabetes Dataset (Binary Classification)
 -------------------------------------------
 
-📌 **Objectif** : prédire si un patient est atteint de **diabète** en fonction
-de caractéristiques médicales et démographiques.  
+📌 **Goal**: Predict whether a patient has **diabetes** based on medical and demographic features.  
 
-- **Source** : *National Institute of Diabetes and Digestive and Kidney Diseases* (Diabetes.csv) 
-- **Taille** : `shape = (100000, 9)`  
-- **Colonnes disponibles** :  
+- **Source**: *National Institute of Diabetes and Digestive and Kidney Diseases* (Diabetes.csv)  
+- **Shape**: `shape = (100000, 9)`  
+- **Available columns**:  
 
-  - `gender` → Sexe du patient  
-  - `age` → Âge  
-  - `hypertension` → Antécédent d’hypertension (0 = Non, 1 = Oui)  
-  - `heart_disease` → Antécédent de maladie cardiaque (0 = Non, 1 = Oui)  
-  - `smoking_history` → Habitudes tabagiques  
-  - `bmi` → Indice de masse corporelle  
-  - `HbA1c_level` → Taux moyen de glycémie sur 3 mois  
-  - `blood_glucose_level` → Niveau de glucose sanguin  
-  - `diabetes` → **Variable cible (binaire : 0 = Non diabétique, 1 = Diabétique)**  
+  - `gender` → Patient’s gender  
+  - `age` → Age  
+  - `hypertension` → Hypertension history (0 = No, 1 = Yes)  
+  - `heart_disease` → Heart disease history (0 = No, 1 = Yes)  
+  - `smoking_history` → Smoking habits  
+  - `bmi` → Body mass index  
+  - `HbA1c_level` → Average blood sugar level over 3 months  
+  - `blood_glucose_level` → Current blood glucose level  
+  - `diabetes` → **Target variable (binary: 0 = Non-diabetic, 1 = Diabetic)**  
 
 .. note::
 
-   Ce dataset est utilisé pour illustrer la **classification binaire**
-   dans les exemples d’entraînement avec **XGBoost**, **CatBoost** et
-   **LightGBM**.
+   This dataset is used to illustrate **binary classification**
+   in training examples with **XGBoost**, **CatBoost**, and **LightGBM**.
 
 ---
 
 2. Obesity Dataset (Multiclass Classification)
 ----------------------------------------------
 
-📌 **Objectif** : prédire la **catégorie de poids corporel** d’un individu
-en fonction de ses habitudes alimentaires, son mode de vie et ses mesures
-anthropométriques.  
+📌 **Goal**: Predict an individual’s **body weight category** based on eating habits, lifestyle, and anthropometric measures.  
 
-- **Source** : Jeu de données académique sur l’obésité (ObesityDataset.csv)  
-- **Taille** : `shape = (2111, 17)`  
-- **Colonnes disponibles** :  
+- **Source**: Academic dataset on obesity (ObesityDataset.csv)  
+- **Shape**: `shape = (2111, 17)`  
+- **Available columns**:  
 
-  - `Age` → Âge  
-  - `Gender` → Sexe  
-  - `Height` → Taille (mètres)  
-  - `Weight` → Poids (kg)  
-  - `CALC` → Consommation d’alcool  
-  - `FAVC` → Consommation fréquente d’aliments riches en calories  
-  - `FCVC` → Consommation de légumes  
-  - `NCP` → Nombre de repas principaux par jour  
-  - `SCC` → Surveillance des calories consommées  
-  - `SMOKE` → Habitude tabagique  
-  - `CH2O` → Consommation d’eau quotidienne  
-  - `family_history_with_overweight` → Antécédents familiaux de surpoids  
-  - `FAF` → Activité physique hebdomadaire  
-  - `TUE` → Temps consacré à l’usage d’appareils électroniques  
-  - `CAEC` → Grignotage entre les repas  
-  - `MTRANS` → Mode de transport principal  
-  - `NObeyesdad` → **Variable cible (multiclasse, 7 catégories)** :  
+  - `Age` → Age  
+  - `Gender` → Gender  
+  - `Height` → Height (meters)  
+  - `Weight` → Weight (kg)  
+  - `CALC` → Alcohol consumption  
+  - `FAVC` → Frequent consumption of high-calorie foods  
+  - `FCVC` → Vegetable consumption  
+  - `NCP` → Number of main meals per day  
+  - `SCC` → Calorie monitoring  
+  - `SMOKE` → Smoking habit  
+  - `CH2O` → Daily water intake  
+  - `family_history_with_overweight` → Family history of overweight  
+  - `FAF` → Weekly physical activity  
+  - `TUE` → Time spent using electronic devices  
+  - `CAEC` → Snacking between meals  
+  - `MTRANS` → Main mode of transportation  
+  - `NObeyesdad` → **Target variable (multiclass, 7 categories)**:  
 
     - `Insufficient_Weight`  
     - `Normal_Weight`  
@@ -81,45 +76,68 @@ anthropométriques.
 
 .. note::
 
-   Ce dataset est utilisé pour illustrer la **classification multiclasse**
-   dans les exemples d’entraînement avec **XGBoost**, **CatBoost** et
-   **LightGBM**.
+   This dataset is used to illustrate **multiclass classification**
+   in training examples with **XGBoost**, **CatBoost**, and **LightGBM**.
 
 ---
 
-3. Préparation et utilisation
------------------------------
+3. Preparation and Usage
+------------------------
 
-Avant d’utiliser **Spark Batch Trainer**, il est recommandé de suivre les étapes suivantes :  
+Before using **Spark Batch Trainer**, it is recommended to follow these steps:  
 
+1. **Load the dataset**  
+   For example, with `pandas.read_csv("file.csv")`.  
 
-1. **Charger les données**  
-   Par exemple, avec `pandas.read_csv("fichier.csv")`.  
+2. **Preprocess the data (if necessary)**  
 
-2. **Prétraiter les données (si nécessaire)** 
+   - Encode categorical variables  
+   - Handle missing values  
+   - Normalize / standardize numerical features  
 
-    - Encodage des variables catégorielles 
+3. **Split the dataset into subsets**  
 
-    - Gestion des valeurs manquantes  
+   - **data_train** (60%): the portion of the dataset used to **teach the model** how to make predictions.  
+   - **data_valid** (20%): a separate portion used to **check the model’s performance while training** and decide when to stop (early stopping).  
+   - **data_test** (20%): a final portion kept aside to **simulate real-world unseen data** and measure how well the model generalizes.
 
-    - Normalisation / standardisation des variables numériques  
-
-3. **Diviser le dataset en sous-ensembles** 
-
-    - **data_train** (60%) : sert à **entraîner le modèle** 
-
-    - **data_valid** (20%) : sert à **valider les performances** et appliquer l’**early stopping**  
-
-    - **data_test** (20%) : sert à l’**évaluation finale** sur des données jamais vues  
-
-4. **Convertir les sous-ensembles train / validation** en **Spark DataFrames**
-     
-     Ces DataFrames seront directement utilisés par les méthodes `.fit()` du framework.  
+4. **Convert the train / validation subsets** into **Spark DataFrames**  
+   These DataFrames can be passed directly to the framework’s `.fit()` methods.  
 
 ---
 
-📘 Ces deux datasets constituent la base des tutoriels :
+4. Example Code Snippet
+-----------------------
 
-   - :doc:`examples_binary` pour la **classification binaire** 
-   - :doc:`examples_multiclass` pour la **classification multiclasse** 
+Below is a minimal example of how to load, split, and convert a dataset for **Spark Batch Trainer**:
 
+.. code-block:: python
+
+   import pandas as pd
+   from sklearn.model_selection import train_test_split
+   from pyspark.sql import SparkSession
+
+   # Load CSV (example with Diabetes dataset)
+   df = pd.read_csv("Diabetes.csv")
+
+   # Split into train (60%) / validation (20%) / test (20%)
+   train, temp = train_test_split(df, test_size=0.4, random_state=42)
+   valid, test = train_test_split(temp, test_size=0.5, random_state=42)
+
+   # Initialize Spark
+   spark = SparkSession.builder.appName("CreateSparkDataFrame").getOrCreate()
+
+   # Convert to Spark DataFrames (schema is inferred automatically)
+   spark_train_df = spark.createDataFrame(train)
+   spark_valid_df = spark.createDataFrame(valid)
+
+   # These Spark DataFrames can now be used with:
+   # spark_train_df : input for .fit()
+   # spark_valid_df : input for validation in .fit()
+
+.. note::
+
+   These two datasets are used throughout the tutorials to illustrate different tasks:
+
+   - :doc:`examples_binary` for binary classification
+   - :doc:`examples_multiclass` for multiclass classification
