@@ -47,7 +47,7 @@ Typical Workflow
 
 Training a model with Spark Batch Trainer can be summarized in three simple steps:
 
-1. **Provide your dataset** as a Spark DataFrame.  
+1. **Provide two Spark DataFrames**: one for training (**train set**) and one for validation (**validation set**).  
 2. **Define your configurations**: model parameters, batch-wise training strategy, and (optionally) a learning rate scheduler.  
 3. **Train incrementally** with monitoring tools such as learning curves and confusion matrices.  
 

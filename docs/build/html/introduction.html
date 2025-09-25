@@ -57,7 +57,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutoriels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -139,7 +139,7 @@ optimized specifically for boosting models.</p></li>
 <h2>Typical Workflow<a class="headerlink" href="#typical-workflow" title="Link to this heading"></a></h2>
 <p>Training a model with Spark Batch Trainer can be summarized in three simple steps:</p>
 <ol class="arabic simple">
-<li><p><strong>Provide your dataset</strong> as a Spark DataFrame.</p></li>
+<li><p><strong>Provide two Spark DataFrames</strong>: one for training (<strong>train set</strong>) and one for validation (<strong>validation set</strong>).</p></li>
 <li><p><strong>Define your configurations</strong>: model parameters, batch-wise training strategy, and (optionally) a learning rate scheduler.</p></li>
 <li><p><strong>Train incrementally</strong> with monitoring tools such as learning curves and confusion matrices.</p></li>
 </ol>

@@ -1,35 +1,35 @@
 Installation
 ============
 
-Prérequis
----------
+Prerequisites
+-------------
 - Python >= 3.11
-- Apache Spark (version compatible : >= 4.0.0)
-- pip ou poetry
+- Apache Spark (compatible version: >= 4.0.0)
+- pip or poetry
 
-Installation avec pip
+Installation with pip
 ---------------------
 .. code-block:: bash
 
    pip install spark-batch-trainer
 
-Installation avec poetry
+Installation with poetry
 ------------------------
 .. code-block:: bash
 
    poetry add spark-batch-trainer
 
-Depuis la source (GitHub)
--------------------------
+From source (GitHub)
+--------------------
 .. code-block:: bash
 
    git clone https://github.com/Manda404/SparkBatchTrainer.git
    cd SparkBatchTrainer
    poetry install
 
-Vérification
+Verification
 ------------
 .. code-block:: python
 
    import spark_batch_trainer
-   print("Installation réussie !")
+   print("Installation successful!")
