@@ -45,7 +45,11 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#principales-fonctionnalites">Principales fonctionnalités</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-batch-wise-training">What is Batch-wise Training?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-spark-batch-trainer-works">How Spark Batch Trainer Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#typical-workflow">Typical Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-spark-batch-trainer">Why Spark Batch Trainer?</a></li>
 </ul>
 </li>
 </ul>
@@ -53,13 +57,18 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">spark_batch_trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Spark batch trainer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
@@ -93,24 +102,74 @@
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<p><strong>Spark Batch Trainer</strong> est un framework modulaire et extensible pour
-l’entraînement de modèles de machine learning par lots (<strong>batch-wise training</strong>).</p>
-<p>Il est conçu pour fonctionner avec :</p>
+<p><strong>Spark Batch Trainer</strong> is a modular and extensible framework dedicated to
+<strong>batch-wise training</strong> of boosting models in machine learning,
+with a strong focus on memory efficiency and scalability.</p>
+<p>—</p>
+<section id="what-is-batch-wise-training">
+<h2>What is Batch-wise Training?<a class="headerlink" href="#what-is-batch-wise-training" title="Link to this heading"></a></h2>
+<p><em>Batch-wise training</em> means splitting large datasets into smaller chunks
+(<em>batches</em>). Instead of loading all the data into memory at once, the model
+is trained incrementally on each batch.</p>
+<p>This approach is especially useful when:</p>
 <ul class="simple">
-<li><p><strong>Apache Spark DataFrames</strong> : prétraitement distribué et scalable.</p></li>
-<li><p><strong>Frameworks ML populaires</strong> : intégration avec <strong>XGBoost</strong>, <strong>CatBoost</strong>, et <strong>LightGBM</strong>.</p></li>
-<li><p><strong>Scénarios Big Data</strong> : apprentissage incrémental, équilibrage des classes, suivi des métriques.</p></li>
+<li><p>The dataset is too large to fit into memory.</p></li>
+<li><p>The classes are imbalanced and must be represented in every training step.</p></li>
+<li><p>Incremental learning and reproducibility are required in Big Data contexts.</p></li>
 </ul>
-<section id="principales-fonctionnalites">
-<h2>Principales fonctionnalités<a class="headerlink" href="#principales-fonctionnalites" title="Link to this heading"></a></h2>
+<p>—</p>
+</section>
+<section id="how-spark-batch-trainer-works">
+<h2>How Spark Batch Trainer Works<a class="headerlink" href="#how-spark-batch-trainer-works" title="Link to this heading"></a></h2>
+<p><strong>Spark Batch Trainer</strong> is designed to integrate seamlessly with:</p>
 <ul class="simple">
-<li><p>Création de batchs stratifiés pour gérer les datasets déséquilibrés.</p></li>
-<li><p>Conversion fluide entre <strong>Spark DataFrames</strong> et <strong>pandas DataFrames</strong>.</p></li>
-<li><p>Visualisation des courbes d’apprentissage et des planifications de learning rate.</p></li>
-<li><p>Extraction des métriques multi-frameworks.</p></li>
+<li><p><strong>Apache Spark DataFrames</strong>
+→ Distributed and scalable preprocessing, so even very large datasets can be handled efficiently.</p></li>
+<li><p><strong>Popular ML frameworks</strong>
+→ Native integration with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>,
+optimized specifically for boosting models.</p></li>
+<li><p><strong>Big Data scenarios</strong>
+→ Supports incremental learning, class balancing, and real-time monitoring of <strong>learning curves</strong>.</p></li>
+<li><p><strong>Target use case</strong>
+→ This initial release focuses on <strong>classification tasks</strong> (binary and multiclass).</p></li>
 </ul>
-<p>👉 Objectif : permettre aux data scientists d’entraîner des modèles à grande échelle
-de façon simple, reproductible et extensible.</p>
+<p>—</p>
+</section>
+<section id="typical-workflow">
+<h2>Typical Workflow<a class="headerlink" href="#typical-workflow" title="Link to this heading"></a></h2>
+<p>Training a model with Spark Batch Trainer can be summarized in three simple steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Provide two Spark DataFrames</strong>: one for training (<strong>train set</strong>) and one for validation (<strong>validation set</strong>).</p></li>
+<li><p><strong>Define your configurations</strong>: model parameters, batch-wise training strategy, and (optionally) a learning rate scheduler.</p></li>
+<li><p><strong>Train incrementally</strong> with monitoring tools such as learning curves and confusion matrices.</p></li>
+</ol>
+<p>—</p>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Stratified batch creation</strong>
+Ensures balanced class distribution in each batch, particularly important for imbalanced datasets.</p></li>
+<li><p><strong>Seamless Spark ↔ Pandas conversion</strong>
+Switch easily between distributed Spark DataFrames and local Pandas DataFrames, with automatic type conversion (e.g. <em>object</em> → <em>category</em>).</p></li>
+<li><p><strong>Built-in visualization</strong>
+Monitor learning curves, learning rate schedules, and confusion matrices to better interpret model performance.</p></li>
+<li><p><strong>Extensibility</strong>
+Add new trainers or custom learning rate schedulers with minimal effort.</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="why-spark-batch-trainer">
+<h2>Why Spark Batch Trainer?<a class="headerlink" href="#why-spark-batch-trainer" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Scalable</strong>: Handles datasets from MBs to TBs.</p></li>
+<li><p><strong>Modular</strong>: Works seamlessly with multiple boosting frameworks.</p></li>
+<li><p><strong>Reproducible</strong>: Same workflow can be replayed across experiments and production.</p></li>
+<li><p><strong>Transparent</strong>: Visual monitoring tools provide insight into training dynamics.</p></li>
+</ul>
+<p>—</p>
+<p><strong>Goal</strong>: provide data scientists with a simple, reproducible, and extensible tool
+to train boosting models at scale.</p>
 </section>
 </section>
 

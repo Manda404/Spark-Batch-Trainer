@@ -1,23 +1,40 @@
-Binary Classification Examples
-==============================
+Binary Classification
+=====================
 
-Cette page montre comment utiliser **Spark Batch Trainer**
-pour un problème de classification **binaire**.
+This page demonstrates the use of **Spark Batch Trainer**
+for a **binary classification** problem, using the
+:doc:`dataset_overview` (Diabetes Dataset).  
+
+📌 **Goal**: Predict whether a patient has diabetes based on medical data.  
+
+.. note::
+
+   Data preparation (loading, splitting into train/validation/test,
+   converting to Spark DataFrames) is already described in detail in the
+   :doc:`dataset_overview` section.  
+
+   In the examples below, we assume that `spark_train_df` and
+   `spark_valid_df` are already available and ready to use.
 
 ---
 
-XGBoost Example (Binary Classification)
----------------------------------------
+1. XGBoost Example
+------------------
+
+**Summary**:  
+This example shows how to train an **XGBoost** model with batch-wise training
+and an **exponential decay learning rate**.  
+XGBoost is one of the most widely used boosting algorithms for tabular data.  
 
 .. code-block:: python
 
     from spark_batch_trainer.trainers.xgboost_trainer import XGBoostTrainer
 
-    # 1. Instanciation
+    # 1. Instantiate trainer
     trainer = XGBoostTrainer()
-    target_column = "TARGET"
+    target_column = "diabetes"
 
-    # 2. Configuration du modèle
+    # 2. Define model configuration
     config_model = {
         "objective": "binary:logistic",
         "eval_metric": "logloss",
@@ -31,14 +48,14 @@ XGBoost Example (Binary Classification)
         "early_stopping_rounds": 50,
     }
 
-    # 3. Scheduler LR
+    # 3. Set learning rate scheduler
     config_lr_scheduler = {
         "initial_lr": 0.1,
         "decay_rate": 0.25,
         "min_lr": 1e-3,
     }
 
-    # 4. Entraînement batch-wise
+    # 4. Configure batch-wise training
     config_training = {
         "num_batches": 10,
         "max_patience": 2,
@@ -46,7 +63,7 @@ XGBoost Example (Binary Classification)
         "use_sample_weight": True,
     }
 
-    # 5. Fit & Evaluation
+    # 5. Fit and evaluate
     trainer.fit(
         train_dataframe=spark_train_df,
         valid_dataframe=spark_valid_df,
@@ -56,23 +73,53 @@ XGBoost Example (Binary Classification)
         config_lr_scheduler=config_lr_scheduler,
     )
 
-    # 6. Récupération modèle entraîné
-    final_model = trainer.get_trained_model()
+    # 6. Retrieve trained model
+    trained_model = trainer.get_trained_model()
+
+
+**Visual Results (XGBoost)**  
+
+- **Learning curve**: shows training vs validation loss convergence  
+- **Learning rate schedule**: exponential decay applied during training  
+- **Confusion matrix**: prediction accuracy on validation and test sets  
+
+.. image:: ../_static/binarylabel/xgboost_learning_curve.png
+   :alt: Learning curve (train vs validation) for XGBoost
+   :align: center
+   :width: 900px
+   :height: 250px
+
+.. image:: ../_static/binarylabel/xgboost_exponential_decay_lr.png
+   :alt: Learning rate schedule with exponential decay (XGBoost)
+   :align: center
+   :width: 900px
+   :height: 250px
+
+.. image:: ../_static/binarylabel/xgboost_confusion_matrix.png
+   :alt: Confusion matrices on validation and test sets (XGBoost)
+   :align: center
+   :width: 900px
+   :height: 250px
 
 ---
 
-CatBoost Example (Binary Classification)
-----------------------------------------
+2. CatBoost Example
+-------------------
+
+**Summary**:  
+This example shows how to train a **CatBoost** model with batch-wise training.  
+CatBoost is particularly effective for datasets with categorical features and
+handles class imbalance natively.  
 
 .. code-block:: python
 
     from spark_batch_trainer.trainers.catboost_trainer import CatBoostTrainer
 
-    # 1. Instanciation
+    # 1. Instantiate trainer
     trainer = CatBoostTrainer()
-    target_column = "TARGET"
+    target_column = "diabetes"
 
-    # 2. Configuration du modèle
+    # 2. Define model configuration
     config_model = {
         "loss_function": "Logloss",
         "eval_metric": "Logloss",
@@ -87,14 +134,14 @@ CatBoost Example (Binary Classification)
         "verbose": False,
     }
 
-    # 3. Entraînement batch-wise
+    # 3. Configure batch-wise training
     config_training = {
         "num_batches": 15,
         "max_patience": 3,
         "show_learning_curve": True,
     }
 
-    # 4. Fit & Evaluation
+    # 4. Fit and evaluate
     trainer.fit(
         train_dataframe=spark_train_df,
         valid_dataframe=spark_valid_df,
@@ -103,23 +150,47 @@ CatBoost Example (Binary Classification)
         config_model=config_model,
     )
 
-    # 5. Récupération modèle entraîné
-    final_model = trainer.get_trained_model()
+    # 5. Retrieve trained model
+    trained_model = trainer.get_trained_model()
+
+
+**Visual Results (CatBoost)**  
+
+- **Learning curve**: shows training vs validation logloss 
+- **Confusion matrix**: classification results on validation/test sets  
+
+.. image:: ../_static/binarylabel/catboost_learning_curve.png
+   :alt: Learning curve (train vs validation) for CatBoost
+   :align: center
+   :width: 900px
+   :height: 250px
+
+.. image:: ../_static/binarylabel/catboost_confusion_matrix.png
+   :alt: Confusion matrices on validation and test sets (CatBoost)
+   :align: center
+   :width: 900px
+   :height: 250px
 
 ---
 
-LightGBM Example (Binary Classification)
-----------------------------------------
+3. LightGBM Example
+-------------------
+
+**Summary**:  
+This example shows how to train a **LightGBM** model with batch-wise training
+and exponential decay learning rate scheduling.  
+LightGBM is optimized for **speed and memory efficiency**, making it suitable
+for large-scale datasets.  
 
 .. code-block:: python
 
     from spark_batch_trainer.trainers.lightgbm_trainer import LGBMTrainer
 
-    # 1. Instanciation
+    # 1. Instantiate trainer
     trainer = LGBMTrainer()
-    target_column = "TARGET"
+    target_column = "diabetes"
 
-    # 2. Configuration du modèle
+    # 2. Define model configuration
     config_model = {
         "objective": "binary",
         "n_estimators": 50,
@@ -128,14 +199,14 @@ LightGBM Example (Binary Classification)
         "force_col_wise": True,
     }
 
-    # 3. Scheduler LR
+    # 3. Set learning rate scheduler
     config_lr_scheduler = {
         "initial_lr": 0.1,
         "decay_rate": 0.25,
         "min_lr": 1e-3,
     }
 
-    # 4. Entraînement batch-wise
+    # 4. Configure batch-wise training
     config_training = {
         "num_batches": 5,
         "max_patience": 2,
@@ -144,7 +215,7 @@ LightGBM Example (Binary Classification)
         "use_sample_weight": True,
     }
 
-    # 5. Fit & Evaluation
+    # 5. Fit and evaluate
     trainer.fit(
         train_dataframe=spark_train_df,
         valid_dataframe=spark_valid_df,
@@ -153,5 +224,45 @@ LightGBM Example (Binary Classification)
         config_model=config_model,
         config_lr_scheduler=config_lr_scheduler,
     )
-    # 6. Récupération modèle entraîné
-    final_model = trainer.get_trained_model()
+
+    # 6. Retrieve trained model
+    trained_model = trainer.get_trained_model()
+
+
+**Visual Results (LightGBM)**  
+
+- **Learning curve**: training vs validation logloss  
+- **Learning rate schedule**: exponential decay applied  
+- **Confusion matrix**: validation/test classification performance  
+
+.. image:: ../_static/binarylabel/lightgbm_learning_curve.png
+   :alt: Learning curve (train vs validation) for LightGBM
+   :align: center
+   :width: 900px
+   :height: 250px
+
+.. image:: ../_static/binarylabel/lightgbm_exponential_decay_lr.png
+   :alt: Learning rate schedule with exponential decay (LightGBM)
+   :align: center
+   :width: 900px
+   :height: 250px
+
+.. image:: ../_static/binarylabel/lightgbm_confusion_matrix.png
+   :alt: Confusion matrices on validation and test sets (LightGBM)
+   :align: center
+   :width: 900px
+   :height: 250px
+
+---
+
+Key Takeaways
+-------------
+
+- Spark Batch Trainer supports **binary classification** with **XGBoost**, **CatBoost**, and **LightGBM**.  
+- Batch-wise training allows **global early stopping** and **progress monitoring**.  
+- Learning rate scheduling (e.g., **exponential decay**) improves training stability.  
+- Each framework has its strengths:  
+
+  - **XGBoost**: versatile, widely adopted.  
+  - **CatBoost**: efficient with categorical data, handles imbalance well.  
+  - **LightGBM**: fast and memory-efficient, ideal for large datasets.  

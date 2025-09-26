@@ -19,6 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributing" href="contributing.html" />
     <link rel="prev" title="spark_batch_trainer.logger package" href="spark_batch_trainer.logger.html" /> 
 </head>
 
@@ -41,9 +42,26 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">spark_batch_trainer</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Spark batch trainer</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="spark_batch_trainer.html">spark_batch_trainer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="spark_batch_trainer.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.core.html">spark_batch_trainer.core package</a></li>
@@ -56,6 +74,11 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
         </div>
@@ -72,7 +95,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">spark_batch_trainer</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Spark batch trainer</a></li>
           <li class="breadcrumb-item"><a href="spark_batch_trainer.html">spark_batch_trainer package</a></li>
       <li class="breadcrumb-item active">spark_batch_trainer.trainers package</li>
       <li class="wy-breadcrumbs-aside">
@@ -86,8 +109,982 @@
              
   <section id="spark-batch-trainer-trainers-package">
 <h1>spark_batch_trainer.trainers package<a class="headerlink" href="#spark-batch-trainer-trainers-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-spark_batch_trainer.trainers.catboost_trainer">
+<span id="spark-batch-trainer-trainers-catboost-trainer-module"></span><h2>spark_batch_trainer.trainers.catboost_trainer module<a class="headerlink" href="#module-spark_batch_trainer.trainers.catboost_trainer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.catboost_trainer.</span></span><span class="sig-name descname"><span class="pre">CatBoostTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for CatBoost classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, global early stopping, and categorical feature handling.</p>
+<p>Initialize the CatBoost batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>Training loss history across all batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>Validation loss history across all batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>Final trained CatBoost model after training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CatBoostClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features if any were detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility for computing and caching sample/class weights
+across training batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train a CatBoost classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>CatBoost hyperparameters.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool), <code class="docutils literal notranslate"><span class="pre">max_patience</span></code> (int).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self.model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports global early stopping across batches.</p></li>
+<li><p>Handles categorical features automatically if detected.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.catboost_trainer.CatBoostTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">CatBoostClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-spark_batch_trainer.trainers.lightgbm_trainer">
+<span id="spark-batch-trainer-trainers-lightgbm-trainer-module"></span><h2>spark_batch_trainer.trainers.lightgbm_trainer module<a class="headerlink" href="#module-spark_batch_trainer.trainers.lightgbm_trainer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.lightgbm_trainer.</span></span><span class="sig-name descname"><span class="pre">LightGBMTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for LightGBM classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, early stopping, sample weighting, and learning rate scheduling.</p>
+<p>Initialize the LightGBM batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>History of training loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>History of validation loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>The trained LightGBM model instance (set after training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>LGBMClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._lr_schedulers">
+<span class="sig-name descname"><span class="pre">_lr_schedulers</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._lr_schedulers" title="Link to this definition"></a></dt>
+<dd><p>History of learning rates applied per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility to compute optimized sample weights per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train a LightGBM classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>LightGBM hyperparameters. <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> may be updated batch-wise.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_lr_scheduler<span class="classifier">dict or callable or None</span></dt><dd><p>Learning rate scheduler configuration.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self._model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports early stopping based on validation loss.</p></li>
+<li><p>Learning rate can be scheduled across batches.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.lightgbm_trainer.LightGBMTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">LGBMClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-spark_batch_trainer.trainers.xgboost_trainer">
+<span id="spark-batch-trainer-trainers-xgboost-trainer-module"></span><h2>spark_batch_trainer.trainers.xgboost_trainer module<a class="headerlink" href="#module-spark_batch_trainer.trainers.xgboost_trainer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.xgboost_trainer.</span></span><span class="sig-name descname"><span class="pre">XGBoostTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for XGBoost classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, early stopping, sample weighting, and learning rate scheduling.</p>
+<p>Initialize the XGBoost batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>History of training loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>History of validation loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>The trained XGBoost model instance (set after training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>XGBClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._lr_schedulers">
+<span class="sig-name descname"><span class="pre">_lr_schedulers</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._lr_schedulers" title="Link to this definition"></a></dt>
+<dd><p>History of learning rates applied per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility to compute optimized sample weights per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train an XGBoost classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>XGBoost hyperparameters. <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> may be updated batch-wise.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool), <code class="docutils literal notranslate"><span class="pre">max_patience</span></code> (int).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_lr_scheduler<span class="classifier">dict or None</span></dt><dd><p>Learning rate scheduler configuration.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self._model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports early stopping based on validation loss.</p></li>
+<li><p>Supports warm-restart training across batches.</p></li>
+<li><p>Learning rate can be scheduled dynamically per batch.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.xgboost_trainer.XGBoostTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">XGBClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-spark_batch_trainer.trainers">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spark_batch_trainer.trainers" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.</span></span><span class="sig-name descname"><span class="pre">CatBoostTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for CatBoost classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, global early stopping, and categorical feature handling.</p>
+<p>Initialize the CatBoost batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>Training loss history across all batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>Validation loss history across all batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>Final trained CatBoost model after training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CatBoostClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features if any were detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility for computing and caching sample/class weights
+across training batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train a CatBoost classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>CatBoost hyperparameters.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool), <code class="docutils literal notranslate"><span class="pre">max_patience</span></code> (int).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self.model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports global early stopping across batches.</p></li>
+<li><p>Handles categorical features automatically if detected.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.CatBoostTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/catboost_trainer.html#CatBoostTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.CatBoostTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">CatBoostClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.</span></span><span class="sig-name descname"><span class="pre">LightGBMTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for LightGBM classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, early stopping, sample weighting, and learning rate scheduling.</p>
+<p>Initialize the LightGBM batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>History of training loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>History of validation loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>The trained LightGBM model instance (set after training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>LGBMClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._lr_schedulers">
+<span class="sig-name descname"><span class="pre">_lr_schedulers</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._lr_schedulers" title="Link to this definition"></a></dt>
+<dd><p>History of learning rates applied per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility to compute optimized sample weights per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train a LightGBM classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>LightGBM hyperparameters. <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> may be updated batch-wise.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_lr_scheduler<span class="classifier">dict or callable or None</span></dt><dd><p>Learning rate scheduler configuration.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self._model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports early stopping based on validation loss.</p></li>
+<li><p>Learning rate can be scheduled across batches.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.LightGBMTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/lightgbm_trainer.html#LightGBMTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.LightGBMTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">LGBMClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spark_batch_trainer.trainers.</span></span><span class="sig-name descname"><span class="pre">XGBoostTrainer</span></span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.base_trainer.BatchTrainer" title="spark_batch_trainer.core.base_trainer.BatchTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchTrainer</span></code></a></p>
+<p>Batch trainer for XGBoost classifiers.</p>
+<p>This class supports incremental training in mini-batches on Spark DataFrames,
+with validation support, early stopping, sample weighting, and learning rate scheduling.</p>
+<p>Initialize the XGBoost batch trainer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._global_train_loss">
+<span class="sig-name descname"><span class="pre">_global_train_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._global_train_loss" title="Link to this definition"></a></dt>
+<dd><p>History of training loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._global_valid_loss">
+<span class="sig-name descname"><span class="pre">_global_valid_loss</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._global_valid_loss" title="Link to this definition"></a></dt>
+<dd><p>History of validation loss values for each batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._global_iterations">
+<span class="sig-name descname"><span class="pre">_global_iterations</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._global_iterations" title="Link to this definition"></a></dt>
+<dd><p>Indices of processed batches during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._model">
+<span class="sig-name descname"><span class="pre">_model</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._model" title="Link to this definition"></a></dt>
+<dd><p>The trained XGBoost model instance (set after training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>XGBClassifier or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._lr_schedulers">
+<span class="sig-name descname"><span class="pre">_lr_schedulers</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._lr_schedulers" title="Link to this definition"></a></dt>
+<dd><p>History of learning rates applied per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._categorical_features">
+<span class="sig-name descname"><span class="pre">_categorical_features</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._categorical_features" title="Link to this definition"></a></dt>
+<dd><p>Names of categorical features used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._weight_calculator">
+<span class="sig-name descname"><span class="pre">_weight_calculator</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._weight_calculator" title="Link to this definition"></a></dt>
+<dd><p>Utility to compute optimized sample weights per batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator" title="spark_batch_trainer.core.class_weight_optimizer.OptimizedWeightCalculator">OptimizedWeightCalculator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer._optimizer">
+<span class="sig-name descname"><span class="pre">_optimizer</span></span><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer._optimizer" title="Link to this definition"></a></dt>
+<dd><p>Utility for reducing memory usage of validation DataFrames
+(optimizes size in MB before training).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="spark_batch_trainer.core.html#spark_batch_trainer.core.memory_optimizer.MemoryOptimizer" title="spark_batch_trainer.core.memory_optimizer.MemoryOptimizer">MemoryOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer.fit" title="Link to this definition"></a></dt>
+<dd><p>Train an XGBoost classifier incrementally on Spark DataFrames in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Training dataset in Spark DataFrame format.</p></li>
+<li><p><strong>valid_dataframe</strong> (<em>SparkDataFrame</em><em> or </em><em>None</em>) – Validation dataset in Spark DataFrame format. Required for metric tracking and early stopping.</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>) – Target column name in both train and validation DataFrames.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional configuration dictionaries.</p>
+<ul>
+<li><dl class="simple">
+<dt>config_model<span class="classifier">dict</span></dt><dd><p>XGBoost hyperparameters. <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> may be updated batch-wise.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_training<span class="classifier">dict</span></dt><dd><p>Training options such as <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> (int), <code class="docutils literal notranslate"><span class="pre">eval_metric</span></code> (str),
+<code class="docutils literal notranslate"><span class="pre">use_sample_weight</span></code> (bool), <code class="docutils literal notranslate"><span class="pre">max_patience</span></code> (int).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>config_lr_scheduler<span class="classifier">dict or None</span></dt><dd><p>Learning rate scheduler configuration.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trained model is stored internally in <code class="docutils literal notranslate"><span class="pre">self._model</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If input DataFrames or target column are invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If no model is successfully trained.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Supports early stopping based on validation loss.</p></li>
+<li><p>Supports warm-restart training across batches.</p></li>
+<li><p>Learning rate can be scheduled dynamically per batch.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spark_batch_trainer.trainers.XGBoostTrainer.get_trained_model">
+<span class="sig-name descname"><span class="pre">get_trained_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spark_batch_trainer/trainers/xgboost_trainer.html#XGBoostTrainer.get_trained_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spark_batch_trainer.trainers.XGBoostTrainer.get_trained_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the final trained model instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Trained model object (e.g. <code class="docutils literal notranslate"><span class="pre">XGBClassifier</span></code>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -96,6 +1093,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="spark_batch_trainer.logger.html" class="btn btn-neutral float-left" title="spark_batch_trainer.logger package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

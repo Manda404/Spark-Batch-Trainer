@@ -1,22 +1,25 @@
 Contributing
 ============
 
-Merci de votre intérêt pour contribuer à **Spark Batch Trainer**
+Thank you for your interest in contributing to **Spark Batch Trainer**!
 
-Étapes pour contribuer
-----------------------
-1. Forkez le dépôt GitHub.
-2. Créez une branche pour vos changements :
+Contribution Steps
+------------------
+1. Fork the GitHub repository.  
+2. Create a branch for your changes:  
+
    .. code-block:: bash
 
-      git checkout -b feature/ma-feature
+      git checkout -b feature/my-feature
 
-3. Installez les dépendances de dev :
+3. Install development dependencies:  
+
    .. code-block:: bash
 
       poetry install
 
-4. Vérifiez le style et les tests :
+4. Run style checks and tests:  
+
    .. code-block:: bash
 
       black src tests
@@ -24,10 +27,10 @@ Merci de votre intérêt pour contribuer à **Spark Batch Trainer**
       mypy src
       pytest
 
-5. Poussez vos changements et créez une Pull Request.
+5. Push your changes and open a Pull Request.
 
-Bonnes pratiques
-----------------
-- Respectez le style PEP8.
-- Utilisez des docstrings (format NumPy).
-- Ajoutez des tests unitaires pour chaque nouvelle fonctionnalité.
+Best Practices
+--------------
+- Follow the PEP8 coding style.  
+- Use docstrings (NumPy format).  
+- Add unit tests for every new feature.  

@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="spark_batch_trainer package" href="spark_batch_trainer.html" />
-    <link rel="prev" title="Tutorials" href="usage/tutorials.html" /> 
+    <link rel="prev" title="Multiclass Classification" href="usage/examples_multiclass.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,10 +50,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/dataset_overview.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/examples_multiclass.html">Multiclass Classification</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -113,12 +117,56 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="spark_batch_trainer.trainers.html">spark_batch_trainer.trainers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.trainers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.trainers.html#module-spark_batch_trainer.trainers.catboost_trainer">spark_batch_trainer.trainers.catboost_trainer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.trainers.html#module-spark_batch_trainer.trainers.lightgbm_trainer">spark_batch_trainer.trainers.lightgbm_trainer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.trainers.html#module-spark_batch_trainer.trainers.xgboost_trainer">spark_batch_trainer.trainers.xgboost_trainer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.trainers.html#module-spark_batch_trainer.trainers">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="spark_batch_trainer.html#module-spark_batch_trainer">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spark_batch_trainer.html#module-spark_batch_trainer">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._global_train_loss"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._global_train_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._global_valid_loss"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._global_valid_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._global_iterations"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._global_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._model"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._categorical_features"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._categorical_features</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._optimizer"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._optimizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer._weight_calculator"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer._weight_calculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer.fit"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.CatBoostTrainer.get_trained_model"><code class="docutils literal notranslate"><span class="pre">CatBoostTrainer.get_trained_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._global_train_loss"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._global_train_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._global_valid_loss"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._global_valid_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._global_iterations"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._global_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._model"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._lr_schedulers"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._lr_schedulers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._categorical_features"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._categorical_features</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._weight_calculator"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._weight_calculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer._optimizer"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer._optimizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer.fit"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.LightGBMTrainer.get_trained_model"><code class="docutils literal notranslate"><span class="pre">LightGBMTrainer.get_trained_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._global_train_loss"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._global_train_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._global_valid_loss"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._global_valid_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._global_iterations"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._global_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._model"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._lr_schedulers"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._lr_schedulers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._categorical_features"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._categorical_features</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._weight_calculator"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._weight_calculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer._optimizer"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer._optimizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer.fit"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="spark_batch_trainer.html#spark_batch_trainer.XGBoostTrainer.get_trained_model"><code class="docutils literal notranslate"><span class="pre">XGBoostTrainer.get_trained_model()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -129,7 +177,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage/tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage/examples_multiclass.html" class="btn btn-neutral float-left" title="Multiclass Classification" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="spark_batch_trainer.html" class="btn btn-neutral float-right" title="spark_batch_trainer package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dataset &mdash; Spark Batch Trainer 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Binary Classification" href="examples_binary.html" />
+    <link rel="prev" title="Overview" href="examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spark Batch Trainer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#diabetes-dataset-binary-classification">1. Diabetes Dataset (Binary Classification)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obesity-dataset-multiclass-classification">2. Obesity Dataset (Multiclass Classification)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preparation-and-usage">3. Preparation and Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-code-snippet">4. Example Code Snippet</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples_binary.html">Binary Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples_multiclass.html">Multiclass Classification</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Spark batch trainer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spark Batch Trainer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Dataset</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/dataset_overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dataset">
+<h1>Dataset<a class="headerlink" href="#dataset" title="Link to this heading"></a></h1>
+<p>This section introduces the two datasets used in the <strong>Spark Batch Trainer</strong> examples:</p>
+<ul class="simple">
+<li><p>The <strong>Diabetes Dataset</strong> for <strong>binary classification</strong> tasks</p></li>
+<li><p>The <strong>Obesity Dataset</strong> for <strong>multiclass classification</strong> tasks</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These datasets are provided for illustrative purposes only, to demonstrate
+how the framework works.</p>
+</div>
+<p>—</p>
+<section id="diabetes-dataset-binary-classification">
+<h2>1. Diabetes Dataset (Binary Classification)<a class="headerlink" href="#diabetes-dataset-binary-classification" title="Link to this heading"></a></h2>
+<p>📌 <strong>Goal</strong>: Predict whether a patient has <strong>diabetes</strong> based on medical and demographic features.</p>
+<ul class="simple">
+<li><p><strong>Source</strong>: <em>National Institute of Diabetes and Digestive and Kidney Diseases</em> (Diabetes.csv)</p></li>
+<li><p><strong>Shape</strong>: <cite>shape = (100000, 9)</cite></p></li>
+<li><p><strong>Available columns</strong>:</p>
+<ul>
+<li><p><cite>gender</cite> → Patient’s gender</p></li>
+<li><p><cite>age</cite> → Age</p></li>
+<li><p><cite>hypertension</cite> → Hypertension history (0 = No, 1 = Yes)</p></li>
+<li><p><cite>heart_disease</cite> → Heart disease history (0 = No, 1 = Yes)</p></li>
+<li><p><cite>smoking_history</cite> → Smoking habits</p></li>
+<li><p><cite>bmi</cite> → Body mass index</p></li>
+<li><p><cite>HbA1c_level</cite> → Average blood sugar level over 3 months</p></li>
+<li><p><cite>blood_glucose_level</cite> → Current blood glucose level</p></li>
+<li><p><cite>diabetes</cite> → <strong>Target variable (binary: 0 = Non-diabetic, 1 = Diabetic)</strong></p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This dataset is used to illustrate <strong>binary classification</strong>
+in training examples with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p>
+</div>
+<p>—</p>
+</section>
+<section id="obesity-dataset-multiclass-classification">
+<h2>2. Obesity Dataset (Multiclass Classification)<a class="headerlink" href="#obesity-dataset-multiclass-classification" title="Link to this heading"></a></h2>
+<p>📌 <strong>Goal</strong>: Predict an individual’s <strong>body weight category</strong> based on eating habits, lifestyle, and anthropometric measures.</p>
+<ul class="simple">
+<li><p><strong>Source</strong>: Academic dataset on obesity (ObesityDataset.csv)</p></li>
+<li><p><strong>Shape</strong>: <cite>shape = (2111, 17)</cite></p></li>
+<li><p><strong>Available columns</strong>:</p>
+<ul>
+<li><p><cite>Age</cite> → Age</p></li>
+<li><p><cite>Gender</cite> → Gender</p></li>
+<li><p><cite>Height</cite> → Height (meters)</p></li>
+<li><p><cite>Weight</cite> → Weight (kg)</p></li>
+<li><p><cite>CALC</cite> → Alcohol consumption</p></li>
+<li><p><cite>FAVC</cite> → Frequent consumption of high-calorie foods</p></li>
+<li><p><cite>FCVC</cite> → Vegetable consumption</p></li>
+<li><p><cite>NCP</cite> → Number of main meals per day</p></li>
+<li><p><cite>SCC</cite> → Calorie monitoring</p></li>
+<li><p><cite>SMOKE</cite> → Smoking habit</p></li>
+<li><p><cite>CH2O</cite> → Daily water intake</p></li>
+<li><p><cite>family_history_with_overweight</cite> → Family history of overweight</p></li>
+<li><p><cite>FAF</cite> → Weekly physical activity</p></li>
+<li><p><cite>TUE</cite> → Time spent using electronic devices</p></li>
+<li><p><cite>CAEC</cite> → Snacking between meals</p></li>
+<li><p><cite>MTRANS</cite> → Main mode of transportation</p></li>
+<li><p><cite>NObeyesdad</cite> → <strong>Target variable (multiclass, 7 categories)</strong>:</p>
+<ul>
+<li><p><cite>Insufficient_Weight</cite></p></li>
+<li><p><cite>Normal_Weight</cite></p></li>
+<li><p><cite>Overweight_Level_I</cite></p></li>
+<li><p><cite>Overweight_Level_II</cite></p></li>
+<li><p><cite>Obesity_Type_I</cite></p></li>
+<li><p><cite>Obesity_Type_II</cite></p></li>
+<li><p><cite>Obesity_Type_III</cite></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This dataset is used to illustrate <strong>multiclass classification</strong>
+in training examples with <strong>XGBoost</strong>, <strong>CatBoost</strong>, and <strong>LightGBM</strong>.</p>
+</div>
+<p>—</p>
+</section>
+<section id="preparation-and-usage">
+<h2>3. Preparation and Usage<a class="headerlink" href="#preparation-and-usage" title="Link to this heading"></a></h2>
+<p>Before using <strong>Spark Batch Trainer</strong>, it is recommended to follow these steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Load the dataset</strong>
+For example, with <cite>pandas.read_csv(“file.csv”)</cite>.</p></li>
+<li><p><strong>Preprocess the data (if necessary)</strong></p>
+<ul class="simple">
+<li><p>Encode categorical variables</p></li>
+<li><p>Handle missing values</p></li>
+<li><p>Normalize / standardize numerical features</p></li>
+</ul>
+</li>
+<li><p><strong>Split the dataset into subsets</strong></p>
+<ul class="simple">
+<li><p><strong>data_train</strong> (60%): the portion of the dataset used to <strong>teach the model</strong> how to make predictions.</p></li>
+<li><p><strong>data_valid</strong> (20%): a separate portion used to <strong>check the model’s performance while training</strong> and decide when to stop (early stopping).</p></li>
+<li><p><strong>data_test</strong> (20%): a final portion kept aside to <strong>simulate real-world unseen data</strong> and measure how well the model generalizes.</p></li>
+</ul>
+</li>
+<li><p><strong>Convert the train / validation subsets</strong> into <strong>Spark DataFrames</strong>
+These DataFrames can be passed directly to the framework’s <cite>.fit()</cite> methods.</p></li>
+</ol>
+<p>—</p>
+</section>
+<section id="example-code-snippet">
+<h2>4. Example Code Snippet<a class="headerlink" href="#example-code-snippet" title="Link to this heading"></a></h2>
+<p>Below is a minimal example of how to load, split, and convert a dataset for <strong>Spark Batch Trainer</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="c1"># Load CSV (example with Diabetes dataset)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;Diabetes.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># Split into train (60%) / validation (20%) / test (20%)</span>
+<span class="n">train</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">valid</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Initialize Spark</span>
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;CreateSparkDataFrame&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Convert to Spark DataFrames (schema is inferred automatically)</span>
+<span class="n">spark_train_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">spark_valid_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span>
+
+<span class="c1"># These Spark DataFrames can now be used with:</span>
+<span class="c1"># spark_train_df : input for .fit()</span>
+<span class="c1"># spark_valid_df : input for validation in .fit()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These two datasets are used throughout the tutorials to illustrate different tasks:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="examples_binary.html"><span class="doc">Binary Classification</span></a> for binary classification</p></li>
+<li><p><a class="reference internal" href="examples_multiclass.html"><span class="doc">Multiclass Classification</span></a> for multiclass classification</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples_binary.html" class="btn btn-neutral float-right" title="Binary Classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Rostand Surel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,15 +1,15 @@
 Quickstart
 ==========
 
-Cet exemple minimal montre comment utiliser **Spark Batch Trainer** avec XGBoost
-sur un problème de classification binaire.
+This minimal example shows how to train an **XGBoost** model with **Spark Batch Trainer**
+on a binary classification problem.  
+You must provide two Spark DataFrames: a **train set**, a **validation set**, and the target column.
 
 .. code-block:: python
 
    from spark_batch_trainer.trainers.xgboost_trainer import XGBoostTrainer
 
-   trainer = XGBoostTrainer()
-
+   # Define model and training configurations
    config_model = {
        "objective": "binary:logistic",
        "eval_metric": "logloss",
@@ -21,6 +21,10 @@ sur un problème de classification binaire.
        "show_learning_curve": True,
    }
 
+   # Instantiate the trainer
+   trainer = XGBoostTrainer()
+
+   # Fit the model on train and validation DataFrames
    trainer.fit(
        train_dataframe=spark_train_df,
        valid_dataframe=spark_valid_df,
@@ -29,4 +33,5 @@ sur un problème de classification binaire.
        config_model=config_model,
    )
 
+   # Retrieve the trained model
    final_model = trainer.get_trained_model()
