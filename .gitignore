@@ -40,3 +40,6 @@ docs/_autosummary/
 # --- MacOS / Linux / Windows ---
 .DS_Store
 Thumbs.db
+
+#
+notebooks/catboost_info
