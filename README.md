@@ -142,7 +142,7 @@ poetry install --only main
 poetry show
 
 # Run a quick test
-poetry run python -c "from spark_batch_trainer.trainers import XGBoostTrainer; print('Installation successful!')"
+poetry run python -c "from spark_batch_trainer import XGBoostTrainer; print('Installation successful!')"
 ```
 
 ---
