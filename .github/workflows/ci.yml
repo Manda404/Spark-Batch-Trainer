@@ -1,0 +1,68 @@
+# 🚀 CI Pipeline for SparkBatchTraining
+# This workflow:
+#  - Installs Java (for Spark) and Python
+#  - Sets up Poetry and installs dependencies
+#  - Runs linting (Ruff) and type checking (mypy) only on src/
+#  - Executes tests separately: ./init and ./fit
+
+name: CI - SparkBatchTraining
+
+on:
+  push:
+    branches: ["main", "feature/**"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Récupérer le code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2) Installer Java (Spark)
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # 3) Installer Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 4) Installer Poetry
+      - name: Install Poetry
+        run: pipx install poetry==1.8.3
+
+      # 5) Installer les dépendances
+      - name: Install deps with Poetry
+        run: |
+          poetry install --no-interaction --with dev
+
+      # 6) Lint et typage (seulement sur src/)
+      - name: Ruff lint (only src)
+        run: poetry run ruff check src
+
+      - name: Mypy type checking (only src)
+        run: poetry run mypy src
+
+      # 7) Tests init
+      - name: 🧪 Run init tests
+        env:
+          PYSPARK_PYTHON: python
+        run: poetry run pytest ./init -v
+
+      # 8) Tests fit
+      - name: 🧪 Run fit tests
+        env:
+          PYSPARK_PYTHON: python
+        run: poetry run pytest ./fit -v

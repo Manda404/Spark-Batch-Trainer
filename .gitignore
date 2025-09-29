@@ -43,3 +43,4 @@ Thumbs.db
 
 #
 notebooks/catboost_info
+.pytest_cache
