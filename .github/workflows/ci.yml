@@ -59,10 +59,10 @@ jobs:
       - name: 🧪 Run init tests
         env:
           PYSPARK_PYTHON: python
-        run: poetry run pytest ./init -v
+        run: poetry run pytest ./tests/init -v
 
       # 8) Tests fit
       - name: 🧪 Run fit tests
         env:
           PYSPARK_PYTHON: python
-        run: poetry run pytest ./fit -v
+        run: poetry run pytest ./tests/fit -v
