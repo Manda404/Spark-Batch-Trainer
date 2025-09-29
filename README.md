@@ -19,15 +19,6 @@ This project provides a scalable and modular framework for training machine lear
 - [Key Features](#-key-features)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
-- [Advanced Features](#-advanced-features)
-- [Monitoring & Visualization](#-monitoring--visualization)
-- [Documentation](#-documentation)
-- [Testing](#-testing)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
-- [Contact](#-contact)
-- [Roadmap](#-roadmap)
 
 ---
 
