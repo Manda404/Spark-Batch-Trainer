@@ -26,6 +26,7 @@ poetry.lock
 coverage.xml
 htmlcov/
 .pytest_cache/
+.ruff_cache
 
 # --- Logs ---
 *.log
@@ -40,3 +41,7 @@ docs/_autosummary/
 # --- MacOS / Linux / Windows ---
 .DS_Store
 Thumbs.db
+
+#
+notebooks/catboost_info
+.pytest_cache
