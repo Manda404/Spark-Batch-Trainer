@@ -154,7 +154,7 @@ poetry run python -c "from spark_batch_trainer.trainers import XGBoostTrainer; p
 
 ```python
 from pyspark.sql import SparkSession
-from spark_batch_trainer.trainers import XGBoostTrainer
+from spark_batch_trainer import XGBoostTrainer
 
 # Initialize Spark session
 spark = SparkSession.builder \
@@ -202,7 +202,7 @@ loaded_trainer.load("models/xgboost_model.pkl")
 ### Using CatBoostTrainer
 
 ```python
-from spark_batch_trainer.trainers import CatBoostTrainer
+from spark_batch_trainer import CatBoostTrainer
 
 trainer = CatBoostTrainer()
 model = trainer.fit(
@@ -226,7 +226,7 @@ model = trainer.fit(
 ### Using LightGBMTrainer
 
 ```python
-from spark_batch_trainer.trainers import LightGBMTrainer
+from spark_batch_trainer import LightGBMTrainer
 
 trainer = LightGBMTrainer()
 model = trainer.fit(
