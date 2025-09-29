@@ -102,7 +102,6 @@ src/
 - LightGBM
 - NumPy
 - Pandas
-- Matplotlib
 
 ### Install Poetry
 
