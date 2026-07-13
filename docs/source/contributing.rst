@@ -1,36 +1,54 @@
 Contributing
 ============
 
-Thank you for your interest in contributing to **Spark Batch Trainer**!
+Development workflow
+--------------------
 
-Contribution Steps
-------------------
-1. Fork the GitHub repository.  
-2. Create a branch for your changes:  
+1. Create a focused branch:
 
    .. code-block:: bash
 
       git checkout -b feature/my-feature
 
-3. Install development dependencies:  
+2. Install the locked development environment:
 
    .. code-block:: bash
 
       poetry install
 
-4. Run style checks and tests:  
+3. Run formatting, static checks, and tests through Poetry:
 
    .. code-block:: bash
 
-      black src tests
-      isort src tests
-      mypy src
-      pytest
+      poetry run black --check src tests
+      poetry run isort --check-only src tests
+      poetry run mypy src
+      poetry run pytest
 
-5. Push your changes and open a Pull Request.
+4. Build the documentation in strict mode:
 
-Best Practices
---------------
-- Follow the PEP8 coding style.  
-- Use docstrings (NumPy format).  
-- Add unit tests for every new feature.  
+   .. code-block:: bash
+
+      poetry run sphinx-build -W --keep-going -b html docs/source docs/build/html
+
+5. Open a pull request that explains the behavior change and its tests.
+
+Project conventions
+-------------------
+
+* Keep public names, docstrings, comments, logs, and documentation in English.
+* Use NumPy-style docstrings for public classes and functions.
+* Put backend-independent behavior in focused ``config``, ``data``,
+  ``evaluation``, ``observability``, or ``visualization`` modules.
+* Keep model-library details inside ``backends``.
+* Add unit tests for isolated behavior and integration tests for Spark/backend
+  boundaries.
+* Preserve compatibility shims only when a deprecation path is intentional and
+  documented.
+
+Documentation changes
+---------------------
+
+Update the user guide when behavior changes. Add API directives only for
+public or intentionally supported objects; exposing every private helper makes
+the reference harder to navigate.

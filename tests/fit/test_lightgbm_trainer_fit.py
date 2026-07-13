@@ -91,7 +91,7 @@ def test_lightgbm_fit_runs_obesity(mock_data_obesity, config_training, config_mo
         train_dataframe=train_df_encoded,
         valid_dataframe=valid_df_encoded,
         target_column=target_col,
-        config_training=config_training,
+        training_config=config_training,
         config_model=config_model_multiclass,
     )
 
@@ -112,8 +112,8 @@ def test_lightgbm_fit_runs_diabetes(mock_data_diabetes, config_training, config_
         train_dataframe=train_df,
         valid_dataframe=valid_df,
         target_column=target_col,
-        config_training=config_training,
-        config_model=config_model_binary,
+        training_config=config_training,
+        model_config=config_model_binary,
     )
 
     model = trainer.get_trained_model()

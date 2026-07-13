@@ -1,254 +1,415 @@
-# SparkBatchTrainer
+<div align="center">
 
+# Spark Batch Trainer
 
-This project provides a scalable and modular framework for training machine learning models in **batches** using **Spark DataFrames**.   It is designed to support large datasets, incremental learning, and integration with **XGBoost**, **CatBoost**, and **LightGBM**.
+### Batch-wise gradient boosting from Spark DataFrames
 
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PySpark 4](https://img.shields.io/badge/PySpark-4.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/docs/latest/api/python/)
+[![Poetry](https://img.shields.io/badge/Packaging-Poetry-60A5FA?logo=poetry&logoColor=white)](https://python-poetry.org/)
+[![Version](https://img.shields.io/badge/Version-1.0.0-2563EB)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-16A34A.svg)](#license)
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-sphinx-blue.svg)](docs/)
-[![Poetry](https://img.shields.io/badge/dependency%20management-poetry-blue.svg)](https://python-poetry.org/)
+**A focused Python library for sequentially training XGBoost, CatBoost, and
+LightGBM classifiers from target-stratified Spark DataFrame batches.**
 
----
+[Getting started](#requirements-and-installation) ·
+[Backend guides](#xgboost-example) ·
+[Architecture](#architecture) ·
+[Documentation](#documentation)
 
-## 📑 Table of Contents
-
-- [Project Goal](#-project-goal)
-- [Problem Addressed](#-problem-addressed)
-- [Architecture](#-architecture)
-- [Key Features](#-key-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-
----
-
-## 🎯 Project Goal
-
-SparkBatchTrainer is a framework designed to train machine learning models on **very large distributed datasets**. It combines the power of **Apache Spark** for data processing with the efficiency of **gradient boosting algorithms** (XGBoost, CatBoost, LightGBM) to create an **incremental batch-wise training system** that is both reproducible and extensible.
+</div>
 
 ---
 
-## 🔍 Problem Addressed
+## Overview
 
-- **Massive datasets**: Impossible to load the entire dataset into memory
-- **Sequential training**: Need to train on coherent data subsets
-- **Continuous optimization**: Dynamic adjustment of hyperparameters (`learning_rate`, `early_stopping`)
-- **Class balancing**: Maintaining target distribution across batches
+Spark performs batch assignment and filtering. Each selected batch is then
+collected as a pandas DataFrame and fitted by the selected model library on the
+Python driver.
 
----
+> [!IMPORTANT]
+> This is driver-side continuation training, not distributed model training.
+> The complete validation dataset and one training batch must fit in driver
+> memory.
 
-## 🏗️ Architecture
+## Contents
 
-The framework is structured around several core components:
+- [Why use it?](#why-use-it)
+- [Supported backends](#supported-backends)
+- [Requirements and installation](#requirements-and-installation)
+- [Input contract](#input-contract)
+- [Shared training configuration](#shared-training-configuration)
+- [XGBoost example](#xgboost-example)
+- [CatBoost example](#catboost-example)
+- [LightGBM example](#lightgbm-example)
+- [Training history and inference](#inspecting-training-history)
+- [Multiclass configuration](#multiclass-configuration)
+- [Architecture and semantics](#architecture)
+- [Development and documentation](#development-and-validation)
 
+## Why use it?
+
+| Capability | What it provides |
+| --- | --- |
+| Spark-native inputs | Training and validation start as Spark DataFrames. |
+| Stratified batching | The target distribution remains approximately stable across batches. |
+| Continuation training | Each backend continues its booster from one batch to the next. |
+| Unified controls | Configuration, sample weighting, monitoring, and stopping share one vocabulary. |
+| Lazy backends | Only the requested model SDK is imported. |
+| Consistent history | Every backend returns the same immutable training-history structure. |
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Spark training DataFrame] --> B[Target-stratified batches]
+    B --> C[Bounded pandas batch]
+    C --> D{Selected backend}
+    D --> E[XGBoost]
+    D --> F[CatBoost]
+    D --> G[LightGBM]
+    H[Spark validation DataFrame] --> I[Validation pandas DataFrame]
+    I --> D
+    D --> J[Global metric monitoring]
+    J --> K[Native trained model]
+    J --> L[Immutable training history]
 ```
-src/
-└── spark_batch_trainer/
-    │
-    ├── __init__.py
-    │
-    ├── core/
-    │   ├── __init__.py                    # Exposes OptimizedWeightCalculator and MemoryOptimizer
-    │   ├── base_trainer.py                # Abstract class: fit(), get_trained_model(), save(), load()
-    │   ├── class_weight_optimizer.py      # OptimizedWeightCalculator (cache, smoothing, normalization)
-    │   └── memory_optimizer.py            # MemoryOptimizer (Pandas DataFrame memory optimization)
-    │
-    ├── trainers/
-    │   ├── __init__.py
-    │   ├── xgboost_trainer.py             # Batch-wise XGBoost training with class weights
-    │   ├── catboost_trainer.py            # Batch-wise CatBoost training with class weights
-    │   └── lightgbm_trainer.py            # Batch-wise LightGBM training with learning rate scheduling
-    │
-    └── logger/
-        └── logger.py                      # Centralized logger (handlers, levels, formatting)
-```
 
----
+The loop continues batch by batch until all batches are processed or global
+early stopping is triggered.
 
-## ⚡ Key Features
+## Supported backends
 
-### 1. **Incremental Batch Training**
-- **Automatic stratification**: Each batch preserves class distribution
-- **Randomized ordering**: Reproducible shuffling with a seed
-- **Warm restart**: Training continuity across batches
+| Backend | Factory name | Returned model |
+| --- | --- | --- |
+| XGBoost | `xgboost` or `xgb` | `xgboost.XGBClassifier` |
+| CatBoost | `catboost` or `cat` | `catboost.CatBoostClassifier` |
+| LightGBM | `lightgbm`, `lgbm`, or `lgb` | `lightgbm.LGBMClassifier` |
 
-### 2. **Advanced Optimization**
-- **Learning Rate Scheduling**: Exponential decay or custom schedulers
-- **Global Early Stopping**: Based on inter-batch validation performance
-- **Class balancing**: Automatic sample weight calculation with `OptimizedWeightCalculator`
+## Requirements and installation
 
-### 3. **Monitoring and Visualization**
-- **Learning curves**: Training/validation metrics visualization
-- **Dynamic hyperparameters**: Track learning rate evolution per batch
-- **Detailed logging**: Full training traceability
-
-### 4. **Multi-Model Support**
-- **XGBoostTrainer**
-- **CatBoostTrainer**
-- **LightGBMTrainer**
-
----
-
-## 📦 Installation
-
-### Requirements
-
-- Python 3.8+
-- Poetry (dependency management)
-- Apache Spark 3.0+
-- PySpark
-- XGBoost
-- CatBoost
-- LightGBM
-- NumPy
-- Pandas
-
-### Install Poetry
-
-If you don't have Poetry installed:
+The project requires Python 3.11 or newer and a working Java environment for
+PySpark.
 
 ```bash
-# Linux, macOS, Windows (WSL)
-curl -sSL https://install.python-poetry.org | python3 -
-
-# Or with pip
-pip install poetry
-```
-
-### Install from source
-
-```bash
-# Clone the repository
-git clone https://github.com/Manda404/SparkBatchTrainer.git
+git clone <repository-url>
 cd SparkBatchTrainer
-
-# Install dependencies with Poetry
 poetry install
-
-# Activate the virtual environment
-poetry shell
 ```
 
-### Install in production mode (without dev dependencies)
+Verify the installation:
 
 ```bash
-poetry install --only main
+poetry run python -c "import spark_batch_trainer; print(spark_batch_trainer.__version__)"
 ```
 
-### Verify installation
+## Input contract
 
-```bash
-# Check installed packages
-poetry show
+Before calling `fit`, prepare:
 
-# Run a quick test
-poetry run python -c "from spark_batch_trainer import XGBoostTrainer; print('Installation successful!')"
-```
+- a Spark training DataFrame;
+- a Spark validation DataFrame;
+- identical feature columns in both DataFrames;
+- the same target column in both DataFrames;
+- an integer-encoded target for multiclass workflows; and
+- feature types supported by the selected model SDK.
 
----
-
-## 🚀 Quick Start
-
-### Basic Usage with XGBoostTrainer
+Keep the test dataset separate. The validation dataset controls model
+selection and must not be reused as the final unbiased test set.
 
 ```python
 from pyspark.sql import SparkSession
-from spark_batch_trainer import XGBoostTrainer
 
-# Initialize Spark session
-spark = SparkSession.builder \
-    .appName("BatchTrainingExample") \
-    .getOrCreate()
+spark = SparkSession.builder.appName("spark-batch-training").getOrCreate()
 
-# Load your data
-spark_train_df = spark.read.parquet("path/to/train_data.parquet")
-spark_valid_df = spark.read.parquet("path/to/valid_data.parquet")
+dataset = spark.read.option("header", True).option("inferSchema", True).csv(
+    "data/churn.csv"
+)
 
-# Initialize trainer
-trainer = XGBoostTrainer()
+train_df, validation_df, test_df = dataset.randomSplit(
+    [0.70, 0.15, 0.15], seed=42
+)
 
-# Train model
-model = trainer.fit(
-    train_dataframe=spark_train_df,
-    valid_dataframe=spark_valid_df,
-    target_column="NObeyesdad",
-    config_model={
-        "objective": "multi:softprob",
+target_column = "churn"
+```
+
+For grouped or temporal observations, replace `randomSplit` with a
+domain-appropriate split to avoid entity or time leakage.
+
+## Shared training configuration
+
+The same `training_config` can be used with every backend:
+
+```python
+training_config = {
+    "num_batches": 5,
+    "max_patience": 3,
+    "metric_mode": "min",
+    "min_delta": 1e-4,
+    "use_sample_weight": False,
+    "show_learning_curve": False,
+    "verbose": True,
+}
+```
+
+| Option | Purpose | Default |
+| --- | --- | --- |
+| `num_batches` | Number of target-stratified Spark batches | `10` |
+| `max_patience` | Consecutive non-improving batches before stopping | `5` |
+| `metric_mode` | Metric direction: `auto`, `min`, or `max` | `auto` |
+| `min_delta` | Minimum change required to count as improvement | `0.0` |
+| `use_sample_weight` | Enable balanced sample weights | `False` |
+| `show_learning_curve` | Render the final learning curve | `False` |
+| `verbose` | Enable progress logging | `True` |
+
+Use `metric_mode="min"` for losses such as log loss and
+`metric_mode="max"` for scores such as AUC. `auto` recognizes common metric
+names, but an explicit value is safer for custom metrics.
+
+## XGBoost example
+
+```python
+from spark_batch_trainer import create_trainer
+
+xgboost_trainer = create_trainer("xgboost")
+xgboost_trainer.fit(
+    train_dataframe=train_df,
+    valid_dataframe=validation_df,
+    target_column=target_column,
+    model_config={
+        "objective": "binary:logistic",
+        "eval_metric": "logloss",
         "n_estimators": 100,
-        "num_class": 7,
+        "learning_rate": 0.05,
         "max_depth": 6,
-        "eval_metric": "mlogloss"
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "random_state": 42,
     },
-    config_training={
-        "num_batches": 5,              # Number of training batches
-        "max_patience": 5,             # Patience for global early stopping
-        "show_learning_curve": True,   # Display learning curves
+    training_config=training_config,
+    learning_rate_config={
+        "initial_lr": 0.05,
+        "decay_rate": 0.95,
+        "min_lr": 0.005,
     },
-    config_lr_scheduler={
-        "initial_lr": 0.1,
-        "decay_rate": 0.95
-    }
 )
 
-# Save trained model
-trainer.save("models/xgboost_model.pkl")
-
-# Load model later
-loaded_trainer = XGBoostTrainer()
-loaded_trainer.load("models/xgboost_model.pkl")
+xgboost_model = xgboost_trainer.get_trained_model()
+xgboost_history = xgboost_trainer.get_training_history()
 ```
 
-### Using CatBoostTrainer
+`learning_rate_config` is optional. When supplied, the learning rate is
+updated between batches.
+
+## CatBoost example
 
 ```python
-from spark_batch_trainer import CatBoostTrainer
+from spark_batch_trainer import create_trainer
 
-trainer = CatBoostTrainer()
-model = trainer.fit(
-    train_dataframe=spark_train_df,
-    valid_dataframe=spark_valid_df,
-    target_column="target",
-    config_model={
+catboost_trainer = create_trainer("catboost")
+catboost_trainer.fit(
+    train_dataframe=train_df,
+    valid_dataframe=validation_df,
+    target_column=target_column,
+    model_config={
+        "loss_function": "Logloss",
+        "eval_metric": "Logloss",
         "iterations": 100,
+        "learning_rate": 0.05,
         "depth": 6,
-        "loss_function": "MultiClass",
-        "classes_count": 7
+        "random_seed": 42,
+        "verbose": False,
     },
-    config_training={
-        "num_batches": 5,
-        "max_patience": 3,
-        "show_learning_curve": True
-    }
+    training_config=training_config,
 )
+
+catboost_model = catboost_trainer.get_trained_model()
+catboost_history = catboost_trainer.get_training_history()
 ```
 
-### Using LightGBMTrainer
+Do not combine CatBoost's `auto_class_weights` with
+`use_sample_weight=True`. Choose one class-balancing strategy to avoid applying
+class correction twice.
+
+## LightGBM example
 
 ```python
-from spark_batch_trainer import LightGBMTrainer
+from spark_batch_trainer import create_trainer
 
-trainer = LightGBMTrainer()
-model = trainer.fit(
-    train_dataframe=spark_train_df,
-    valid_dataframe=spark_valid_df,
-    target_column="target",
-    config_model={
-        "objective": "multiclass",
-        "num_class": 7,
-        "num_iterations": 100,
-        "max_depth": 6,
-        "learning_rate": 0.1
+lightgbm_trainer = create_trainer("lightgbm")
+lightgbm_trainer.fit(
+    train_dataframe=train_df,
+    valid_dataframe=validation_df,
+    target_column=target_column,
+    model_config={
+        "objective": "binary",
+        "metric": "binary_logloss",
+        "n_estimators": 100,
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "random_state": 42,
+        "verbosity": -1,
     },
-    config_training={
-        "num_batches": 5,
-        "max_patience": 5,
-        "show_learning_curve": True
+    training_config=training_config,
+    learning_rate_config={
+        "initial_lr": 0.05,
+        "decay_rate": 0.95,
+        "min_lr": 0.005,
     },
-    config_lr_scheduler={
-        "initial_lr": 0.1,
-        "decay_rate": 0.9
-    }
+)
+
+lightgbm_model = lightgbm_trainer.get_trained_model()
+lightgbm_history = lightgbm_trainer.get_training_history()
+```
+
+## Inspecting training history
+
+Every trainer exposes the same read-only history object:
+
+```python
+history = xgboost_trainer.get_training_history()
+
+for batch_number, train_scores, validation_scores in zip(
+    history.batch_numbers,
+    history.train_scores,
+    history.validation_scores,
+):
+    print(
+        f"batch={batch_number} "
+        f"train={train_scores[-1]:.5f} "
+        f"validation={validation_scores[-1]:.5f}"
+    )
+```
+
+The history contains the metric sequences reported by the backend for each
+processed batch. A batch can contain several boosting iterations.
+
+## Bounded inference example
+
+The returned object is the native backend model. Its `predict` method expects
+in-memory features rather than a Spark DataFrame.
+
+```python
+prediction_sample = test_df.limit(100).toPandas()
+features = prediction_sample.drop(columns=[target_column])
+
+categorical_columns = features.select_dtypes(include=["object"]).columns
+features[categorical_columns] = features[categorical_columns].astype("category")
+
+predictions = xgboost_model.predict(features)
+```
+
+> [!WARNING]
+> Keep inference collection explicitly bounded. Calling `toPandas()` on an
+> unrestricted Spark DataFrame can exhaust driver memory. Use a separate
+> distributed inference workflow for production-scale scoring.
+
+## Multiclass configuration
+
+The workflow is identical for multiclass classification, but the target must
+be encoded as integer class identifiers and the backend configuration must
+declare the correct objective.
+
+```python
+xgboost_config = {
+    "objective": "multi:softprob",
+    "num_class": number_of_classes,
+    "eval_metric": "mlogloss",
+}
+
+catboost_config = {
+    "loss_function": "MultiClass",
+    "eval_metric": "MultiClass",
+}
+
+lightgbm_config = {
+    "objective": "multiclass",
+    "num_class": number_of_classes,
+    "metric": "multi_logloss",
+}
+```
+
+## Direct class imports
+
+The factory is recommended when the backend is selected dynamically. Direct
+imports are also part of the public API:
+
+```python
+from spark_batch_trainer import (
+    CatBoostTrainer,
+    LightGBMTrainer,
+    XGBoostTrainer,
 )
 ```
 
----
+## Architecture
+
+```text
+src/spark_batch_trainer/
+├── __init__.py         # public API and lazy backend imports
+├── factory.py          # backend selection
+├── logging.py          # library logging configuration
+├── backends/           # model-specific adapters
+├── data/               # Spark batching and pandas preparation
+└── training/           # lifecycle, configuration, metrics, and history
+```
+
+Dependency direction:
+
+```text
+public API -> factory -> selected backend -> model SDK
+                              |-> data
+                              |-> training
+```
+
+Backend-independent modules do not import XGBoost, CatBoost, or LightGBM.
+
+## Training semantics
+
+Spark Batch Trainer performs continuation training, not online learning. A
+backend retains the previous booster while fitting the next batch. Results can
+depend on batch order and are not mathematically identical to one fit over the
+complete dataset.
+
+Global early stopping compares validation results after each batch. It does
+not replace every backend-specific convergence mechanism inside an individual
+fit.
+
+## Current limitations
+
+- Model fitting runs on the Python driver, not on Spark executors.
+- The complete validation dataset is collected in driver memory.
+- One training batch can still exceed available driver memory.
+- Model persistence is delegated to each native model SDK.
+- The package currently documents classification workflows only.
+- Large-scale distributed inference is outside the current public API.
+
+## Development and validation
+
+```bash
+poetry run pytest
+poetry run black --check src tests
+poetry run isort --check-only src tests
+poetry run mypy src
+poetry run sphinx-build -W --keep-going -b html docs/source docs/build/html
+```
+
+The test suite separates backend-independent unit tests from Spark integration
+tests that exercise XGBoost, CatBoost, and LightGBM.
+
+## Documentation
+
+- [Installation guide](docs/source/usage/installation.rst)
+- [Practical training guide](docs/source/usage/tutorials.rst)
+- [Configuration reference](docs/source/configuration.rst)
+- [Architecture](docs/source/architecture.rst)
+- [API reference](docs/source/api/index.rst)
+- [Binary classification notebook](notebooks/01_binary_classification.ipynb)
+- [Multiclass classification notebook](notebooks/02_multiclass_classification.ipynb)
+
+## License
+
+This project is distributed under the MIT License.

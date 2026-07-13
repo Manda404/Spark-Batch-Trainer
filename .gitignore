@@ -1,47 +1,53 @@
-# --- Python ---
+# Python bytecode and caches
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.pdb
+*.py[cod]
+*$py.class
+
+# Python packaging artifacts
+/build/
+/dist/
 *.egg-info/
 *.egg
 
-# --- Environnements ---
+# Local virtual environments
 .venv/
-env/
 venv/
+env/
 ENV/
 
-# --- Poetry ---
+# Poetry local lock file
 poetry.lock
 
-# --- IDE / Éditeurs ---
+# Test, coverage, and type-checking artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter runtime artifacts
+.ipynb_checkpoints/
+
+# Generated Sphinx website
+# The documentation sources under /docs/source/ remain versioned.
+/docs/build/
+
+# Runtime logs
+*.log
+/logs/
+
+# Model SDK training artifacts
+/catboost_info/
+/notebooks/catboost_info/
+
+# IDE and editor settings
 .vscode/
 .idea/
 *.swp
+*.swo
 
-# --- Tests ---
-.coverage
-coverage.xml
-htmlcov/
-.pytest_cache/
-.ruff_cache
-
-# --- Logs ---
-*.log
-
-# --- Sphinx Docs ---
-docs/_build/
-docs/_autosummary/
-
-# --- Jupyter Notebooks ---
-.ipynb_checkpoints/
-
-# --- MacOS / Linux / Windows ---
+# Operating-system metadata
 .DS_Store
 Thumbs.db
-
-#
-notebooks/catboost_info
-.pytest_cache

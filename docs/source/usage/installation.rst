@@ -1,35 +1,39 @@
 Installation
 ============
 
-Prerequisites
--------------
-- Python >= 3.11
-- Apache Spark (compatible version: >= 4.0.0)
-- pip or poetry
+Requirements
+------------
 
-Installation with pip
----------------------
-.. code-block:: bash
+* Python 3.11 or newer
+* Java supported by the installed PySpark release
+* Poetry for development from source
 
-   pip install spark-batch-trainer
+Install from source
+-------------------
 
-Installation with poetry
-------------------------
-.. code-block:: bash
-
-   poetry add spark-batch-trainer
-
-From source (GitHub)
---------------------
 .. code-block:: bash
 
    git clone https://github.com/Manda404/SparkBatchTrainer.git
    cd SparkBatchTrainer
    poetry install
 
-Verification
-------------
-.. code-block:: python
+The package is not documented here as available from a public package index.
+Use the source installation until a release is published and verified.
 
-   import spark_batch_trainer
-   print("Installation successful!")
+Verify the public API
+---------------------
+
+.. code-block:: bash
+
+   poetry run python -c "from spark_batch_trainer import create_trainer; print(create_trainer('xgboost'))"
+
+Run tests
+---------
+
+.. code-block:: bash
+
+   poetry run pytest -q tests/core tests/init
+   poetry run pytest -q tests/fit
+
+The integration suite starts a local Spark JVM and trains every backend in
+binary and multiclass modes.

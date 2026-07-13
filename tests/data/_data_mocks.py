@@ -51,7 +51,7 @@ class DiabetesRow:
 # =========================================================
 
 def generate_obesity_row() -> ObesityRow:
-    """Génère une ligne mockée pour un dataset multiclasse (obésité)."""
+    """Generate one mock row for the multiclass obesity dataset."""
     return ObesityRow(
         Age=float(randint(18, 60)),
         Gender=choice(["Male", "Female"]),
@@ -82,7 +82,7 @@ def generate_obesity_row() -> ObesityRow:
 
 
 def generate_diabetes_row() -> DiabetesRow:
-    """Génère une ligne mockée pour un dataset binaire (diabète)."""
+    """Generate one mock row for the binary diabetes dataset."""
     return DiabetesRow(
         gender=choice(["Male", "Female"]),
         age=float(randint(18, 90)),
@@ -108,7 +108,7 @@ def build_mock_spark_df(
     seed: Optional[int] = None
 ) -> SparkDataFrame:
     """
-    Construit un DataFrame Spark à partir d’un générateur de lignes.
+    Build a Spark DataFrame from a row generator.
     """
     if seed is not None:
         random.seed(seed)
@@ -116,7 +116,7 @@ def build_mock_spark_df(
     return spark.createDataFrame(rows, schema=schema)
 
 
-# Schémas explicites
+# Explicit Spark schemas.
 OBESITY_SCHEMA = T.StructType([
     T.StructField("Age", T.DoubleType(), False),
     T.StructField("Gender", T.StringType(), False),
@@ -150,7 +150,7 @@ DIABETES_SCHEMA = T.StructType([
 ])
 
 
-# Helpers spécialisés
+# Dataset-specific helpers.
 def build_mock_obesity_df(spark: SparkSession, n: int, seed: Optional[int] = None) -> SparkDataFrame:
     return build_mock_spark_df(spark, n, generate_obesity_row, OBESITY_SCHEMA, seed)
 
@@ -170,10 +170,10 @@ def stratified_split_sparkdf(
     seed: int = 42
 ) -> Tuple[SparkDataFrame, SparkDataFrame]:
     """
-    Split stratifié train/valid en préservant les proportions de classes.
+    Create a stratified train/validation split while preserving class ratios.
     """
     if not (0.0 < valid_size < 1.0):
-        raise ValueError("valid_size doit être dans (0, 1).")
+        raise ValueError("valid_size must be between 0 and 1")
 
     w = W.partitionBy(target_col).orderBy(F.rand(seed))
     df_rn = sparkdf.withColumn("_rn", F.row_number().over(w))

@@ -1,37 +1,55 @@
 Quickstart
 ==========
 
-This minimal example shows how to train an **XGBoost** model with **Spark Batch Trainer**
-on a binary classification problem.  
-You must provide two Spark DataFrames: a **train set**, a **validation set**, and the target column.
+This example assumes that ``train_df`` and ``validation_df`` are Spark
+DataFrames with the same feature columns and a binary ``churn`` target.
 
 .. code-block:: python
 
-   from spark_batch_trainer.trainers.xgboost_trainer import XGBoostTrainer
+   from spark_batch_trainer import create_trainer
 
-   # Define model and training configurations
-   config_model = {
-       "objective": "binary:logistic",
-       "eval_metric": "logloss",
-       "n_estimators": 50,
-   }
-
-   config_training = {
-       "num_batches": 5,
-       "show_learning_curve": True,
-   }
-
-   # Instantiate the trainer
-   trainer = XGBoostTrainer()
-
-   # Fit the model on train and validation DataFrames
+   trainer = create_trainer("xgboost")
    trainer.fit(
-       train_dataframe=spark_train_df,
-       valid_dataframe=spark_valid_df,
-       target_column="TARGET",
-       config_training=config_training,
-       config_model=config_model,
+       train_dataframe=train_df,
+       valid_dataframe=validation_df,
+       target_column="churn",
+       model_config={
+           "objective": "binary:logistic",
+           "eval_metric": "logloss",
+           "n_estimators": 50,
+           "learning_rate": 0.05,
+           "max_depth": 6,
+           "random_state": 42,
+       },
+       training_config={
+           "num_batches": 5,
+           "max_patience": 3,
+           "metric_mode": "auto",
+           "min_delta": 1e-4,
+           "show_learning_curve": False,
+       },
    )
 
-   # Retrieve the trained model
-   final_model = trainer.get_trained_model()
+   model = trainer.get_trained_model()
+   history = trainer.get_training_history()
+
+   print(history.batch_numbers)
+   predictions = model.predict(validation_df.limit(100).toPandas().drop(columns=["churn"]))
+
+.. warning::
+
+   The final prediction snippet is intentionally small. Calling ``toPandas()``
+   on an unbounded Spark DataFrame can exhaust driver memory.
+
+Choose another backend
+----------------------
+
+Only the backend name and ``model_config`` need to change:
+
+.. code-block:: python
+
+   catboost_trainer = create_trainer("catboost")
+   lightgbm_trainer = create_trainer("lightgbm")
+
+Continue with :doc:`../configuration` and :doc:`../concepts` before running on
+large datasets.

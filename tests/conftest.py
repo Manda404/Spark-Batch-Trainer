@@ -5,7 +5,7 @@ from tests.spark_config import settings
 
 @pytest.fixture(scope="session")
 def spark():
-    """Fixture Spark réutilisable pour tous les tests."""
+    """Create one reusable Spark session for the complete test suite."""
     spark = (
         SparkSession.builder
         .master(settings.SPARK_MASTER)

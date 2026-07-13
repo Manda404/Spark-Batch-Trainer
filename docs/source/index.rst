@@ -1,43 +1,34 @@
-.. Spark Batch Trainer documentation master file
-   Created by sphinx-quickstart.
-   This is the main entry point for the documentation.
+Spark Batch Trainer
+===================
 
-=================================
-Spark Batch Trainer Documentation
-=================================
+Train XGBoost, CatBoost, and LightGBM models sequentially from stratified
+Spark DataFrame batches.
 
-**Spark Batch Trainer** is a modular and extensible framework for
-batch-wise training of machine learning models.
+.. important::
 
-It integrates seamlessly with **Apache Spark DataFrames** and popular ML
-frameworks such as **XGBoost**, **CatBoost**, and **LightGBM**.
+   Spark distributes batch assignment and filtering. Model training runs on
+   the Python driver. The validation dataset and each pandas batch must fit in
+   driver memory.
 
-This documentation is organized into several sections:
+Start here
+----------
 
-- **Introduction**: project overview and key concepts.  
-- **User Guide**: installation, quickstart, and hands-on tutorials.  
-- **Examples**: practical use cases for different problem types.  
-- **API Reference**: detailed description of classes, functions, and modules.  
-- **Developer Guide**: contribution guidelines and version history.  
-
-.. toctree:: 
-   :maxdepth: 2
-   :caption: Introduction
-
-   introduction
+* :doc:`usage/installation` — install the package and verify dependencies.
+* :doc:`usage/quickstart` — run the smallest valid training example.
+* :doc:`concepts` — understand continuation training, memory, and stopping.
+* :doc:`architecture` — learn how the packages fit together.
+* :doc:`api/index` — browse the supported public API.
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide
+   :caption: User guide
 
+   introduction
    usage/installation
    usage/quickstart
    usage/tutorials
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-
+   concepts
+   configuration
    usage/examples
    usage/dataset_overview
    usage/examples_binary
@@ -45,20 +36,20 @@ This documentation is organized into several sections:
 
 .. toctree::
    :maxdepth: 2
-   :caption: API Reference
+   :caption: Design and API
 
-   modules
+   architecture
+   api/index
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developer Guide
+   :caption: Development
 
    contributing
    changelog
 
+Indices
+-------
 
-Indices and tables
-==================
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
