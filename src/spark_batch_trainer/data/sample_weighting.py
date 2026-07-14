@@ -1,3 +1,5 @@
+"""Class-balanced sample weighting shared by every model backend."""
+
 from threading import Lock
 from typing import Optional, Sequence, Tuple, Dict
 
@@ -18,8 +20,7 @@ KeyType = Tuple[bytes, bytes, float, bool]
 
 
 class BalancedSampleWeightCalculator:
-    """
-    Compute class-balanced sample weights with caching.
+    """Compute class-balanced sample weights with caching.
 
     This class implements an optimized version of balanced weights:
 
@@ -27,53 +28,27 @@ class BalancedSampleWeightCalculator:
 
         sample_weights(c) = \\frac{sample_count}{class_count \\cdot n_c}
 
-    where:
-        - ``sample_count`` is the total number of samples,
-        - ``class_count`` is the number of classes,
-        - ``n_c`` is the number of samples in class ``c``.
+    where ``sample_count`` is the total number of samples, ``class_count``
+    is the number of classes, and ``n_c`` is the number of samples in class
+    ``c``. Supports additive smoothing to avoid zero-count divisions, and
+    optional normalization so that weights average to 1. Results are
+    cached, and consistent across batches when ``known_labels`` is provided.
 
-    Features
-    --------
-    - Supports additive smoothing to avoid zero-count divisions.
-    - Normalizes weights so that the mean equals 1 (optional).
-    - Uses a cache for previously computed class weights to speed up repeated calls.
-    - Ensures consistency across batches when ``known_labels`` is provided.
-
-    Attributes
-    ----------
-    _cache : dict
-        Internal cache mapping keys to precomputed class weights.
-    _lock : threading.Lock
-        Thread lock to ensure thread-safe access to the cache.
+    Attributes:
+        _cache (dict): Internal cache mapping keys to precomputed class weights.
+        _lock (threading.Lock): Thread lock guarding access to the cache.
     """
 
     __slots__ = ("_cache", "_lock")
 
     def __init__(self) -> None:
-        """
-        Initialize the weight calculator.
-
-        Initializes an empty cache and a thread lock to ensure thread-safe
-        operations when computing or retrieving cached class weights.
-        """
+        """Initialize an empty cache and its thread lock."""
         self._cache: Dict[KeyType, ndarray] = {}
         self._lock = Lock()
 
     @staticmethod
     def _as_1d(y) -> ndarray:
-        """
-        Convert input array-like to a 1D numpy array.
-
-        Parameters
-        ----------
-        y : array-like
-            Input labels.
-
-        Returns
-        -------
-        ndarray
-            Flattened 1D numpy array of labels.
-        """
+        """Flatten array-like input to a 1D numpy array."""
         y = asarray(y)
         if y.ndim != 1:
             y = y.ravel()
@@ -81,18 +56,10 @@ class BalancedSampleWeightCalculator:
 
     @staticmethod
     def _validate(y: ndarray) -> None:
-        """
-        Validate the input labels array.
+        """Reject a labels array containing NaN values.
 
-        Parameters
-        ----------
-        y : ndarray
-            Input labels array.
-
-        Raises
-        ------
-        ValueError
-            If ``y`` contains NaN values.
+        Raises:
+            ValueError: If ``y`` contains NaN values.
         """
         if y.size == 0:
             return
@@ -106,25 +73,7 @@ class BalancedSampleWeightCalculator:
         smoothing: float,
         normalize: bool,
     ) -> KeyType:
-        """
-        Build a compact and stable cache key from classes and counts.
-
-        Parameters
-        ----------
-        classes : ndarray
-            Unique class labels.
-        counts : ndarray
-            Class counts (after smoothing).
-        smoothing : float
-            Additive smoothing applied to counts.
-        normalize : bool
-            Whether normalization is applied.
-
-        Returns
-        -------
-        tuple of (bytes, bytes, float, bool)
-            A tuple uniquely identifying the weight configuration.
-        """
+        """Build a compact, stable cache key from classes and counts."""
         kind = classes.dtype.kind  # 'i','u','f','U','S','O',...
         if kind in ("i", "u"):
             classes_bytes = asarray(classes, dtype="int64").tobytes()
@@ -143,30 +92,24 @@ class BalancedSampleWeightCalculator:
         smoothing: float = 0.0,
         normalize: bool = True,
     ) -> ndarray:
-        """
-        Compute balanced sample weights for a training batch.
+        """Compute balanced sample weights for a training batch.
 
-        Parameters
-        ----------
-        target_values : array-like
-            Labels of the current batch.
-        known_labels : sequence of shape (n_classes,), optional
-            Complete set of possible labels. Ensures batch-to-batch consistency
-            and allows normalization across all classes.
-        smoothing : float, default=0.0
-            Additive smoothing applied to class counts.
-        normalize : bool, default=True
-            Whether to normalize weights so that their mean equals 1.
+        Args:
+            target_values: Labels of the current batch.
+            known_labels: Complete set of possible labels (shape
+                ``(n_classes,)``). Ensures batch-to-batch consistency and
+                allows normalization across all classes.
+            smoothing: Additive smoothing applied to class counts.
+                Defaults to ``0.0``.
+            normalize: Whether to normalize weights so that their mean
+                equals 1. Defaults to ``True``.
 
-        Returns
-        -------
-        ndarray of shape (n_samples,)
-            Array of sample weights for the batch.
+        Returns:
+            numpy.ndarray: Array of sample weights, shape ``(n_samples,)``.
 
-        Raises
-        ------
-        ValueError
-            If unknown labels are found (when ``known_labels`` is provided).
+        Raises:
+            ValueError: If unknown labels are found (when ``known_labels``
+                is provided).
         """
         target_array = self._as_1d(target_values)
         self._validate(target_array)
@@ -221,24 +164,15 @@ class BalancedSampleWeightCalculator:
         return sample_weights
 
     def clear_cache(self) -> None:
-        """
-        Clear the internal cache of computed class weights.
-
-        Returns
-        -------
-        None
-        """
+        """Clear the internal cache of computed class weights."""
         with self._lock:
             self._cache.clear()
 
     def get_cache_size(self) -> int:
-        """
-        Get the current size of the cache.
+        """Get the current size of the cache.
 
-        Returns
-        -------
-        int
-            Number of cached entries.
+        Returns:
+            int: Number of cached entries.
         """
         with self._lock:
             return len(self._cache)

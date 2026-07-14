@@ -10,6 +10,7 @@ class LearningCurvePlotter:
     """Render diagnostics only when explicitly requested by the caller."""
 
     def __init__(self, logger: Logger) -> None:
+        """Store the logger used to report skipped or empty plots."""
         self._logger = logger
 
     def plot_metrics(
@@ -20,7 +21,16 @@ class LearningCurvePlotter:
         model_name: str,
         metric_name: str,
     ) -> None:
-        """Plot flattened train/validation curves and batch boundaries."""
+        """Plot flattened train/validation curves with a marker at each batch boundary.
+
+        Args:
+            train_scores: Per-batch training metric values, in processing order.
+            validation_scores: Per-batch validation metric values, in processing order.
+            batch_numbers: One-based index of every processed batch, used to
+                label the batch-boundary markers.
+            model_name: Model name shown in the plot title.
+            metric_name: Metric name shown in the legend and y-axis label.
+        """
         from matplotlib import pyplot
 
         flattened_train = [value for curve in train_scores for value in curve]
@@ -50,7 +60,12 @@ class LearningCurvePlotter:
         pyplot.show()
 
     def plot_learning_rates(self, name: str, values: List[float]) -> None:
-        """Plot one learning-rate value per processed batch."""
+        """Plot one learning-rate value per processed batch, skipping if empty.
+
+        Args:
+            name: Scheduler name shown in the legend and plot title.
+            values: Learning rate applied to each batch, in processing order.
+        """
         if not values:
             self._logger.warning("Skipping empty learning-rate schedule")
             return

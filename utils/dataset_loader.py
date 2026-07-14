@@ -1,68 +1,67 @@
-# from sys import path
+"""Dataset loading helpers used by the example notebooks."""
+
 from pathlib import Path
-from pandas import read_csv, DataFrame as PandasDataFrame
+from typing import Union
+
+from pandas import DataFrame as PandasDataFrame
+from pandas import read_csv
+
+PathLike = Union[str, Path]
 
 
-def get_data_split(
-    split: str = "train", base_dir: str = "data/binary_dataset"
-) -> PandasDataFrame:
-    """
-    Load a dataset (train, test, or other split) from a CSV file.
-
-    Parameters
-    ----------
-    split : str, default="train"
-        Which dataset split to load (e.g., "train", "test", "valid").
-    base_dir : str, default="data/binary_dataset"
-        Base directory containing the CSV files.
-
-    Returns
-    -------
-    pd.DataFrame
-        Loaded dataset as a pandas DataFrame.
-    """
-    root_path = Path().resolve().parent
-    dataset_path = root_path.joinpath(base_dir, f"{split}.csv")
-    return load_dataset(dataset_path)
-
-
-def get_dataset_path(data_dir: str = "data") -> Path:
-    """
-    Go one level up from the current working directory,
-    then return the absolute path of the only CSV file inside `data_dir`.
+def find_project_root(start: PathLike = ".") -> Path:
+    """Return the nearest parent directory containing ``pyproject.toml``.
 
     Parameters
     ----------
-    data_dir : str, default="data"
-        Directory containing the dataset.
-
-    Returns
-    -------
-    Path
-        Path to the single CSV file found.
+    start:
+        File or directory from which to begin the upward search.
 
     Raises
     ------
     FileNotFoundError
-        If no CSV file is found in the directory.
-    ValueError
-        If more than one CSV file is found.
+        If no project configuration can be found.
     """
-    root_path = Path().resolve().parent
-    data_path = root_path / data_dir
-    csv_files = list(data_path.glob("*.csv"))
+    resolved = Path(start).expanduser().resolve()
+    current = resolved.parent if resolved.is_file() else resolved
+    for candidate in (current, *current.parents):
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise FileNotFoundError(
+        f"Could not locate pyproject.toml from {resolved}."
+    )
 
-    if len(csv_files) == 0:
-        raise FileNotFoundError(f"No CSV file found in {data_path}")
+
+def get_dataset_path(data_dir: PathLike = "data") -> Path:
+    """Return the only CSV file contained in a project-relative directory."""
+    directory = Path(data_dir)
+    if not directory.is_absolute():
+        directory = find_project_root() / directory
+
+    csv_files = sorted(directory.glob("*.csv"))
+    if not csv_files:
+        raise FileNotFoundError(f"No CSV file found in {directory}.")
     if len(csv_files) > 1:
-        raise ValueError(f"Multiple CSV files found in {data_path}, expected only one.")
-
-    # ici on sait qu’il y a exactement 1 fichier
+        raise ValueError(
+            f"Expected one CSV file in {directory}, found {len(csv_files)}."
+        )
     return csv_files[0]
 
 
-def load_dataset(dataset_path: Path) -> PandasDataFrame:
-    """
-    Load a CSV dataset into a pandas DataFrame.
-    """
-    return read_csv(dataset_path)
+def load_dataset(dataset_path: PathLike) -> PandasDataFrame:
+    """Load a CSV dataset from an absolute or project-relative path."""
+    path = Path(dataset_path).expanduser()
+    if not path.is_absolute():
+        path = find_project_root() / path
+    if not path.is_file():
+        raise FileNotFoundError(f"Dataset not found: {path}")
+    return read_csv(path)
+
+
+def get_data_split(
+    split: str = "train", base_dir: PathLike = "data/binary_dataset"
+) -> PandasDataFrame:
+    """Load a named CSV split such as ``train``, ``validation``, or ``test``."""
+    if not split or Path(split).name != split:
+        raise ValueError("split must be a simple file name without directories")
+    return load_dataset(Path(base_dir) / f"{split}.csv")

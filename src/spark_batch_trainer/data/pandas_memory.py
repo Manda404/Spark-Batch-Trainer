@@ -1,11 +1,12 @@
+"""In-place pandas memory footprint reduction."""
+
 from numpy import iinfo
 from pandas import DataFrame
 from spark_batch_trainer.logging import configure_logger
 
 
 class PandasMemoryOptimizer:
-    """
-    Utility class to optimize the memory usage of a Pandas DataFrame.
+    """Utility class to optimize the memory usage of a Pandas DataFrame.
 
     Optimizations include:
 
@@ -13,67 +14,49 @@ class PandasMemoryOptimizer:
     - Downcasting floats (``float64`` → ``float32``).
     - Downcasting integers (``int64`` → ``int32`` when possible).
 
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> from spark_batch_trainer.data import PandasMemoryOptimizer
-    >>> 
-    >>> # Create a sample DataFrame
-    >>> dataframe = pd.DataFrame({
-    ...     "category_col": ["a", "b", "a", "c", "b"],
-    ...     "int_col": [1, 2, 3, 4, 5],
-    ...     "float_col": [1.0, 2.5, 3.2, 4.8, 5.1]
-    ... })
-    >>> 
-    >>> optimizer = PandasMemoryOptimizer(enable_logging=False)
-    >>> optimized = optimizer.optimize(dataframe)
-    >>> 
-    >>> optimized.dtypes
-    category_col    category
-    int_col           int32
-    float_col       float32
-    dtype: object
+    Example:
+        >>> import pandas as pd
+        >>> from spark_batch_trainer.data import PandasMemoryOptimizer
+        >>> dataframe = pd.DataFrame({
+        ...     "category_col": ["a", "b", "a", "c", "b"],
+        ...     "int_col": [1, 2, 3, 4, 5],
+        ...     "float_col": [1.0, 2.5, 3.2, 4.8, 5.1]
+        ... })
+        >>> optimizer = PandasMemoryOptimizer(enable_logging=False)
+        >>> optimized = optimizer.optimize(dataframe)
+        >>> optimized.dtypes
+        category_col    category
+        int_col           int32
+        float_col       float32
+        dtype: object
     """
 
     def __init__(self, enable_logging: bool = True):
-        """
-        Initialize the memory optimizer.
+        """Initialize the memory optimizer.
 
-        Parameters
-        ----------
-        enable_logging : bool, default=True
-            If True, logging is enabled to display optimization steps
-            and memory usage statistics.
+        Args:
+            enable_logging: If ``True``, logging is enabled to display
+                optimization steps and memory usage statistics. Defaults
+                to ``True``.
         """
         self.enable_logging = enable_logging
         self._logger = configure_logger(__name__)
 
     def optimize(self, dataframe: DataFrame) -> DataFrame:
-        """
-        Optimize the memory usage of a Pandas DataFrame.
+        """Optimize the memory usage of a Pandas DataFrame, in place.
 
         The optimization includes:
-        
+
         - Converting object columns to category when the ratio of unique values
           to total values is less than 0.5.
         - Downcasting float64 columns to float32.
         - Downcasting int64 columns to int32 if values fit within bounds.
 
-        Parameters
-        ----------
-        dataframe : pandas.DataFrame
-            Input DataFrame to optimize.
+        Args:
+            dataframe: Input DataFrame to optimize, modified in place.
 
-        Returns
-        -------
-        pandas.DataFrame
-            Optimized DataFrame with reduced memory footprint.
-
-        Notes
-        -----
-        - The method modifies the DataFrame in place and returns it.
-        - Logging information about the optimization process is displayed
-          if ``enable_logging=True``.
+        Returns:
+            pandas.DataFrame: The same DataFrame, with reduced memory footprint.
         """
         if self.enable_logging:
             self._logger.info("Starting pandas memory optimization")

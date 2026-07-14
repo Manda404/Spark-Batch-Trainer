@@ -35,3 +35,12 @@ evaluation history, and serialization. Shared Spark, pandas, metric, and early
 stopping behavior must not be copied into the backend. Avoid compatibility
 folders and one-file packages: add a module only when it owns a clear,
 independent responsibility.
+
+.. note::
+
+   The three existing backends currently duplicate a handful of small,
+   backend-agnostic methods (input validation, runtime-state initialization,
+   batch preparation) almost verbatim rather than sharing them through
+   :class:`~spark_batch_trainer.training.base.BatchTrainer`. This is known
+   debt, not the intended pattern — a future refactor should move that logic
+   into the shared base class rather than a fourth backend repeating it again.

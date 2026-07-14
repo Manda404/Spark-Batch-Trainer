@@ -2,7 +2,7 @@
 
 # Spark Batch Trainer
 
-### Batch-wise gradient boosting from Spark DataFrames
+### Gradient boosting on Spark DataFrames, without the `toPandas()` OOM
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PySpark 4](https://img.shields.io/badge/PySpark-4.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/docs/latest/api/python/)
@@ -10,8 +10,9 @@
 [![Version](https://img.shields.io/badge/Version-1.0.0-2563EB)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-16A34A.svg)](#license)
 
-**A focused Python library for sequentially training XGBoost, CatBoost, and
-LightGBM classifiers from target-stratified Spark DataFrame batches.**
+**A focused Python library for training XGBoost, CatBoost, and LightGBM
+classifiers on Spark DataFrames without collecting the full dataset into
+driver memory.**
 
 [Getting started](#requirements-and-installation) ·
 [Backend guides](#xgboost-example) ·
@@ -24,14 +25,31 @@ LightGBM classifiers from target-stratified Spark DataFrame batches.**
 
 ## Overview
 
-Spark performs batch assignment and filtering. Each selected batch is then
-collected as a pandas DataFrame and fitted by the selected model library on the
-Python driver.
+Spark distributes ingestion, preprocessing, and feature engineering across a
+cluster. XGBoost, CatBoost, and LightGBM do not participate in that
+distribution: their scikit-learn-style APIs fit against a pandas DataFrame
+held in the memory of a single process. Connecting the two normally means
+calling `spark_df.toPandas()`, which collects the entire distributed dataset
+into driver memory before a single training iteration runs.
+
+On clusters sized for distributed ETL rather than single-node training, that
+collection step is frequently what fails first — the driver runs out of
+memory before training even starts, regardless of how well the upstream Spark
+job scaled.
+
+Spark Batch Trainer removes the need for a single full collection. Spark
+performs target-stratified batch assignment and filtering; only the current
+batch is ever collected as a pandas DataFrame, and each backend continues
+training its booster from one batch to the next instead of fitting once
+against a fully materialized dataset. Driver memory usage is governed by the
+batch size and the validation set, not by the size of the full training
+dataset.
 
 > [!IMPORTANT]
 > This is driver-side continuation training, not distributed model training.
-> The complete validation dataset and one training batch must fit in driver
-> memory.
+> The complete validation dataset and one training batch must still fit in
+> driver memory — batching reduces the memory constraint, it does not remove
+> it.
 
 ## Contents
 
@@ -50,8 +68,16 @@ Python driver.
 
 ## Why use it?
 
+The straightforward alternative — call `toPandas()` once and fit a single
+model against the fully collected DataFrame — works until the dataset grows
+or the cluster shrinks. Driver memory does not scale with the rest of a Spark
+job, so on a modest cluster it is usually the first resource exhausted,
+producing an out-of-memory error before training begins rather than a
+graceful degradation.
+
 | Capability | What it provides |
 | --- | --- |
+| Bounded driver memory | Only one batch is materialized in pandas at a time; the full training dataset never needs to fit in driver memory. |
 | Spark-native inputs | Training and validation start as Spark DataFrames. |
 | Stratified batching | The target distribution remains approximately stable across batches. |
 | Continuation training | Each backend continues its booster from one batch to the next. |
@@ -60,6 +86,9 @@ Python driver.
 | Consistent history | Every backend returns the same immutable training-history structure. |
 
 ## How it works
+
+The diagram below shows why only one bounded batch ever reaches the driver at
+a time, instead of the whole training dataset:
 
 ```mermaid
 flowchart LR

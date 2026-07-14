@@ -51,3 +51,5 @@ htmlcov/
 # Operating-system metadata
 .DS_Store
 Thumbs.db
+notebooks/olds
+docs/_notes

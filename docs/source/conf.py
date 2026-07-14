@@ -33,8 +33,8 @@ autodoc_typehints = "description"
 autoclass_content = "class"
 autodoc_member_order = "bysource"
 autosummary_generate = True
-napoleon_numpy_docstring = True
-napoleon_google_docstring = False
+napoleon_numpy_docstring = False
+napoleon_google_docstring = True
 autosectionlabel_prefix_document = True
 
 rst_prolog = f"""

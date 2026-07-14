@@ -87,7 +87,7 @@ def test_catboost_fit_runs_obesity(mock_data_obesity, config_training, config_mo
         valid_dataframe=valid_df_encoded,
         target_column=target_col,
         training_config=config_training,
-        config_model=config_model_multiclass,
+        model_config=config_model_multiclass,
     )
 
     model = trainer.get_trained_model()

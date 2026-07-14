@@ -37,7 +37,7 @@ Project conventions
 -------------------
 
 * Keep public names, docstrings, comments, logs, and documentation in English.
-* Use NumPy-style docstrings for public classes and functions.
+* Use Google-style docstrings for public classes and functions.
 * Put backend-independent behavior in focused ``config``, ``data``,
   ``evaluation``, ``observability``, or ``visualization`` modules.
 * Keep model-library details inside ``backends``.

@@ -11,59 +11,14 @@ from spark_batch_trainer.training.learning_curves import LearningCurvePlotter
 
 
 class BatchTrainer(ABC):
+    """Shared batching, preprocessing, and plotting utilities for batch trainers.
+
+    Subclassed by the concrete XGBoost, CatBoost, and LightGBM trainers,
+    which implement ``fit`` and ``get_trained_model``.
     """
-    Abstract base class for batch trainers.
 
-    This class defines the interface and provides common utilities
-    for implementing batch-wise training with Spark and pandas.
-    It is designed to be subclassed by concrete trainers
-    (e.g., XGBoost, CatBoost, LightGBM).
-
-    Main Features
-    -------------
-    - **Training interface**
-
-      - ``fit``: Abstract method to train a model in batches.
-      - ``get_trained_model``: Abstract method to retrieve the trained model.
-
-    - **Batch creation & processing**
-
-      - ``_assign_batches``: Stratified splitting into batches using Spark.
-      - ``_iter_training_batches``: Convert Spark batches to pandas DataFrames (generator).
-      - ``_collect_validation_data``: Convert a full Spark DataFrame into pandas.
-
-    - **Learning curve visualization**
-
-      - ``_plot_metric_history``: Plot flattened training/validation loss across batches.
-
-    - **Data preprocessing**
-
-      - ``_convert_categorical_features``: Convert object-type columns in pandas DataFrame to categorical.
-
-    - **Learning rate scheduling**
-
-      - ``_calculate_scheduled_learning_rate``: Compute exponentially decayed learning rates per batch.
-      - ``_plot_learning_rate_history``: Plot learning rate evolution across batches.
-
-    - **Training metrics extraction**
-
-      - ``_extract_metric_history``: Extract per-iteration training and validation metrics
-        from LightGBM, XGBoost, or CatBoost models.
-
-    Attributes
-    ----------
-    _logger : Logger
-        Logger instance used for logging training, preprocessing, and plotting information.
-
-    Notes
-    -----
-    - This is an abstract class and cannot be instantiated directly.
-    - Subclasses must implement at least ``fit`` and ``get_trained_model``.
-    - Designed for scalable ML workflows combining Spark preprocessing and batch-wise training.
-    """
     def __init__(self):
-        """
-        """
+        """Wire up the shared batching, preparation, and plotting collaborators."""
         self._logger = configure_logger(__name__)
         self._batcher = StratifiedSparkBatcher(self._logger)
         self._data_preparer = PandasDataPreparer(self._logger)
@@ -77,6 +32,46 @@ class BatchTrainer(ABC):
         if hasattr(self, "_lr_schedulers"):
             self._lr_schedulers.clear()
         self._categorical_features = None
+        self._known_labels = None
+        self._data_preparer.reset_category_schema()
+
+    def _fit_category_schema(
+        self,
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
+        target_column: str,
+    ) -> None:
+        """Learn one categorical mapping reused by validation and all batches."""
+        self._categorical_features = self._data_preparer.fit_category_schema(
+            train_dataframe,
+            valid_dataframe,
+            target_column,
+        )
+
+    def _fit_known_labels(
+        self,
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
+        target_column: str,
+    ) -> None:
+        """Learn the global target label space once from train and validation data.
+
+        Sample weights are computed per batch; without a shared label space,
+        each batch (and the validation set) would derive its own class list
+        from whatever labels it happens to contain, making weight scale
+        inconsistent across batches and disabling mean-1 normalization (see
+        :meth:`~spark_batch_trainer.data.BalancedSampleWeightCalculator.calculate_sample_weights`).
+        """
+        distinct_rows = (
+            train_dataframe.select(target_column)
+            .union(valid_dataframe.select(target_column))
+            .distinct()
+            .collect()
+        )
+        self._known_labels = sorted(
+            (row[target_column] for row in distinct_rows if row[target_column] is not None),
+            key=str,
+        )
 
     def get_training_history(self) -> TrainingHistory:
         """Return an immutable snapshot of metrics from the latest fit run."""
@@ -95,70 +90,18 @@ class BatchTrainer(ABC):
         target_column: str,
         **kwargs,
     ) -> None:
-        """
-        Abstract method to train a model on Spark DataFrames in batches.
-
-        Parameters
-        ----------
-        train_dataframe : SparkDataFrame or None
-            Training dataset.
-        valid_dataframe : SparkDataFrame or None
-            Validation dataset.
-        target_column : str
-            Name of the target column.
-        **kwargs : dict
-            Additional training configurations.
-        """
+        """Train a model on Spark DataFrames in batches. Implemented by each backend."""
         pass
 
     @abstractmethod
     def get_trained_model(self) -> Any:
-        """
-        Abstract method to retrieve the trained model instance.
-
-        Returns
-        -------
-        Any
-            The trained model object (depends on implementation).
-        """
+        """Return the trained model instance. Implemented by each backend."""
         pass
 
     def _assign_batches(
         self, dataframe: SparkDataFrame, target_column: str, **kwargs
     ) -> SparkDataFrame:
-        """
-        Create stratified training batches per target class using Spark's ``ntile``.
-
-        This ensures that each batch contains approximately the same distribution
-        of the target classes, which is useful for imbalanced datasets.
-
-        Parameters
-        ----------
-        dataframe : SparkDataFrame
-            Input dataset.
-        target_column : str
-            Target column used for stratified batching.
-        **kwargs : dict
-            Additional arguments, such as:
-            - ``num_batches`` (int, default=10): Number of batches to create.
-
-        Returns
-        -------
-        SparkDataFrame
-            Input DataFrame with an additional ``batch_id`` column
-            indicating the assigned batch index.
-
-        Raises
-        ------
-        ValueError
-            If ``num_batches`` <= 0 or if ``target_column`` is missing.
-
-        Notes
-        -----
-        - Uses ``ntile`` to split each class into evenly sized batches.
-        - A fixed random seed (42) ensures reproducibility.
-        - Batch indices start at 0 and go up to ``num_batches - 1``.
-        """
+        """Assign a stratified batch id per target class using Spark's ``ntile``."""
         num_batches = int(kwargs.get("num_batches", 10))
         return self._batcher.assign_batches(dataframe, target_column, num_batches)
 
@@ -168,41 +111,13 @@ class BatchTrainer(ABC):
         batch_column: str,
         num_batches: int,
     ) -> Generator[PandasDataFrame, None, None]:
-        """
-        Convert Spark DataFrame batches into pandas DataFrames, yielding them sequentially.
-
-        Parameters
-        ----------
-        dataframe : SparkDataFrame
-            Input dataset.
-        batch_column : str
-            Column used for batch stratification.
-        num_batches : int
-            Number of batches.
-
-        Yields
-        ------
-        PandasDataFrame
-            Pandas DataFrame for each batch.
-        """
+        """Yield one collected pandas batch at a time from the Spark dataset."""
         yield from self._batcher.iter_pandas_batches(
             dataframe, batch_column, num_batches
         )
 
     def _collect_validation_data(self, dataframe: SparkDataFrame) -> PandasDataFrame:
-        """
-        Convert a Spark DataFrame into a pandas DataFrame.
-
-        Parameters
-        ----------
-        dataframe : SparkDataFrame
-            Input dataset.
-
-        Returns
-        -------
-        PandasDataFrame
-            Equivalent pandas DataFrame.
-        """
+        """Collect the full validation Spark DataFrame onto the driver as pandas."""
         return self._data_preparer.collect(dataframe, purpose="validation")
 
     def _plot_metric_history(
@@ -213,27 +128,7 @@ class BatchTrainer(ABC):
         model_name: str = "CatBoost",
         eval_metric: str = "Logloss",
     ) -> None:
-        """
-        Plot the global flattened learning curve over all batches.
-
-        Parameters
-        ----------
-        global_train_loss : list of list of float
-            Training loss per batch.
-        global_valid_loss : list of list of float
-            Validation loss per batch.
-        global_iterations : list of int
-            Batch indices corresponding to losses.
-        model_name : str, optional
-            Model name for plot title (default="CatBoost").
-        eval_metric : str, optional
-            Evaluation metric name for axis label (default="Logloss").
-
-        Returns
-        -------
-        None
-            Displays the matplotlib plot.
-        """
+        """Plot the global flattened learning curve over all batches."""
         self._plotter.plot_metrics(
             global_train_loss,
             global_valid_loss,
@@ -245,23 +140,7 @@ class BatchTrainer(ABC):
     def _convert_categorical_features(
         self, data: PandasDataFrame, target_column: str = ""
     ) -> Tuple[PandasDataFrame, bool]:
-        """
-        Convert object columns in a pandas DataFrame to categorical dtype.
-
-        Parameters
-        ----------
-        data : PandasDataFrame
-            Input dataset.
-        target_column : str, optional
-            Target column name (excluded from conversion).
-
-        Returns
-        -------
-        data : PandasDataFrame
-            Updated DataFrame with categorical features converted.
-        bool
-            Whether categorical features were detected and converted.
-        """
+        """Convert object columns to categorical dtype; report whether any were found."""
         prepared, categorical_features = self._data_preparer.convert_categories(
             data, target_column
         )
@@ -274,40 +153,11 @@ class BatchTrainer(ABC):
         batch_id: int,
         min_lr: float = 1e-4,
     ) -> float:
-        """
-        Compute exponentially decayed learning rate, bounded by ``min_lr``.
+        """Exponentially decay the learning rate: ``max(min_lr, initial_lr * decay_rate**(batch_id-1))``.
 
-        Formula
-        -------
-        lr_b = max(min_lr, initial_lr * decay_rate ** (batch_id - 1))
-
-        Parameters
-        ----------
-        initial_lr : float
-            Initial learning rate (> 0).
-        decay_rate : float
-            Multiplicative decay factor (0 < decay_rate <= 1).
-        batch_id : int
-            Current batch index (1-indexed).
-        min_lr : float, optional
-            Minimum learning rate (default=1e-4).
-
-        Returns
-        -------
-        float
-            Learning rate for the current batch.
-
-        Raises
-        ------
-        ValueError
-            If parameters are invalid.
-
-        Examples
-        --------
-        >>> trainer._calculate_scheduled_learning_rate(0.1, 0.9, 3)
-        0.081
-        >>> trainer._calculate_scheduled_learning_rate(0.001, 0.5, 10, min_lr=0.0005)
-        0.0005
+        Raises:
+            ValueError: If ``initial_lr``, ``decay_rate``, ``batch_id``, or
+                ``min_lr`` is out of range.
         """
         # Validate that the initial learning rate is positive
         if initial_lr <= 0:
@@ -337,56 +187,17 @@ class BatchTrainer(ABC):
         learning_rates: List[float],
         title: str = "Learning Rate Schedule",
     ) -> None:
-        """
-        Plot a learning-rate schedule.
-
-        Parameters
-        ----------
-        name : str
-            Scheduler name (e.g., "ExponentialLR").
-        learning_rates : list of float
-            Sequence of learning rates.
-        title : str, optional
-            Plot title (default="Learning Rate Schedule").
-
-        Returns
-        -------
-        None
-            Displays the matplotlib plot.
-        """
+        """Plot a learning-rate schedule."""
         self._plotter.plot_learning_rates(name, learning_rates)
 
     def _extract_metric_history(
         self, model: Any, framework: str = "lightgbm"
     ) -> Tuple[List[float], List[float], str]:
-        """
-        Extract per-iteration training and validation metrics.
+        """Extract (train_metric, valid_metric, metric_name) from a trained model's eval history.
 
-        Supports LightGBM, XGBoost, and CatBoost.
-
-        Parameters
-        ----------
-        model : object
-            Trained model instance. Supported types:
-            - lightgbm.LGBMClassifier
-            - xgboost.XGBClassifier
-            - catboost.CatBoostClassifier
-        framework : str, optional
-            Framework name, one of {"lightgbm", "xgboost", "catboost"}.
-
-        Returns
-        -------
-        train_metric : list of float
-            Training metric values per iteration.
-        valid_metric : list of float
-            Validation metric values per iteration.
-        metric_name : str
-            Name of the evaluation metric (e.g., "logloss").
-
-        Raises
-        ------
-        ValueError
-            If the framework is unsupported or no eval results are available.
+        Raises:
+            ValueError: If ``framework`` is unsupported or no eval results
+                are available.
         """
         evals_result: Optional[Dict[str, Dict[str, list[Any]]]] = None
 

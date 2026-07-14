@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(poetry --version)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(.venv/bin/sphinx-build --version)",
+      "Bash(poetry install *)",
+      "Bash(poetry config *)",
+      "Bash(pyenv versions *)"
+    ]
+  }
+}

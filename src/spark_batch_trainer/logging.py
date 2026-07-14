@@ -11,38 +11,30 @@ from typing import Optional
 
 
 def configure_logger(name: str, log_path: Optional[str] = None, level: int = INFO):
-    """
-    Configure a logger with console output and optional file rotation.
+    """Configure a logger with console output and optional file rotation.
 
-    Parameters
-    ----------
-    name : str
-        Name of the logger (used as log file name as well).
-    log_path : str, optional
-        Optional directory for rotating log files. By default the library logs
-        only to the console and never writes inside the installed package.
-    level : int, optional
-        Logging level (e.g., ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR``, ``CRITICAL``).
-        Default is ``INFO``.
+    Args:
+        name: Name of the logger (used as log file name as well).
+        log_path: Optional directory for rotating log files. By default the
+            library logs only to the console and never writes inside the
+            installed package.
+        level: Logging level (e.g., ``DEBUG``, ``INFO``, ``WARNING``,
+            ``ERROR``, ``CRITICAL``). Defaults to ``INFO``.
 
-    Returns
-    -------
-    logging.Logger
-        Configured logger instance.
+    Returns:
+        logging.Logger: Configured logger instance.
 
-    Notes
-    -----
-    - Logs are always written to the console.
-    - File logging is opt-in through ``log_path``; rotating files keep up to
-      5 MB per file with five backups.
-    - Prevents duplicate handlers from being added if called multiple times.
+    Note:
+        Logs are always written to the console. File logging is opt-in
+        through ``log_path``; rotating files keep up to 5 MB per file with
+        five backups. Calling this twice for the same ``name`` does not add
+        duplicate handlers.
 
-    Examples
-    --------
-    >>> from spark_batch_trainer.logging import configure_logger
-    >>> logger = configure_logger("training")
-    >>> logger.info("Training process started.")
-    2025-09-17 12:00:00 - training - INFO - Training process started.
+    Example:
+        >>> from spark_batch_trainer.logging import configure_logger
+        >>> logger = configure_logger("training")
+        >>> logger.info("Training process started.")
+        2025-09-17 12:00:00 - training - INFO - Training process started.
     """
     if len(path.split(name)) > 1:
         name = path.split(name)[-1]

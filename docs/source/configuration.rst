@@ -40,6 +40,13 @@ installed XGBoost, CatBoost, or LightGBM version.
      - ``0.0``
      - Minimum score change considered an improvement.
 
+``metric_mode="auto"`` recognizes common score metrics (``auc``, ``accuracy``,
+``precision``, ``recall``, ``ndcg@k``, ``map@k``, …) as maximized and defaults
+every other metric name to minimized. A custom metric that should be
+maximized but is not recognized logs a warning and is still treated as
+minimized — pass ``metric_mode="max"`` explicitly for those metrics instead
+of relying on ``"auto"``.
+
 ``learning_rate_config``
 ------------------------
 
@@ -53,5 +60,5 @@ Available for XGBoost and LightGBM.
        "min_lr": 1e-4,
    }
 
-Legacy names ``config_model``, ``config_training``, and
-``config_lr_scheduler`` remain accepted during the compatibility period.
+Use only ``model_config``, ``training_config``, and
+``learning_rate_config``. The legacy keyword names are no longer supported.

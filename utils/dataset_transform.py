@@ -7,7 +7,7 @@ from typing import Iterable, List, Optional, Tuple
 
 
 # -------------------------------------------------------------------
-# Helpers pour les features catégorielles
+# Categorical-feature helpers
 # -------------------------------------------------------------------
 def get_categorical_features(X: PandasDataFrame) -> Tuple[List[str], List[int]]:
     """
@@ -70,7 +70,7 @@ def align_categoricals(
 
 
 # -------------------------------------------------------------------
-# Dataclass de sortie
+# Output data structure
 # -------------------------------------------------------------------
 @dataclass
 class PreprocessedSplits:
@@ -85,7 +85,7 @@ class PreprocessedSplits:
 
 
 # -------------------------------------------------------------------
-# Fonction principale
+# Public preprocessing workflow
 # -------------------------------------------------------------------
 def preprocess_splits(
     train_df: pd.DataFrame,

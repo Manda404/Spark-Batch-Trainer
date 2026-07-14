@@ -1,401 +1,274 @@
-import numpy as np
-import seaborn as sns
-import plotly.express as px
+"""Reusable model-diagnostic visualizations for the example notebooks."""
+
+from typing import Sequence, Tuple, Union
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 from sklearn.metrics import confusion_matrix
-from sklearn.calibration import calibration_curve
 
-sns.set_style("whitegrid")  # style global plus clean
+from .metrics import compute_confusion
+
+# Configure global visualization style
+sns.set_theme(style="whitegrid")
 
 
-def plot_confusion_matrices(
-    y_true_valid,
-    y_pred_valid,
-    y_true_test,
-    y_pred_test,
-    class_names,
-    normalize: bool = False,
-):
+# ==============================================================================
+# 1. DATA DISTRIBUTION VISUALIZATIONS
+# ==============================================================================
+
+def plot_class_distribution(
+    dataset: pd.DataFrame, 
+    target_column: str, 
+    figsize: Tuple[int, int] = (10, 5)
+) -> pd.DataFrame:
     """
-    Affiche côte à côte les matrices de confusion (Validation vs Test).
+    Plots a bar chart of the target class distribution with distinct colors 
+    and dynamic labels, and returns the calculated distribution DataFrame.
 
-    Args:
-        y_true_valid (array-like): vraies étiquettes validation
-        y_pred_valid (array-like): prédictions validation
-        y_true_test (array-like): vraies étiquettes test
-        y_pred_test (array-like): prédictions test
-        class_names (list): noms des classes (ex: encoder.classes_)
-        normalize (bool): si True, affiche les fréquences (%) au lieu des comptes
+    Parameters
+    ----------
+    dataset : pandas.DataFrame
+        The input dataset containing the target column.
+    target_column : str
+        The name of the target column to analyze.
+    figsize : tuple of int, default (10, 5)
+        Width and height of the resulting figure.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the row counts and percentage share per class.
     """
-    labels = list(range(len(class_names)))
+    # 1. Distribution Calculations
+    class_distribution = (
+        dataset[target_column]
+        .value_counts()
+        .rename_axis("class_name")
+        .reset_index(name="rows")
+    )
+    class_distribution["share"] = class_distribution["rows"] / len(dataset)
 
-    # Matrices de confusion
-    cm_valid = confusion_matrix(y_true_valid, y_pred_valid, labels=labels)
-    cm_test = confusion_matrix(y_true_test, y_pred_test, labels=labels)
+    # 2. Visualization Creation
+    plt.figure(figsize=figsize)
+    
+    ax = sns.barplot(
+        data=class_distribution, 
+        x="class_name", 
+        y="rows", 
+        hue="class_name",
+        palette="viridis",
+        legend=False
+    )
+    
+    plt.title("Target-Class Distribution", fontweight="bold", fontsize=14, pad=15)
+    plt.xlabel("Class", fontsize=11, labelpad=10)
+    plt.ylabel("Rows", fontsize=11, labelpad=10)
+    plt.xticks(rotation=35, ha="right")
+    
+    max_height = class_distribution["rows"].max()
+    plt.ylim(0, max_height * 1.15)
 
-    if normalize:
-        cm_valid = cm_valid.astype("float") / cm_valid.sum(axis=1)[:, np.newaxis]
-        cm_test = cm_test.astype("float") / cm_test.sum(axis=1)[:, np.newaxis]
-        fmt = ".2f"
-    else:
-        fmt = "d"
+    # 3. Adding Text Labels (Count & Percentage)
+    for i, row in class_distribution.iterrows():
+        count = int(row["rows"])
+        share = row["share"] * 100
+        label = f"{count:,}\n({share:.2f}%)"
+        
+        ax.text(
+            x=i, 
+            y=count + (max_height * 0.01),
+            s=label, 
+            ha="center", 
+            va="bottom", 
+            fontsize=10, 
+            fontweight="bold"
+        )
 
-    # Figure
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    plt.tight_layout()
+    plt.show()
 
-    # --- Validation ---
-    sns.heatmap(
-        cm_valid,
-        annot=True,
-        fmt=fmt,
+    return class_distribution
+
+
+# ==============================================================================
+# 2. CORE CONFUSION MATRIX PLOTTER
+# ==============================================================================
+
+def plot_confusion(
+    ax: plt.Axes, 
+    y_true: Union[Sequence, pd.Series], 
+    y_pred: Union[Sequence, pd.Series], 
+    title: str, 
+    labels: Sequence, 
+    class_labels: Sequence[str], 
+    cmap: str
+) -> None:
+    """
+    Plots a single normalized confusion matrix with raw counts and percentages 
+    annotated inside each cell.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The specific subplot axis where the matrix heatmap will be drawn.
+    y_true : array-like
+        Ground truth (correct) target values.
+    y_pred : array-like
+        Estimated targets as returned by a classifier.
+    title : str
+        The title text to display on top of the subplot.
+    labels : list or array-like
+        List of labels to index the matrix. This controls the ordering of the classes.
+    class_labels : list of str
+        Human-readable class names to display on the x and y axes ticks.
+    cmap : str
+        The mapping from data values to color space (e.g., 'Blues', 'Oranges').
+    """
+    cm, cmn = compute_confusion(y_true, y_pred, labels)
+    im = ax.imshow(cmn, interpolation="nearest", cmap=cmap)
+
+    ax.set_title(title, fontsize=13, fontweight="bold", pad=10)
+    ax.set_xlabel("Predicted label", fontsize=11, labelpad=8)
+    ax.set_ylabel("True label", fontsize=11, labelpad=8)
+    ax.set_xticks(range(len(labels)))
+    ax.set_yticks(range(len(labels)))
+    ax.set_xticklabels(class_labels)
+    ax.set_yticklabels(class_labels)
+
+    for i in range(len(labels)):
+        for j in range(len(labels)):
+            ax.text(
+                j,
+                i,
+                f"{cm[i, j]}\n({cmn[i, j]:.1f}%)",
+                ha="center",
+                va="center",
+                fontsize=11,
+                color="black",
+            )
+
+    plt.colorbar(im, ax=ax, orientation="vertical", fraction=0.046, pad=0.04)
+
+
+# ==============================================================================
+# 3. HIGH-LEVEL PIPELINE VISUALIZATIONS
+# ==============================================================================
+
+def plot_binary_confusion_matrices(
+    results_valid_df: pd.DataFrame, 
+    results_test_df: pd.DataFrame, 
+    *, 
+    label_order: Sequence, 
+    class_labels: Sequence[str]
+) -> None:
+    """
+    Generates a side-by-side comparison of row-normalized confusion matrices 
+    for both validation and test datasets (Binary context).
+
+    Parameters
+    ----------
+    results_valid_df : pandas.DataFrame
+        DataFrame containing validation results. Must include 'ground_true' 
+        and 'prediction' columns.
+    results_test_df : pandas.DataFrame
+        DataFrame containing test results. Must include 'ground_true' 
+        and 'prediction' columns.
+    label_order : list or tuple
+        The exact numerical order/sequence of class IDs (e.g., (0, 1)).
+    class_labels : list or tuple of str
+        Custom text strings representing the class labels on the axes.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    plot_confusion(
+        axes[0],
+        results_valid_df["ground_true"],
+        results_valid_df["prediction"],
+        "Confusion Matrix — Validation (Row-Normalized)",
+        label_order,
+        class_labels,
         cmap="Blues",
-        xticklabels=class_names,
-        yticklabels=class_names,
-        cbar=False,
-        ax=axes[0],
-        linewidths=0.5,
-        linecolor="gray",
     )
-    axes[0].set_title("Validation", fontsize=14, fontweight="bold")
-    axes[0].set_xlabel("Prédictions")
-    axes[0].set_ylabel("Vraies classes")
-    plt.setp(axes[0].get_xticklabels(), rotation=45, ha="right")
-
-    # --- Test ---
-    sns.heatmap(
-        cm_test,
-        annot=True,
-        fmt=fmt,
-        cmap="Greens",
-        xticklabels=class_names,
-        yticklabels=class_names,
-        cbar=False,
-        ax=axes[1],
-        linewidths=0.5,
-        linecolor="gray",
-    )
-    axes[1].set_title("Test", fontsize=14, fontweight="bold")
-    axes[1].set_xlabel("Prédictions")
-    axes[1].set_ylabel("")
-    plt.setp(axes[1].get_xticklabels(), rotation=45, ha="right")
-
-    # --- Titre global ---
-    plt.suptitle(
-        " Matrices de confusion - Validation vs Test",
-        fontsize=18,
-        fontweight="bold",
-        y=1.05,
+    plot_confusion(
+        axes[1],
+        results_test_df["ground_true"],
+        results_test_df["prediction"],
+        "Confusion Matrix — Test (Row-Normalized)",
+        label_order,
+        class_labels,
+        cmap="Oranges",
     )
     plt.tight_layout()
     plt.show()
 
 
-# -------------------------------------------------------------------------------#
-# -------------------------------------------------------------------------------#
-def plot_max_proba_distribution(y_proba_valid, y_proba_test):
+def plot_multiclass_confusion_matrices(
+    y_true_valid: Union[Sequence, pd.Series],
+    y_pred_valid: Union[Sequence, pd.Series],
+    y_true_test: Union[Sequence, pd.Series],
+    y_pred_test: Union[Sequence, pd.Series],
+    mapping_df: pd.DataFrame,
+    normalize: bool = False,
+) -> None:
     """
-    Visualise la distribution des probabilités maximales (confiance du modèle).
+    Plots multiclass validation and test confusion matrices side-by-side.
+    Uses sorted class names mapped from a reference mapping DataFrame.
 
-    Objectif:
-        - Évaluer si le modèle est généralement confiant (probas proches de 1)
-          ou incertain (probas autour de 0.5).
-        - Comparer la répartition des confiances entre Validation et Test.
-
-    Args:
-        y_proba_valid (array): prédictions de probabilité pour la validation (n_samples x n_classes)
-        y_proba_test (array): prédictions de probabilité pour le test (n_samples x n_classes)
+    Parameters
+    ----------
+    y_true_valid : array-like
+        Ground truth target values for the validation set.
+    y_pred_valid : array-like
+        Predicted target values for the validation set.
+    y_true_test : array-like
+        Ground truth target values for the test set.
+    y_pred_test : array-like
+        Predicted target values for the test set.
+    mapping_df : pandas.DataFrame
+        Reference DataFrame containing 'class_id' and 'class_name' columns 
+        to ensure proper ordering and labeling.
+    normalize : bool, default False
+        Whether to compute row-normalized confusion matrices displayed in percentages.
     """
-    max_proba_valid = np.max(y_proba_valid, axis=1)
-    max_proba_test = np.max(y_proba_test, axis=1)
+    # 1. Extract Ordered Class Names From Mapping
+    sorted_mapping = mapping_df.sort_values("class_id")
+    class_names = sorted_mapping["class_name"].tolist()
+    labels = sorted_mapping["class_id"].tolist()
 
-    plt.figure(figsize=(8, 5))
-    sns.histplot(
-        max_proba_valid,
-        bins=20,
-        kde=True,
-        color="royalblue",
-        label="Validation",
-        stat="density",
-        alpha=0.6,
+    # 2. Compute Confusion Matrices
+    normalization = "true" if normalize else None
+    matrices = (
+        confusion_matrix(y_true_valid, y_pred_valid, labels=labels, normalize=normalization),
+        confusion_matrix(y_true_test, y_pred_test, labels=labels, normalize=normalization),
     )
-    sns.histplot(
-        max_proba_test,
-        bins=20,
-        kde=True,
-        color="darkorange",
-        label="Test",
-        stat="density",
-        alpha=0.6,
-    )
-    plt.title("Distribution des probabilités maximales")
-    plt.xlabel("Probabilité prédite max")
-    plt.ylabel("Densité")
-    plt.legend()
-    plt.show()
-
-
-def plot_classwise_confidence(y_proba_valid, y_proba_test, class_names):
-    """
-    Visualise la confiance du modèle par classe prédite (via un boxplot).
-
-    Objectif:
-        - Identifier les classes pour lesquelles le modèle est très confiant
-          (distributions concentrées vers 1.0).
-        - Détecter les classes plus ambiguës avec de fortes variabilités.
-        - Comparer Validation vs Test pour repérer un éventuel surapprentissage.
-
-    Args:
-        y_proba_valid (array): prédictions de probabilité pour la validation (n_samples x n_classes)
-        y_proba_test (array): prédictions de probabilité pour le test (n_samples x n_classes)
-        class_names (list): noms des classes dans l'ordre encodé
-    """
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    pred_max_proba_valid = np.max(y_proba_valid, axis=1)
-    pred_max_proba_test = np.max(y_proba_test, axis=1)
-
-    plt.figure(figsize=(14, 6))
-    sns.boxplot(
-        x=[class_names[i] for i in y_pred_valid],
-        y=pred_max_proba_valid,
-        color="royalblue",
-        width=0.4,
-        fliersize=2,
-    )
-    sns.boxplot(
-        x=[class_names[i] for i in y_pred_test],
-        y=pred_max_proba_test,
-        color="darkorange",
-        width=0.4,
-        fliersize=2,
-    )
-    plt.title("Confiance (probabilité max) par classe prédite")
-    plt.xticks(rotation=45)
-    plt.ylabel("Probabilité max")
-    plt.show()
-
-
-def plot_calibration_curve(y_true_valid, y_proba_valid, y_true_test, y_proba_test):
-    """
-    Trace la courbe de calibration (reliability diagram).
-
-    Objectif:
-        - Vérifier si les probabilités émises par le modèle sont bien calibrées :
-          ex: une proba de 0.8 correspond bien à ~80% de bonnes prédictions.
-        - Comparer la calibration entre Validation et Test.
-
-    Args:
-        y_true_valid (array): vraies classes pour la validation
-        y_proba_valid (array): prédictions de probabilité validation (n_samples x n_classes)
-        y_true_test (array): vraies classes pour le test
-        y_proba_test (array): prédictions de probabilité test (n_samples x n_classes)
-    """
-    max_proba_valid = np.max(y_proba_valid, axis=1)
-    max_proba_test = np.max(y_proba_test, axis=1)
-
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    plt.figure(figsize=(8, 6))
-    prob_true_val, prob_pred_val = calibration_curve(
-        (y_true_valid == y_pred_valid).astype(int), max_proba_valid, n_bins=10
-    )
-    prob_true_test, prob_pred_test = calibration_curve(
-        (y_true_test == y_pred_test).astype(int), max_proba_test, n_bins=10
-    )
-
-    plt.plot(
-        prob_pred_val, prob_true_val, marker="o", label="Validation", color="royalblue"
-    )
-    plt.plot(
-        prob_pred_test, prob_true_test, marker="s", label="Test", color="darkorange"
-    )
-    plt.plot([0, 1], [0, 1], linestyle="--", color="gray", label="Idéal")
-    plt.title("Diagramme de calibration (multiclass via proba max)")
-    plt.xlabel("Probabilité prédite")
-    plt.ylabel("Fréquence observée")
-    plt.legend()
-    plt.show()
-
-
-# -------------------------------------------------------------------------------#
-# -------------------------------------------------------------------------------#
-def plot_max_proba_distribution_px(y_proba_valid, y_proba_test):
-    """
-    Visualise la distribution des probabilités maximales avec Plotly Express.
-
-    Objectif:
-        - Comparer les distributions de confiance (Validation vs Test).
-        - Graph interactif (zoom, hover, légendes dynamiques).
-    """
-    max_proba_valid = np.max(y_proba_valid, axis=1)
-    max_proba_test = np.max(y_proba_test, axis=1)
-
-    data = [(p, "Validation") for p in max_proba_valid] + [
-        (p, "Test") for p in max_proba_test
-    ]
-    proba, dataset = zip(*data)
-
-    fig = px.histogram(
-        x=proba,
-        color=dataset,
-        nbins=20,
-        marginal="box",
-        opacity=0.7,
-        barmode="overlay",
-        labels={"x": "Probabilité prédite max", "color": "Dataset"},
-        title="Distribution des probabilités maximales",
-    )
-    fig.show()
-
-
-def plot_classwise_confidence_px(y_proba_valid, y_proba_test, class_names):
-    """
-    Visualise la confiance du modèle par classe prédite (violin plot interractif).
-
-    Objectif:
-        - Explorer la variabilité des probas par classe.
-        - Comparer Validation vs Test avec un graphe interactif.
-    """
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    pred_max_proba_valid = np.max(y_proba_valid, axis=1)
-    pred_max_proba_test = np.max(y_proba_test, axis=1)
-
-    data = [
-        (class_names[i], p, "Validation")
-        for i, p in zip(y_pred_valid, pred_max_proba_valid)
-    ] + [(class_names[i], p, "Test") for i, p in zip(y_pred_test, pred_max_proba_test)]
-    classes, probs, dataset = zip(*data)
-
-    fig = px.violin(
-        x=classes,
-        y=probs,
-        color=dataset,
-        box=True,
-        points="all",
-        labels={"x": "Classe prédite", "y": "Probabilité max", "color": "Dataset"},
-        title="Confiance (probabilité max) par classe prédite",
-    )
-    fig.update_xaxes(tickangle=45)
-    fig.show()
-
-
-def plot_calibration_curve_px(y_true_valid, y_proba_valid, y_true_test, y_proba_test):
-    """
-    Trace la courbe de calibration avec Plotly Express.
-
-    Objectif:
-        - Vérifier l’alignement entre proba prédite et fréquence observée.
-        - Comparer Validation vs Test avec une visualisation interactive.
-    """
-    max_proba_valid = np.max(y_proba_valid, axis=1)
-    max_proba_test = np.max(y_proba_test, axis=1)
-
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    prob_true_val, prob_pred_val = calibration_curve(
-        (y_true_valid == y_pred_valid).astype(int), max_proba_valid, n_bins=10
-    )
-    prob_true_test, prob_pred_test = calibration_curve(
-        (y_true_test == y_pred_test).astype(int), max_proba_test, n_bins=10
-    )
-
-    data = [(x, y, "Validation") for x, y in zip(prob_pred_val, prob_true_val)] + [
-        (x, y, "Test") for x, y in zip(prob_pred_test, prob_true_test)
-    ]
-    prob_pred, prob_true, dataset = zip(*data)
-
-    fig = px.line(
-        x=prob_pred,
-        y=prob_true,
-        color=dataset,
-        markers=True,
-        labels={"x": "Probabilité prédite", "y": "Fréquence observée"},
-        title="Diagramme de calibration (multiclass via proba max)",
-    )
-    fig.add_scatter(
-        x=[0, 1],
-        y=[0, 1],
-        mode="lines",
-        line=dict(dash="dash", color="gray"),
-        name="Idéal",
-    )
-    fig.show()
-
-
-# -------------------------------------------------------------------------------#
-# -------------------------------------------------------------------------------#
-def plot_box_confidence_overlay(y_proba_valid, y_proba_test, class_names):
-    """
-    Boxplot superposé des probabilités maximales par classe prédite.
-    (Validation et Test affichés l'un sur l'autre)
-    """
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    pred_max_proba_valid = np.max(y_proba_valid, axis=1)
-    pred_max_proba_test = np.max(y_proba_test, axis=1)
-
-    plt.figure(figsize=(14, 6))
-    sns.boxplot(
-        x=[class_names[i] for i in y_pred_valid],
-        y=pred_max_proba_valid,
-        color="royalblue",
-        width=0.4,
-        fliersize=2,
-    )
-    sns.boxplot(
-        x=[class_names[i] for i in y_pred_test],
-        y=pred_max_proba_test,
-        color="darkorange",
-        width=0.4,
-        fliersize=2,
-    )
-    plt.title(
-        "Confiance (probabilité max) par classe prédite (Overlay)",
-        fontsize=14,
-        fontweight="bold",
-    )
-    plt.xticks(rotation=45)
-    plt.ylabel("Probabilité max")
-    plt.show()
-
-
-def plot_box_confidence_split(y_proba_valid, y_proba_test, class_names):
-    """
-    Boxplot côte à côte (split) des probabilités maximales par classe prédite.
-    (Validation vs Test séparés par la couleur et la légende)
-    """
-    y_pred_valid = np.argmax(y_proba_valid, axis=1)
-    y_pred_test = np.argmax(y_proba_test, axis=1)
-
-    pred_max_proba_valid = np.max(y_proba_valid, axis=1)
-    pred_max_proba_test = np.max(y_proba_test, axis=1)
-
-    # Préparation des données pour seaborn
-    data = [
-        (class_names[i], p, "Validation")
-        for i, p in zip(y_pred_valid, pred_max_proba_valid)
-    ] + [(class_names[i], p, "Test") for i, p in zip(y_pred_test, pred_max_proba_test)]
-    classes, probs, dataset = zip(*data)
-
-    plt.figure(figsize=(14, 6))
-    sns.boxplot(
-        x=classes,
-        y=probs,
-        hue=dataset,
-        palette={"Validation": "royalblue", "Test": "darkorange"},
-    )
-    plt.title(
-        "Confiance (probabilité max) par classe prédite (Split)",
-        fontsize=14,
-        fontweight="bold",
-    )
-    plt.xticks(rotation=45)
-    plt.ylabel("Probabilité max")
-    plt.legend(title="Dataset")
+    
+    number_format = ".2%" if normalize else "g"
+    figure, axes = plt.subplots(1, 2, figsize=(16, 6))
+    
+    # 3. Plot Heatmaps
+    for axis, matrix, title, color in zip(
+        axes,
+        matrices,
+        ("Validation Set", "Test Set"),
+        ("Blues", "Greens"),
+    ):
+        sns.heatmap(
+            matrix,
+            annot=True,
+            fmt=number_format,
+            cmap=color,
+            xticklabels=class_names,
+            yticklabels=class_names,
+            cbar=False,
+            ax=axis,
+            annot_kws={"size": 10, "weight": "bold"}
+        )
+        axis.set_title(title, fontweight="bold", fontsize=12, pad=10)
+        axis.set_xlabel("Predicted Class", fontsize=10, labelpad=8)
+        axis.set_ylabel("True Class", fontsize=10, labelpad=8)
+        axis.tick_params(axis="x", rotation=45)
+        axis.tick_params(axis="y", rotation=0)
+        
+    figure.suptitle("Multiclass Validation and Test Confusion Matrices", fontweight="bold", fontsize=14, y=1.02)
+    figure.tight_layout()
     plt.show()
