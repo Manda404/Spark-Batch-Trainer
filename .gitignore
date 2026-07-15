@@ -53,3 +53,4 @@ htmlcov/
 Thumbs.db
 notebooks/olds
 docs/_notes
+.claude

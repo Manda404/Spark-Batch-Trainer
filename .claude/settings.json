@@ -6,7 +6,12 @@
       "Bash(.venv/bin/sphinx-build --version)",
       "Bash(poetry install *)",
       "Bash(poetry config *)",
-      "Bash(pyenv versions *)"
+      "Bash(pyenv versions *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)"
     ]
   }
 }
