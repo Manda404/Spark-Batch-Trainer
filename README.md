@@ -17,7 +17,7 @@ driver memory.**
 [Getting started](#requirements-and-installation) ·
 [Backend guides](#xgboost-example) ·
 [Architecture](#architecture) ·
-[Documentation](#documentation)
+[Documentation](https://manda404.github.io/SparkBatchTrainer/)
 
 </div>
 
@@ -427,6 +427,9 @@ The test suite separates backend-independent unit tests from Spark integration
 tests that exercise XGBoost, CatBoost, and LightGBM.
 
 ## Documentation
+
+The complete documentation is available on
+[GitHub Pages](https://manda404.github.io/SparkBatchTrainer/).
 
 - [Installation guide](docs/source/usage/installation.rst)
 - [Practical training guide](docs/source/usage/tutorials.rst)
