@@ -9,10 +9,9 @@ Package map
    spark_batch_trainer/
    ├── __init__.py         small public API with lazy backend imports
    ├── factory.py          create_trainer() backend selection
-   ├── logging.py          console and optional file logging
-   ├── backends/           XGBoost, CatBoost, and LightGBM adapters
-   ├── data/               Spark batching and pandas preparation
-   └── training/           configuration, lifecycle, metrics, and history
+   ├── backends/           small XGBoost, CatBoost, and LightGBM adapters
+   ├── data/               internal Spark and pandas preparation functions
+   └── training/           shared lifecycle, configuration, and history
 
 Dependency direction
 --------------------
@@ -20,8 +19,10 @@ Dependency direction
 .. code-block:: text
 
    package facade -> factory -> selected backend -> model SDK
-                                  |-> data
-                                  |-> training
+                                  |
+                                  +-> BatchTrainer -> data functions
+                                                  -> run state
+                                                  -> metric functions
 
 Backends are loaded lazily. Importing training or data components
 does not import XGBoost, CatBoost, or LightGBM. Matplotlib is imported only when
@@ -36,11 +37,14 @@ stopping behavior must not be copied into the backend. Avoid compatibility
 folders and one-file packages: add a module only when it owns a clear,
 independent responsibility.
 
-.. note::
+Shared workflow
+---------------
 
-   The three existing backends currently duplicate a handful of small,
-   backend-agnostic methods (input validation, runtime-state initialization,
-   batch preparation) almost verbatim rather than sharing them through
-   :class:`~spark_batch_trainer.training.base.BatchTrainer`. This is known
-   debt, not the intended pattern — a future refactor should move that logic
-   into the shared base class rather than a fourth backend repeating it again.
+The :class:`~spark_batch_trainer.training.base.BatchTrainer` base class owns
+input validation, pandas preparation, learning-rate scheduling, metric
+recording, global early stopping, and final model selection. Small internal
+dataclasses make the values passed through that lifecycle explicit.
+
+Each backend therefore owns only the SDK boundary: constructing its native
+model, supplying the correct continuation object, and calling ``fit``. This
+keeps backend differences visible without copying the orchestration logic.

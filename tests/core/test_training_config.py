@@ -1,6 +1,7 @@
 import pytest
 
 from spark_batch_trainer.training import TrainingConfig
+from spark_batch_trainer.training.state import TrainingRunState
 
 
 def test_training_config_parses_legacy_mapping() -> None:
@@ -27,10 +28,13 @@ def test_training_config_rejects_invalid_values(values: dict, message: str) -> N
         TrainingConfig.from_mapping(values)
 
 
-def test_apply_to_preserves_backend_specific_options() -> None:
-    runtime = {"eval_metric": "auc"}
+def test_run_state_keeps_validated_config_and_backend_metric() -> None:
+    state = TrainingRunState.from_mapping(
+        {"num_batches": 3, "eval_metric": "auc"},
+        default_eval_metric="logloss",
+    )
 
-    TrainingConfig(num_batches=3).apply_to(runtime)
-
-    assert runtime["eval_metric"] == "auc"
-    assert runtime["num_batches"] == 3
+    assert state.config.num_batches == 3
+    assert state.eval_metric == "auc"
+    assert state.best_model is None
+    assert state.best_valid_score is None

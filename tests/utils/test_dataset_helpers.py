@@ -1,24 +1,14 @@
 """Tests for reusable notebook dataset helpers."""
 
-from pathlib import Path
-
 import pandas as pd
 import pytest
 
-from utils.dataset_loader import find_project_root, load_dataset
+from utils.dataset_loader import load_dataset
 from utils.dataset_preprocessor import stratified_split_dataset
 
 
-def test_find_project_root_from_nested_directory() -> None:
-    root = find_project_root(Path(__file__).parent)
-
-    assert (root / "pyproject.toml").is_file()
-
-
 def test_load_dataset_accepts_project_relative_path() -> None:
-    dataframe = load_dataset(
-        "data/multiclass_dataset/ObesityDataset.csv"
-    )
+    dataframe = load_dataset("data/multiclass_dataset/ObesityDataset.csv")
 
     assert not dataframe.empty
     assert "NObeyesdad" in dataframe.columns
