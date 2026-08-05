@@ -9,6 +9,4 @@ aliases are intentionally not part of the public API.
 
    facade
    backends
-   data
    training
-   logging

@@ -20,8 +20,8 @@ Development workflow
 
    .. code-block:: bash
 
-      poetry run black --check src tests
-      poetry run isort --check-only src tests
+      poetry run black --check src utils tests
+      poetry run ruff check src utils tests
       poetry run mypy src
       poetry run pytest
 

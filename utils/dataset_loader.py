@@ -9,7 +9,7 @@ from pandas import read_csv
 PathLike = Union[str, Path]
 
 
-def find_project_root(start: PathLike = ".") -> Path:
+def _find_project_root(start: PathLike = ".") -> Path:
     """Return the nearest parent directory containing ``pyproject.toml``.
 
     Parameters
@@ -27,16 +27,14 @@ def find_project_root(start: PathLike = ".") -> Path:
     for candidate in (current, *current.parents):
         if (candidate / "pyproject.toml").is_file():
             return candidate
-    raise FileNotFoundError(
-        f"Could not locate pyproject.toml from {resolved}."
-    )
+    raise FileNotFoundError(f"Could not locate pyproject.toml from {resolved}.")
 
 
 def get_dataset_path(data_dir: PathLike = "data") -> Path:
     """Return the only CSV file contained in a project-relative directory."""
     directory = Path(data_dir)
     if not directory.is_absolute():
-        directory = find_project_root() / directory
+        directory = _find_project_root() / directory
 
     csv_files = sorted(directory.glob("*.csv"))
     if not csv_files:
@@ -52,16 +50,7 @@ def load_dataset(dataset_path: PathLike) -> PandasDataFrame:
     """Load a CSV dataset from an absolute or project-relative path."""
     path = Path(dataset_path).expanduser()
     if not path.is_absolute():
-        path = find_project_root() / path
+        path = _find_project_root() / path
     if not path.is_file():
         raise FileNotFoundError(f"Dataset not found: {path}")
     return read_csv(path)
-
-
-def get_data_split(
-    split: str = "train", base_dir: PathLike = "data/binary_dataset"
-) -> PandasDataFrame:
-    """Load a named CSV split such as ``train``, ``validation``, or ``test``."""
-    if not split or Path(split).name != split:
-        raise ValueError("split must be a simple file name without directories")
-    return load_dataset(Path(base_dir) / f"{split}.csv")

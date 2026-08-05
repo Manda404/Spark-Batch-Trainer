@@ -27,9 +27,6 @@ installed XGBoost, CatBoost, or LightGBM version.
    * - ``use_sample_weight``
      - ``False``
      - Apply balanced sample weights.
-   * - ``verbose``
-     - ``True``
-     - Forward verbose output to the backend where supported.
    * - ``show_learning_curve``
      - ``False``
      - Display blocking Matplotlib figures after training.

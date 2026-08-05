@@ -178,7 +178,6 @@ training_config = {
     "min_delta": 1e-4,
     "use_sample_weight": False,
     "show_learning_curve": False,
-    "verbose": True,
 }
 ```
 
@@ -190,7 +189,6 @@ training_config = {
 | `min_delta` | Minimum change required to count as improvement | `0.0` |
 | `use_sample_weight` | Enable balanced sample weights | `False` |
 | `show_learning_curve` | Render the final learning curve | `False` |
-| `verbose` | Enable progress logging | `True` |
 
 Use `metric_mode="min"` for losses such as log loss and
 `metric_mode="max"` for scores such as AUC. `auto` recognizes common metric
@@ -380,7 +378,6 @@ from spark_batch_trainer import (
 src/spark_batch_trainer/
 ├── __init__.py         # public API and lazy backend imports
 ├── factory.py          # backend selection
-├── logging.py          # library logging configuration
 ├── backends/           # model-specific adapters
 ├── data/               # Spark batching and pandas preparation
 └── training/           # lifecycle, configuration, metrics, and history
@@ -420,8 +417,8 @@ fit.
 
 ```bash
 poetry run pytest
-poetry run black --check src tests
-poetry run isort --check-only src tests
+poetry run black --check src utils tests
+poetry run ruff check src utils tests
 poetry run mypy src
 poetry run sphinx-build -W --keep-going -b html docs/source docs/build/html
 ```

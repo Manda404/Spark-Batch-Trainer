@@ -1,8 +1,8 @@
 """Sphinx configuration for Spark Batch Trainer."""
 
+import sys
 from datetime import date
 from pathlib import Path
-import sys
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
@@ -27,7 +27,9 @@ source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 html_title = f"{project} {release}"
+html_show_sourcelink = False
 
 autodoc_typehints = "description"
 autoclass_content = "class"

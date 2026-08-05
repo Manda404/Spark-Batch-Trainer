@@ -2,8 +2,10 @@
 
 from typing import Any
 
+from spark_batch_trainer.training.base import BatchTrainer
 
-def create_trainer(backend: str) -> Any:
+
+def create_trainer(backend: str) -> BatchTrainer[Any]:
     """Create a trainer by a friendly backend name.
 
     Args:
