@@ -14,13 +14,17 @@ Unreleased
   NumPy style to Google style.
 * Fixed an ``UnboundLocalError`` that could mask the real exception when a
   backend failed before its first batch was collected.
-* Sample weights are now computed against the global target label space
-  learned once from train and validation data, instead of per batch — this
-  makes weight scale consistent across batches and enables normalization.
+* Sample weights are computed and normalized independently for each collected
+  training batch and once for the complete validation dataset.
 * ``metric_mode="auto"`` now logs a warning instead of silently defaulting
   to ``"min"`` when it cannot recognize a custom metric name.
 * Unified categorical-feature detection across backends; CatBoost and
   LightGBM no longer redetect features independently from the validation set.
+* Added strict configuration, schema, label, batch-size, and finite-metric
+  validation.
+* Added ``prepare_features()`` so bounded inference reuses the fitted feature
+  order and categorical schema.
+* Moved the duplicated collection and evaluation loop into ``BatchTrainer``.
 
 1.0.0
 -----

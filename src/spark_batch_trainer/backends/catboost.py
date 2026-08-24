@@ -7,6 +7,7 @@ from pyspark.sql import DataFrame as SparkDataFrame
 
 from spark_batch_trainer.data.spark_batching import iter_pandas_batches
 from spark_batch_trainer.training.base import BatchTrainer
+from spark_batch_trainer.training.config import LearningRateConfig, TrainingConfig
 from spark_batch_trainer.training.state import PreparedDataset, TrainingRunState
 
 
@@ -15,26 +16,29 @@ class CatBoostTrainer(BatchTrainer[CatBoostClassifier]):
 
     def fit(
         self,
-        train_dataframe: Optional[SparkDataFrame],
-        valid_dataframe: Optional[SparkDataFrame],
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
         target_column: str,
-        **kwargs: Any,
+        *,
+        model_config: Optional[Mapping[str, Any]] = None,
+        training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
+        learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
         """Train the model and retain the best validation checkpoint."""
-        model_config = dict(kwargs.get("model_config") or {})
-        model_config.setdefault("allow_writing_files", False)
-        training_values: Optional[Mapping[str, Any]] = kwargs.get("training_config")
+        resolved_model_config = dict(model_config or {})
+        resolved_model_config.setdefault("allow_writing_files", False)
         state = TrainingRunState[CatBoostClassifier].from_mapping(
-            training_values,
+            training_config,
             default_eval_metric=str(
-                model_config.get(
-                    "eval_metric", model_config.get("loss_function", "Logloss")
+                resolved_model_config.get(
+                    "eval_metric",
+                    resolved_model_config.get("loss_function", "Logloss"),
                 )
             ),
         )
 
         self._reset_run_history()
-        if kwargs.get("learning_rate_config") is not None:
+        if learning_rate_config is not None:
             self._logger.warning(
                 "CatBoost does not support the shared learning-rate scheduler; "
                 "learning_rate_config is ignored"
@@ -57,36 +61,22 @@ class CatBoostTrainer(BatchTrainer[CatBoostClassifier]):
             state.config.num_batches,
             self._logger,
         )
-        self._logger.info(
-            "Starting CatBoost training with %d batches", state.config.num_batches
+
+        def fit_batch(
+            _batch_number: int, batch_data: PreparedDataset
+        ) -> CatBoostClassifier:
+            return self._fit_batch(
+                state, batch_data, validation_data, resolved_model_config
+            )
+
+        self._model = self._run_batches(
+            batches,
+            state,
+            target_column,
+            framework="catboost",
+            model_name="CatBoost",
+            fit_batch=fit_batch,
         )
-
-        batch_number = 0
-        try:
-            for batch_number, pandas_batch in enumerate(batches, start=1):
-                self._logger.info(
-                    "Processing batch %d/%d",
-                    batch_number,
-                    state.config.num_batches,
-                )
-                batch_data = self._prepare_batch(
-                    pandas_batch,
-                    target_column,
-                    use_sample_weight=state.config.use_sample_weight,
-                )
-                model = self._fit_batch(
-                    state, batch_data, validation_data, model_config
-                )
-                if self._evaluate_model(
-                    model, state, batch_number, framework="catboost"
-                ):
-                    self._logger.info("Global early stopping triggered")
-                    break
-        except Exception:
-            self._logger.exception("CatBoost training failed at batch %d", batch_number)
-            raise
-
-        self._model = self._finalize_run(state, model_name="CatBoost")
 
     def _fit_batch(
         self,

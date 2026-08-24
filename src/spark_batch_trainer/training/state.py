@@ -43,13 +43,18 @@ class TrainingRunState(Generic[ModelT]):
     @classmethod
     def from_mapping(
         cls,
-        values: Optional[Mapping[str, Any]],
+        values: Optional[Mapping[str, Any] | TrainingConfig],
         *,
         default_eval_metric: str,
     ) -> "TrainingRunState[ModelT]":
         """Build validated run state while retaining a backend metric option."""
-        source = values or {}
+        if isinstance(values, TrainingConfig):
+            return cls(config=values, eval_metric=default_eval_metric)
+        source = dict(values or {})
+        eval_metric = source.pop("eval_metric", default_eval_metric)
+        if not isinstance(eval_metric, str):
+            raise TypeError("eval_metric must be a string")
         return cls(
             config=TrainingConfig.from_mapping(source),
-            eval_metric=str(source.get("eval_metric", default_eval_metric)),
+            eval_metric=eval_metric,
         )

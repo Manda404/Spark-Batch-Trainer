@@ -32,7 +32,7 @@ Run tests
 
 .. code-block:: bash
 
-   poetry run pytest -q tests/core tests/init
+   poetry run pytest -q tests/core tests/utils
    poetry run pytest -q tests/fit
 
 The integration suite starts a local Spark JVM and trains every backend in

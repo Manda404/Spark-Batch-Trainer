@@ -1,6 +1,6 @@
 """Backend-independent components of the batch-training workflow."""
 
-from .config import TrainingConfig
+from .config import LearningRateConfig, TrainingConfig
 from .history import TrainingHistory
 
-__all__ = ["TrainingConfig", "TrainingHistory"]
+__all__ = ["LearningRateConfig", "TrainingConfig", "TrainingHistory"]

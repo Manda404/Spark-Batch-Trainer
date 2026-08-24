@@ -38,7 +38,10 @@ def iter_pandas_batches(
                 .toPandas(),
             )
             if batch.empty:
-                logger.warning("Batch %d is empty", batch_id + 1)
+                raise RuntimeError(
+                    f"batch {batch_id + 1} is empty; reduce num_batches or "
+                    "inspect target stratification"
+                )
             yield batch
     finally:
         assigned.unpersist(blocking=False)

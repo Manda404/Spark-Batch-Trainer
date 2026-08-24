@@ -22,7 +22,7 @@ Development workflow
 
       poetry run black --check src utils tests
       poetry run ruff check src utils tests
-      poetry run mypy src
+      poetry run mypy src utils
       poetry run pytest
 
 4. Build the documentation in strict mode:

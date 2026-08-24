@@ -189,6 +189,7 @@ training_config = {
 | `min_delta` | Minimum change required to count as improvement | `0.0` |
 | `use_sample_weight` | Enable balanced sample weights | `False` |
 | `show_learning_curve` | Render the final learning curve | `False` |
+| `monitor_metric` | Metric used for model selection when a backend reports several metrics | `None` |
 
 Use `metric_mode="min"` for losses such as log loss and
 `metric_mode="max"` for scores such as AUC. `auto` recognizes common metric
@@ -321,10 +322,7 @@ in-memory features rather than a Spark DataFrame.
 
 ```python
 prediction_sample = test_df.limit(100).toPandas()
-features = prediction_sample.drop(columns=[target_column])
-
-categorical_columns = features.select_dtypes(include=["object"]).columns
-features[categorical_columns] = features[categorical_columns].astype("category")
+features = xgboost_trainer.prepare_features(prediction_sample)
 
 predictions = xgboost_model.predict(features)
 ```
@@ -419,7 +417,8 @@ fit.
 poetry run pytest
 poetry run black --check src utils tests
 poetry run ruff check src utils tests
-poetry run mypy src
+poetry run mypy src utils
+poetry run pytest
 poetry run sphinx-build -W --keep-going -b html docs/source docs/build/html
 ```
 

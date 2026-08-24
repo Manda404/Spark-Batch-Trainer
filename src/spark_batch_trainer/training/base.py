@@ -1,7 +1,9 @@
 """Shared, backend-neutral batch-training workflow."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterable
 from logging import getLogger
+from math import isfinite
 from typing import Any, Generic, Literal, Mapping, Optional, TypeVar, cast
 
 from pandas import DataFrame as PandasDataFrame
@@ -14,6 +16,7 @@ from spark_batch_trainer.data.pandas_preparation import (
     learn_category_schema,
 )
 from spark_batch_trainer.data.sample_weighting import calculate_sample_weights
+from spark_batch_trainer.training.config import LearningRateConfig, TrainingConfig
 from spark_batch_trainer.training.early_stopping import observe_early_stopping
 from spark_batch_trainer.training.history import TrainingHistory
 from spark_batch_trainer.training.learning_curves import (
@@ -36,15 +39,18 @@ class BatchTrainer(ABC, Generic[ModelT]):
         self._global_iterations: list[int] = []
         self._lr_schedulers: list[float] = []
         self._category_schema: CategorySchema = {}
+        self._feature_columns: tuple[str, ...] = ()
         self._model: Optional[ModelT] = None
 
     def _reset_run_history(self) -> None:
-        """Clear diagnostics and learned categories before a new fit run."""
+        """Clear all public artifacts before a new fit run."""
         self._global_train_loss.clear()
         self._global_valid_loss.clear()
         self._global_iterations.clear()
         self._lr_schedulers.clear()
         self._category_schema.clear()
+        self._feature_columns = ()
+        self._model = None
 
     def get_training_history(self) -> TrainingHistory:
         """Return an immutable snapshot of metrics from the latest fit run."""
@@ -59,19 +65,50 @@ class BatchTrainer(ABC, Generic[ModelT]):
         """Return the best model from the latest completed fit run."""
         return self._model
 
+    def prepare_features(self, dataframe: PandasDataFrame) -> PandasDataFrame:
+        """Apply the fitted feature order, categorical schema, and downcasting.
+
+        Args:
+            dataframe: In-memory features to prepare for bounded inference. A
+                target column may be present and is ignored.
+
+        Returns:
+            A prepared copy with exactly the feature columns seen during fit.
+
+        Raises:
+            RuntimeError: If the trainer has not completed a fit run.
+            ValueError: If a required feature is missing.
+        """
+        if self._model is None or not self._feature_columns:
+            raise RuntimeError("the trainer must be fitted before preparing features")
+        missing = [
+            name for name in self._feature_columns if name not in dataframe.columns
+        ]
+        if missing:
+            raise ValueError(f"missing inference feature columns: {missing}")
+        features = dataframe.loc[:, self._feature_columns].copy()
+        convert_categories(features, self._category_schema)
+        return downcast_numeric_features(features)
+
     @abstractmethod
     def fit(
         self,
-        train_dataframe: Optional[SparkDataFrame],
-        valid_dataframe: Optional[SparkDataFrame],
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
         target_column: str,
-        **kwargs: Any,
+        *,
+        model_config: Optional[Mapping[str, Any]] = None,
+        training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
+        learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
         """Train a model on Spark DataFrames in batches."""
         raise NotImplementedError
 
     def _extract_metric_history(
-        self, model: Any, framework: FrameworkName
+        self,
+        model: Any,
+        framework: FrameworkName,
+        monitor_metric: Optional[str] = None,
     ) -> tuple[list[float], list[float], str]:
         """Extract train and validation history from a backend model."""
         if framework == "lightgbm":
@@ -85,7 +122,22 @@ class BatchTrainer(ABC, Generic[ModelT]):
             train_key, valid_key = "learn", "validation"
 
         try:
-            metric_name = next(iter(results[train_key]))
+            train_metrics = results[train_key]
+            valid_metrics = results[valid_key]
+            common_metrics = [name for name in train_metrics if name in valid_metrics]
+            if monitor_metric is None:
+                if len(common_metrics) != 1:
+                    raise ValueError(
+                        f"{framework} returned multiple metrics {common_metrics}; "
+                        "set training_config['monitor_metric'] explicitly"
+                    )
+                metric_name = common_metrics[0]
+            else:
+                metric_name = next(
+                    name
+                    for name in common_metrics
+                    if name.casefold() == monitor_metric.casefold()
+                )
             train_scores = results[train_key][metric_name]
             valid_scores = results[valid_key][metric_name]
         except (KeyError, StopIteration) as error:
@@ -94,16 +146,16 @@ class BatchTrainer(ABC, Generic[ModelT]):
             ) from error
         if not train_scores or not valid_scores:
             raise ValueError(f"Empty evaluation history returned by {framework}")
-        return train_scores, valid_scores, metric_name
+        return list(train_scores), list(valid_scores), metric_name
 
     def _validate_inputs(
         self,
-        train_dataframe: Optional[SparkDataFrame],
-        valid_dataframe: Optional[SparkDataFrame],
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
         target_column: str,
         num_batches: int,
     ) -> tuple[SparkDataFrame, SparkDataFrame]:
-        """Validate the input contract and narrow optional DataFrames."""
+        """Validate schema, labels, and batch viability before training."""
         if train_dataframe is None or valid_dataframe is None:
             raise ValueError("train dataframe and validation dataframe cannot be None")
         if num_batches < 1:
@@ -112,11 +164,72 @@ class BatchTrainer(ABC, Generic[ModelT]):
             raise ValueError(f"train dataframe must contain '{target_column}' column")
         if target_column not in valid_dataframe.columns:
             raise ValueError(f"valid dataframe must contain '{target_column}' column")
+
+        train_features = [
+            name for name in train_dataframe.columns if name != target_column
+        ]
+        valid_features = [
+            name for name in valid_dataframe.columns if name != target_column
+        ]
+        if not train_features:
+            raise ValueError("at least one feature column is required")
+        if train_features != valid_features:
+            raise ValueError(
+                "train and validation feature columns must match in the same order"
+            )
+
+        train_types = {
+            field.name: field.dataType.simpleString()
+            for field in train_dataframe.schema.fields
+        }
+        valid_types = {
+            field.name: field.dataType.simpleString()
+            for field in valid_dataframe.schema.fields
+        }
+        mismatched_types = [
+            name
+            for name in train_dataframe.columns
+            if train_types[name] != valid_types[name]
+        ]
+        if mismatched_types:
+            raise ValueError(
+                f"train and validation column types differ: {mismatched_types}"
+            )
+
+        train_label_counts = {
+            row[target_column]: row["count"]
+            for row in train_dataframe.groupBy(target_column).count().collect()
+        }
+        valid_labels = {
+            row[target_column]
+            for row in valid_dataframe.select(target_column).distinct().collect()
+        }
+        if not train_label_counts:
+            raise ValueError("train dataframe must not be empty")
+        if not valid_labels:
+            raise ValueError("validation dataframe must not be empty")
+        if None in train_label_counts or None in valid_labels:
+            raise ValueError("target values must not contain nulls")
+        if len(train_label_counts) < 2:
+            raise ValueError("training target must contain at least two classes")
+        unknown_valid_labels = valid_labels - set(train_label_counts)
+        if unknown_valid_labels:
+            raise ValueError(
+                f"validation contains labels absent from training: "
+                f"{sorted(unknown_valid_labels, key=str)}"
+            )
+        smallest_class = min(train_label_counts.values())
+        if smallest_class < num_batches:
+            raise ValueError(
+                f"num_batches={num_batches} exceeds the smallest training class "
+                f"size ({smallest_class})"
+            )
+        self._feature_columns = tuple(train_features)
         return train_dataframe, valid_dataframe
 
     def _resolve_learning_rate(
         self,
-        config: Optional[Mapping[str, Any]],
+        config: Optional[Mapping[str, Any] | LearningRateConfig],
         batch_id: int,
         default_lr: float = 0.1,
     ) -> float:
@@ -124,19 +237,14 @@ class BatchTrainer(ABC, Generic[ModelT]):
         if config is None:
             return default_lr
 
-        initial = float(config.get("initial_lr", 0.1))
-        decay = float(config.get("decay_rate", 0.95))
-        minimum = float(config.get("min_lr", 1e-4))
-        if initial <= 0:
-            raise ValueError("initial_lr must be > 0")
-        if not 0 < decay <= 1:
-            raise ValueError("decay_rate must be in the interval (0, 1]")
+        resolved = LearningRateConfig.from_mapping(config)
         if batch_id < 1:
             raise ValueError("batch_id must be >= 1")
-        if minimum <= 0:
-            raise ValueError("min_lr must be > 0")
 
-        learning_rate = max(minimum, initial * decay ** (batch_id - 1))
+        learning_rate = max(
+            resolved.min_lr,
+            resolved.initial_lr * resolved.decay_rate ** (batch_id - 1),
+        )
         self._lr_schedulers.append(learning_rate)
         return learning_rate
 
@@ -199,10 +307,15 @@ class BatchTrainer(ABC, Generic[ModelT]):
     ) -> bool:
         """Record metrics and update best-model and early-stopping state."""
         train_scores, valid_scores, metric_name = self._extract_metric_history(
-            model, framework
+            model, framework, state.config.monitor_metric
         )
         train_score = train_scores[-1]
         valid_score = valid_scores[-1]
+        if not isfinite(train_score) or not isfinite(valid_score):
+            raise ValueError(
+                f"Non-finite {metric_name} returned at batch {batch_number}: "
+                f"train={train_score}, validation={valid_score}"
+            )
         self._global_train_loss.append(train_scores)
         self._global_valid_loss.append(valid_scores)
         self._global_iterations.append(batch_number)
@@ -240,6 +353,47 @@ class BatchTrainer(ABC, Generic[ModelT]):
             )
         return decision.should_stop
 
+    def _run_batches(
+        self,
+        batches: Iterable[PandasDataFrame],
+        state: TrainingRunState[ModelT],
+        target_column: str,
+        *,
+        framework: FrameworkName,
+        model_name: str,
+        fit_batch: Callable[[int, PreparedDataset], ModelT],
+    ) -> ModelT:
+        """Run the backend-neutral preparation, fitting, and evaluation loop."""
+        self._logger.info(
+            "Starting %s training with %d batches",
+            model_name,
+            state.config.num_batches,
+        )
+        batch_number = 0
+        try:
+            for batch_number, pandas_batch in enumerate(batches, start=1):
+                self._logger.info(
+                    "Processing batch %d/%d",
+                    batch_number,
+                    state.config.num_batches,
+                )
+                batch_data = self._prepare_batch(
+                    pandas_batch,
+                    target_column,
+                    use_sample_weight=state.config.use_sample_weight,
+                )
+                model = fit_batch(batch_number, batch_data)
+                if self._evaluate_model(model, state, batch_number, framework):
+                    self._logger.info("Global early stopping triggered")
+                    break
+        except Exception:
+            self._logger.exception(
+                "%s training failed at batch %d", model_name, batch_number
+            )
+            self._reset_run_history()
+            raise
+        return self._finalize_run(state, model_name=model_name)
+
     def _finalize_run(
         self,
         state: TrainingRunState[ModelT],
@@ -247,7 +401,9 @@ class BatchTrainer(ABC, Generic[ModelT]):
         model_name: str,
     ) -> ModelT:
         """Select the best model and render optional diagnostics."""
-        final_model = state.best_model or state.previous_model
+        final_model = (
+            state.best_model if state.best_model is not None else state.previous_model
+        )
         if final_model is None:
             raise RuntimeError("No model was successfully trained")
 

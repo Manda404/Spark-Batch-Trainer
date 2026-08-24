@@ -36,6 +36,9 @@ installed XGBoost, CatBoost, or LightGBM version.
    * - ``min_delta``
      - ``0.0``
      - Minimum score change considered an improvement.
+   * - ``monitor_metric``
+     - ``None``
+     - Metric selected when a backend reports more than one metric.
 
 ``metric_mode="auto"`` recognizes common score metrics (``auc``, ``accuracy``,
 ``precision``, ``recall``, ``ndcg@k``, ``map@k``, …) as maximized and defaults
@@ -43,6 +46,10 @@ every other metric name to minimized. A custom metric that should be
 maximized but is not recognized logs a warning and is still treated as
 minimized — pass ``metric_mode="max"`` explicitly for those metrics instead
 of relying on ``"auto"``.
+
+Configuration keys and value types are validated strictly. Unknown keys are
+rejected instead of being silently ignored. ``TrainingConfig`` and
+``LearningRateConfig`` instances may be passed directly in place of mappings.
 
 ``learning_rate_config``
 ------------------------

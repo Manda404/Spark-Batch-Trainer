@@ -66,10 +66,9 @@ def preprocess_splits(
         if dataframe is not None and target_column not in dataframe.columns:
             raise KeyError(f"[{name}] Missing target column '{target_column}'.")
 
-    train, valid, test = (
-        dataframe.copy() if dataframe is not None and copy else dataframe
-        for dataframe in datasets
-    )
+    train = train_df.copy() if copy else train_df
+    valid = valid_df.copy() if valid_df is not None and copy else valid_df
+    test = test_df.copy() if test_df is not None and copy else test_df
 
     encoder = None
     if auto_encode_target:

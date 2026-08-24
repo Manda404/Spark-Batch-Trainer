@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from logging import Logger
+from math import isfinite
 from typing import Optional
 
 from .metrics import is_improvement
@@ -32,6 +33,10 @@ def observe_early_stopping(
     """Return the early-stopping state after observing one batch score."""
     if max_patience < 1:
         raise ValueError("max_patience must be >= 1")
+    if not isfinite(current_score):
+        raise ValueError("current_score must be finite")
+    if best_score is not None and not isfinite(best_score):
+        raise ValueError("best_score must be finite")
 
     improved = best_score is None or is_improvement(
         current_score,
