@@ -4,6 +4,8 @@ Changelog
 Unreleased
 ----------
 
+* Updated the supported runtime, formatting target, type checking, continuous
+  integration, and documentation to Python 3.14.
 * Added a backend factory and a stable, English configuration vocabulary.
 * Separated backend, configuration, data preparation, evaluation,
   visualization, and observability responsibilities.

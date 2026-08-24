@@ -51,4 +51,4 @@ def mock_data_diabetes(spark):
 @pytest.fixture
 def config_training():
     """Provide the small configuration shared by integration tests."""
-    return {"num_batches": 2, "max_patience": 1, "show_learning_curve": False}
+    return {"num_batches": 2, "show_learning_curve": False}

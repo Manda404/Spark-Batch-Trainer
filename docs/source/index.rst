@@ -15,7 +15,7 @@ Start here
 
 * :doc:`usage/installation` — install the package and verify dependencies.
 * :doc:`usage/quickstart` — run the smallest valid training example.
-* :doc:`concepts` — understand continuation training, memory, and stopping.
+* :doc:`concepts` — understand continuation training, memory, and monitoring.
 * :doc:`architecture` — learn how the packages fit together.
 * :doc:`api/index` — browse the supported public API.
 

@@ -87,6 +87,7 @@ def test_backend_trains_binary_classifier(
 
     model = trainer.get_trained_model()
     assert model is not None
+    assert trainer.get_training_history().batch_numbers == (1, 2)
     assert_predicts_sample(model, valid, target)
     inference_sample = valid.limit(5).toPandas()
     prepared_features = trainer.prepare_features(inference_sample)
@@ -126,4 +127,5 @@ def test_backend_trains_multiclass_classifier(
 
     model = trainer.get_trained_model()
     assert model is not None
+    assert trainer.get_training_history().batch_numbers == (1, 2)
     assert_predicts_sample(model, encoded_valid, target)

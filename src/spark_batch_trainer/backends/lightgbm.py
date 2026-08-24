@@ -24,7 +24,7 @@ class LightGBMTrainer(BatchTrainer[LGBMClassifier]):
         training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
         learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
-        """Train the model and retain the best validation checkpoint."""
+        """Train the continuation model through every configured batch."""
         resolved_model_config = dict(model_config or {})
         state = TrainingRunState[LGBMClassifier].from_mapping(
             training_config,

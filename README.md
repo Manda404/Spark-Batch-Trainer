@@ -4,7 +4,7 @@
 
 ### Gradient boosting on Spark DataFrames, without the `toPandas()` OOM
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PySpark 4](https://img.shields.io/badge/PySpark-4.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/docs/latest/api/python/)
 [![Poetry](https://img.shields.io/badge/Packaging-Poetry-60A5FA?logo=poetry&logoColor=white)](https://python-poetry.org/)
 [![Version](https://img.shields.io/badge/Version-1.0.0-2563EB)](pyproject.toml)
@@ -118,7 +118,7 @@ early stopping is triggered.
 
 ## Requirements and installation
 
-The project requires Python 3.11 or newer and a working Java environment for
+The project targets Python 3.14 and requires a working Java environment for
 PySpark.
 
 ```bash

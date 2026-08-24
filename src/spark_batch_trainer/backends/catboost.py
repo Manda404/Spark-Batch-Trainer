@@ -24,7 +24,7 @@ class CatBoostTrainer(BatchTrainer[CatBoostClassifier]):
         training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
         learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
-        """Train the model and retain the best validation checkpoint."""
+        """Train the continuation model through every configured batch."""
         resolved_model_config = dict(model_config or {})
         resolved_model_config.setdefault("allow_writing_files", False)
         state = TrainingRunState[CatBoostClassifier].from_mapping(

@@ -24,12 +24,12 @@ class XGBoostTrainer(BatchTrainer[XGBClassifier]):
         training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
         learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
-        """Train the model and retain the best validation checkpoint.
+        """Train the continuation model through every configured batch.
 
         Keyword Args:
             model_config: Parameters passed to :class:`XGBClassifier`.
-            training_config: Shared batching, weighting, plotting, and early-
-                stopping options.
+            training_config: Shared batching, weighting, plotting, and metric
+                recording options.
             learning_rate_config: Optional exponential-decay configuration.
         """
         resolved_model_config = dict(model_config or {})

@@ -4,7 +4,7 @@ Installation
 Requirements
 ------------
 
-* Python 3.11 or newer
+* Python 3.14
 * Java supported by the installed PySpark release
 * Poetry for development from source
 

@@ -4,7 +4,7 @@ from spark_batch_trainer.training import LearningRateConfig, TrainingConfig
 from spark_batch_trainer.training.state import TrainingRunState
 
 
-def test_training_config_parses_legacy_mapping() -> None:
+def test_training_config_parses_mapping() -> None:
     config = TrainingConfig.from_mapping(
         {"num_batches": 4, "max_patience": 2, "metric_mode": "MAX"}
     )

@@ -27,7 +27,9 @@ Global early stopping
 The library compares one validation score after each completed batch. Known
 score metrics such as AUC are maximized; loss metrics are minimized. Use
 ``metric_mode="min"`` or ``metric_mode="max"`` for custom metrics and
-``min_delta`` to ignore insignificant changes.
+``min_delta`` to ignore insignificant changes. Training stops after
+``max_patience`` consecutive batches without improvement and returns the best
+model observed.
 
 Learning-rate scheduling
 ------------------------

@@ -52,6 +52,8 @@ class TrainingConfig:
             infers the direction from the metric name. Defaults to ``"auto"``.
         min_delta (float): Minimum change required for a batch to count as
             an improvement. Defaults to ``0.0``.
+        monitor_metric (str | None): Metric to record when a backend reports
+            more than one. Defaults to ``None``.
     """
 
     num_batches: int = 10
@@ -106,7 +108,8 @@ class TrainingConfig:
         Raises:
             ValueError: If ``num_batches`` or ``max_patience`` is less than
                 1, if ``metric_mode`` is not one of ``"auto"``, ``"min"``,
-                ``"max"``, or if ``min_delta`` is negative.
+                ``"max"``, if ``min_delta`` is negative, or if
+                ``monitor_metric`` is empty.
         """
         if self.num_batches < 1:
             raise ValueError("num_batches must be >= 1")

@@ -11,12 +11,10 @@ __pycache__/
 
 # Local virtual environments
 .venv/
+.venv-*/
 venv/
 env/
 ENV/
-
-# Poetry local lock file
-poetry.lock
 
 # Test, coverage, and type-checking artifacts
 .pytest_cache/
