@@ -88,6 +88,12 @@ def test_backend_trains_binary_classifier(
     model = trainer.get_trained_model()
     assert model is not None
     assert_predicts_sample(model, valid, target)
+    inference_sample = valid.limit(5).toPandas()
+    prepared_features = trainer.prepare_features(inference_sample)
+    assert list(prepared_features.columns) == [
+        name for name in valid.columns if name != target
+    ]
+    assert len(model.predict(prepared_features)) == len(inference_sample)
 
 
 @pytest.mark.parametrize(

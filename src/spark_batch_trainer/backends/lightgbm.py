@@ -7,6 +7,7 @@ from pyspark.sql import DataFrame as SparkDataFrame
 
 from spark_batch_trainer.data.spark_batching import iter_pandas_batches
 from spark_batch_trainer.training.base import BatchTrainer
+from spark_batch_trainer.training.config import LearningRateConfig, TrainingConfig
 from spark_batch_trainer.training.state import PreparedDataset, TrainingRunState
 
 
@@ -15,20 +16,21 @@ class LightGBMTrainer(BatchTrainer[LGBMClassifier]):
 
     def fit(
         self,
-        train_dataframe: Optional[SparkDataFrame],
-        valid_dataframe: Optional[SparkDataFrame],
+        train_dataframe: SparkDataFrame,
+        valid_dataframe: SparkDataFrame,
         target_column: str,
-        **kwargs: Any,
+        *,
+        model_config: Optional[Mapping[str, Any]] = None,
+        training_config: Optional[Mapping[str, Any] | TrainingConfig] = None,
+        learning_rate_config: Optional[Mapping[str, Any] | LearningRateConfig] = None,
     ) -> None:
         """Train the model and retain the best validation checkpoint."""
-        model_config = dict(kwargs.get("model_config") or {})
-        training_values: Optional[Mapping[str, Any]] = kwargs.get("training_config")
-        learning_rate_config: Optional[Mapping[str, Any]] = kwargs.get(
-            "learning_rate_config"
-        )
+        resolved_model_config = dict(model_config or {})
         state = TrainingRunState[LGBMClassifier].from_mapping(
-            training_values,
-            default_eval_metric=str(model_config.get("metric", "binary_logloss")),
+            training_config,
+            default_eval_metric=str(
+                resolved_model_config.get("metric", "binary_logloss")
+            ),
         )
 
         self._reset_run_history()
@@ -50,45 +52,29 @@ class LightGBMTrainer(BatchTrainer[LGBMClassifier]):
             state.config.num_batches,
             self._logger,
         )
-        self._logger.info(
-            "Starting LightGBM training with %d batches", state.config.num_batches
+
+        def fit_batch(batch_number: int, batch_data: PreparedDataset) -> LGBMClassifier:
+            learning_rate = self._resolve_learning_rate(
+                learning_rate_config,
+                batch_number,
+                default_lr=float(resolved_model_config.get("learning_rate", 0.1)),
+            )
+            return self._fit_batch(
+                state,
+                batch_data,
+                validation_data,
+                resolved_model_config,
+                learning_rate,
+            )
+
+        self._model = self._run_batches(
+            batches,
+            state,
+            target_column,
+            framework="lightgbm",
+            model_name="LightGBM",
+            fit_batch=fit_batch,
         )
-
-        batch_number = 0
-        try:
-            for batch_number, pandas_batch in enumerate(batches, start=1):
-                self._logger.info(
-                    "Processing batch %d/%d",
-                    batch_number,
-                    state.config.num_batches,
-                )
-                batch_data = self._prepare_batch(
-                    pandas_batch,
-                    target_column,
-                    use_sample_weight=state.config.use_sample_weight,
-                )
-                learning_rate = self._resolve_learning_rate(
-                    learning_rate_config,
-                    batch_number,
-                    default_lr=float(model_config.get("learning_rate", 0.1)),
-                )
-                model = self._fit_batch(
-                    state,
-                    batch_data,
-                    validation_data,
-                    model_config,
-                    learning_rate,
-                )
-                if self._evaluate_model(
-                    model, state, batch_number, framework="lightgbm"
-                ):
-                    self._logger.info("Global early stopping triggered")
-                    break
-        except Exception:
-            self._logger.exception("LightGBM training failed at batch %d", batch_number)
-            raise
-
-        self._model = self._finalize_run(state, model_name="LightGBM")
 
     def _fit_batch(
         self,

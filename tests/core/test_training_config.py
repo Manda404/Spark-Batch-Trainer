@@ -1,6 +1,6 @@
 import pytest
 
-from spark_batch_trainer.training import TrainingConfig
+from spark_batch_trainer.training import LearningRateConfig, TrainingConfig
 from spark_batch_trainer.training.state import TrainingRunState
 
 
@@ -38,3 +38,29 @@ def test_run_state_keeps_validated_config_and_backend_metric() -> None:
     assert state.eval_metric == "auc"
     assert state.best_model is None
     assert state.best_valid_score is None
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        {"show_learning_curve": "false"},
+        {"num_batches": 2.5},
+        {"min_delta": "0.1"},
+    ],
+)
+def test_training_config_rejects_ambiguous_types(values: dict) -> None:
+    with pytest.raises(TypeError):
+        TrainingConfig.from_mapping(values)
+
+
+def test_training_config_rejects_unknown_keys() -> None:
+    with pytest.raises(ValueError, match="max_pacience"):
+        TrainingConfig.from_mapping({"max_pacience": 2})
+
+
+def test_typed_configs_are_accepted_directly() -> None:
+    training = TrainingConfig(num_batches=3)
+    learning_rate = LearningRateConfig(initial_lr=0.05)
+
+    assert TrainingConfig.from_mapping(training) is training
+    assert LearningRateConfig.from_mapping(learning_rate) is learning_rate

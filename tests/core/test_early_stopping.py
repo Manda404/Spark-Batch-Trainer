@@ -1,3 +1,5 @@
+import pytest
+
 from spark_batch_trainer.training.early_stopping import observe_early_stopping
 
 
@@ -27,3 +29,15 @@ def test_patience_stops_after_consecutive_non_improvements() -> None:
     assert not decision.improved
     assert decision.should_stop
     assert decision.patience_counter == 2
+
+
+@pytest.mark.parametrize("score", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_score_is_rejected(score: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        observe_early_stopping(
+            current_score=score,
+            best_score=None,
+            metric_name="logloss",
+            patience_counter=0,
+            max_patience=2,
+        )

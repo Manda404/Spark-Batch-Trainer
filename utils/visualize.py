@@ -1,10 +1,13 @@
 """Reusable model-diagnostic visualizations for the example notebooks."""
 
-from typing import Sequence
+from __future__ import annotations
+
+from typing import Any, Sequence
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib.axes import Axes
 from sklearn.metrics import confusion_matrix
 
 
@@ -78,11 +81,11 @@ def plot_class_distribution(
 
 
 def _plot_confusion(
-    ax: plt.Axes,
-    y_true: Sequence | pd.Series,
-    y_pred: Sequence | pd.Series,
+    ax: Axes,
+    y_true: Sequence[Any] | pd.Series[Any],
+    y_pred: Sequence[Any] | pd.Series[Any],
     title: str,
-    labels: Sequence,
+    labels: Sequence[Any],
     class_labels: Sequence[str],
     cmap: str,
 ) -> None:
@@ -138,7 +141,7 @@ def plot_binary_confusion_matrices(
     results_valid_df: pd.DataFrame,
     results_test_df: pd.DataFrame,
     *,
-    label_order: Sequence,
+    label_order: Sequence[Any],
     class_labels: Sequence[str],
 ) -> None:
     """
@@ -183,10 +186,10 @@ def plot_binary_confusion_matrices(
 
 
 def plot_multiclass_confusion_matrices(
-    y_true_valid: Sequence | pd.Series,
-    y_pred_valid: Sequence | pd.Series,
-    y_true_test: Sequence | pd.Series,
-    y_pred_test: Sequence | pd.Series,
+    y_true_valid: Sequence[Any] | pd.Series[Any],
+    y_pred_valid: Sequence[Any] | pd.Series[Any],
+    y_true_test: Sequence[Any] | pd.Series[Any],
+    y_pred_test: Sequence[Any] | pd.Series[Any],
     mapping_df: pd.DataFrame,
     normalize: bool = False,
 ) -> None:
