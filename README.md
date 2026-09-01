@@ -33,7 +33,7 @@ calling `spark_df.toPandas()`, which collects the entire distributed dataset
 into driver memory before a single training iteration runs.
 
 On clusters sized for distributed ETL rather than single-node training, that
-collection step is frequently what fails first — the driver runs out of
+collection step is frequently what fails first the driver runs out of
 memory before training even starts, regardless of how well the upstream Spark
 job scaled.
 
